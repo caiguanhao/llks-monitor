@@ -46,7 +46,15 @@
   <script type="text/ng-template" id="login">
     <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
-        <form role="form">
+        <form ng-submit="login()">
+          <div class="alert alert-dismissable alert-{{statusClass}}"
+            ng-show="status" ng-switch on="status">
+            <button type="button" class="close"
+              ng-click="status=null">&times;</button>
+            <span ng-switch-when="loading">Logging in...</span>
+            <span ng-switch-when="success">You are now logged in.</span>
+            <span ng-switch-default ng-bind="status"></span>
+          </div>
           <div class="form-group">
             <label for="username">Username</label>
             <input type="text" class="form-control" id="username"
@@ -58,7 +66,7 @@
               placeholder="Password" ng-model="password">
           </div>
           <button type="submit" class="btn btn-default"
-            ng-disabled="!username || !password">Login</button>
+            ng-disabled="shouldLoginDisable()">Login</button>
         </form>
       </div>
     </div>

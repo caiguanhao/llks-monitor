@@ -25,12 +25,42 @@ directive('body', [function() {
   };
 }]).
 
+service('Users', ['$http', function($http) {
+  this.Authenticate = function(user, pass) {
+    return $http.post('/login', { username: user, password: pass });
+  };
+}]).
+
 controller('MainController', [function() {
 
 }]).
 
-controller('LoginController', ['$scope', function($scope) {
+controller('LoginController', ['$scope', 'Users', '$timeout',
+  function($scope, Users, $timeout) {
+  $scope.statusClass = 'info';
+  $scope.shouldLoginDisable = function() {
+    if ($scope.status === 'loading') return true;
+    if ($scope.username && $scope.password) return false;
+    return true;
+  }
 
+  $scope.login = function() {
+    $scope.statusClass = 'info';
+    $scope.status = 'loading';
+    Users.Authenticate($scope.username, $scope.password).
+    then(function(response) {
+      $scope.username = null;
+      $scope.password = null;
+      $scope.statusClass = 'success';
+      $scope.status = 'success';
+      console.log(response.data.token)
+    }, function(response) {
+      $timeout(function() {
+        $scope.statusClass = 'danger';
+        $scope.status = response.data.error || 'Unknown Error.';
+      }, 1000);
+    });
+  };
 }]).
 
 run([function() {
