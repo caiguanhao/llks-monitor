@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html ng-app="llksMonitor">
+
+<head>
+  <meta charset="UTF-8">
+  <title>LLKS Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LLKS Monitor">
+  <link rel="stylesheet" href="/css/llks-monitor.css">
+  <script src="/js/llks-monitor.js"></script>
+  <script src="http://localhost:35729/livereload.js"></script>
+  <script type="text/ng-template" id="index">
+    <div id="wrap">
+      <header>
+        <nav class="navbar navbar-default navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="/">LLKS Monitor</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <ul class="nav navbar-nav">
+              </ul>
+              <ul class="nav navbar-nav navbar-right">
+                <li><a href="/#/login">Login</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <div id="content" class="container" ng-view></div>
+    </div>
+    <footer>
+      <div class="footer container">
+        Copyright &copy; 2014 <a href="http://cgh.io/">cgh.io</a>
+      </div>
+    </footer>
+  </script>
+  <script type="text/ng-template" id="main">
+  </script>
+  <script type="text/ng-template" id="login">
+    <div class="row">
+      <div class="col-sm-6 col-sm-offset-3">
+        <form role="form">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username"
+              placeholder="Username" ng-model="username">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password"
+              placeholder="Password" ng-model="password">
+          </div>
+          <button type="submit" class="btn btn-default"
+            ng-disabled="!username || !password">Login</button>
+        </form>
+      </div>
+    </div>
+  </script>
+</head>
+
+<body>
+  <!--[if lte IE 9]>
+    <div class="ie-warnings">
+      <b>Your browser is out of date.</b>
+      <br>
+      Please upgrade to IE 10 or use Chrome or Firefox browser.
+      <br>
+      Download Chrome from:
+      <a href="https://www.google.com/chrome/">Google</a> |
+      <a href="http://dl.pconline.com.cn/download/51614-1.html">
+        PCOnline (Windows)
+      </a>
+      <br>
+      Download Firefox from:
+      <a href="http://www.mozilla.org/en-US/firefox/new/">Mozilla</a>
+      <br>
+      You can also view this page on your iPhone or Android.
+    </div>
+  <![endif]-->
+</body>
+
+</html>
