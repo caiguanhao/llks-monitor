@@ -80,6 +80,20 @@ module.exports = function(grunt) {
     grunt.log.ok('Copied index.html to public/index.html.');
   });
 
+  grunt.registerTask('adduser', 'adduser:username:password',
+    function(username, password) {
+    if (!username || !password) {
+      grunt.fail.fatal('Please provide username and password');
+    }
+    var finish = this.async();
+    var db = require('./db');
+    db.createUser(username, password, function(err, user) {
+      if (err) grunt.fail.fatal(err);
+      console.log(user);
+      finish();
+    });
+  });
+
   grunt.registerTask('download-angular', 'Download Angular',
     function(version) {
     var http = require('http');
