@@ -73,6 +73,36 @@ function authorize(callback) {
   };
 }
 
+app.get('/accounts', authorize(function(req, res, next) {
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return serverUnavailable(res);
+    res.status(200);
+    res.send(accounts);
+  });
+}));
+
+app.post('/accounts', authorize(function(req, res, next) {
+  var name = req.body.name;
+  var code = req.body.code;
+  var user = req.user;
+  db.createAccount(name, code, user, function(err, account) {
+    if (err) return serverUnavailable(res);
+    restartTimers();
+    res.status(201);
+    res.send(account);
+  });
+}));
+
+var server = require('http').createServer(app);
+
+server.listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});
+
+var https = require('https');
+var Q = require('q');
+var io = require('socket.io').listen(server);
+
 var timers = [];
 
 function resetTimers() {
@@ -81,15 +111,11 @@ function resetTimers() {
 }
 
 function restartTimers() {
-  resetTimers();
-  startTimers();
+  // resetTimers();
+  // startTimers();
 }
 
-var https = require('https');
-
-var Q = require('q');
-
-function startTimers() {
+function startTimers(socket) {
   db.accounts.find({}, function(err, accounts) {
     if (err) return;
     var deferred = Q.defer();
@@ -125,7 +151,16 @@ function startTimers() {
 
       var then = (function(account) {
         return function(data) {
-          console.log(data);
+          var data = JSON.parse(data);
+          var miners = [];
+          for (var i = 0; i < data.data.stats.length; i++) {
+            var miner = data.data.stats[i];
+            miners.push({
+              ip: miner.ip,
+              speed: miner.speed,
+            });
+          }
+          socket.emit('update', miners);
         };
       })(accounts[i]);
       promise = promise.then(then);
@@ -135,28 +170,6 @@ function startTimers() {
   });
 }
 
-startTimers();
-
-app.get('/accounts', authorize(function(req, res, next) {
-  db.accounts.find({}, function(err, accounts) {
-    if (err) return serverUnavailable(res);
-    res.status(200);
-    res.send(accounts);
-  });
-}));
-
-app.post('/accounts', authorize(function(req, res, next) {
-  var name = req.body.name;
-  var code = req.body.code;
-  var user = req.user;
-  db.createAccount(name, code, user, function(err, account) {
-    if (err) return serverUnavailable(res);
-    restartTimers();
-    res.status(201);
-    res.send(account);
-  });
-}));
-
-app.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+io.sockets.on('connection', function (socket) {
+  startTimers(socket);
 });

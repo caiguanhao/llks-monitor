@@ -96,7 +96,12 @@ controller('MainController', ['$scope', 'Accounts',
 
   Accounts.Get().then(function(response) {
     $scope.accounts = response.data;
-  })
+  });
+
+  var socket = io.connect('http://localhost');
+  socket.on('update', function(data) {
+    console.log(data);
+  });
 
   $scope.create = function() {
     Accounts.Create($scope.name, $scope.code).then(function(response) {
