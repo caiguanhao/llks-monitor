@@ -50,6 +50,36 @@
     </footer>
   </script>
   <script type="text/ng-template" id="main">
+    <div class="row">
+      <div class="col-sm-6 col-sm-offset-3">
+        <div class="alert alert-dismissable alert-{{statusClass}}"
+          ng-show="status" ng-switch on="status">
+          <span ng-switch-when="loading">Loading...</span>
+          <span ng-switch-when="success">Successfully created.</span>
+          <span ng-switch-default ng-bind="status"></span>
+        </div>
+        <form ng-submit="create()">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name"
+              placeholder="Name" ng-model="name">
+          </div>
+          <div class="form-group">
+            <label for="code">Code</label>
+            <input type="text" class="form-control" id="code"
+              placeholder="Code" ng-model="code">
+          </div>
+          <button type="submit" class="btn btn-default"
+            ng-disabled="!name || !code">Add</button>
+        </form>
+      </div>
+      <div class="col-sm-6 col-sm-offset-3">
+        <div ng-repeat="account in accounts">
+          <h3 ng-bind="account.name"></h3>
+          {{account.code}}
+        </div>
+      </div>
+    </div>
   </script>
   <script type="text/ng-template" id="login">
     <div class="row">

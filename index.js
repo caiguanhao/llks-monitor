@@ -50,6 +50,11 @@ app.use(function(req, res, next) {
   next();
 });
 
+function serverUnavailable(res) {
+  res.status(500);
+  res.send({ error: 'Server unavailable.' });
+}
+
 function permissionDenied(res) {
   res.status(403);
   res.send({ error: 'Permission denied.' });
@@ -68,8 +73,23 @@ function authorize(callback) {
   };
 }
 
+app.get('/accounts', authorize(function(req, res, next) {
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return serverUnavailable(res);
+    res.status(200);
+    res.send(accounts);
+  });
+}));
+
 app.post('/accounts', authorize(function(req, res, next) {
-  res.send({ok:1});
+  var name = req.body.name;
+  var code = req.body.code;
+  var user = req.user;
+  db.createAccount(name, code, user, function(err, account) {
+    if (err) return serverUnavailable(res);
+    res.status(201);
+    res.send(account);
+  });
 }));
 
 app.listen(app.get('port'), function(){

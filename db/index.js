@@ -15,10 +15,23 @@ users.ensureIndex({
 
 module.exports.users = users;
 
-module.exports.accounts = new Datastore({
+var accounts = new Datastore({
   filename: __dirname + '/.accounts',
   autoload: true
 });
+
+module.exports.accounts = accounts;
+
+module.exports.createAccount = function(name, code, user, callback) {
+  var newDate = new Date;
+  accounts.insert({
+    user: user._id,
+    name: name,
+    code: code,
+    created_at: newDate,
+    updated_at: newDate
+  }, callback);
+};
 
 var hashPassword = function(password) {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(10));

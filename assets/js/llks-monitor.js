@@ -29,14 +29,24 @@ directive('body', [function() {
   };
 }]).
 
-service('Accounts', ['$http', 'Users', function($http, Users) {
-  this.save = function() {
-    return $http.post('/accounts');
+service('Accounts', ['$http', 'Users', '$route',
+  function($http, Users, $route) {
+  this.PermissionDenied = function() {
+    return Users.PermissionDenied();
+  };
+  this.Reload = function() {
+    $route.reload();
+  };
+  this.Get = function(name, code) {
+    return $http.get('/accounts');
+  };
+  this.Create = function(name, code) {
+    return $http.post('/accounts', { name: name, code: code });
   };
 }]).
 
-service('Users', ['$http', '$window', '$rootScope', '$route',
-  function($http, $window, $rootScope, $route) {
+service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
+  function($http, $window, $rootScope, $route, $location) {
   function ls(key, val) {
     if (val === undefined) return $window.localStorage[key];
     if (val === null) {
@@ -45,6 +55,9 @@ service('Users', ['$http', '$window', '$rootScope', '$route',
       $window.localStorage[key] = val;
     }
   }
+  this.PermissionDenied = function() {
+    return $location.path('/login');
+  };
   this.Authenticate = function(user, pass) {
     return $http.post('/login', { username: user, password: pass });
   };
@@ -76,8 +89,30 @@ service('Users', ['$http', '$window', '$rootScope', '$route',
   };
 }]).
 
-controller('MainController', ['Accounts', function(Accounts) {
-  Accounts.save();
+controller('MainController', ['$scope', 'Accounts',
+  function($scope, Accounts) {
+  $scope.name = null;
+  $scope.code = null;
+
+  Accounts.Get().then(function(response) {
+    $scope.accounts = response.data;
+  })
+
+  $scope.create = function() {
+    Accounts.Create($scope.name, $scope.code).then(function(response) {
+      $scope.statusClass = 'success';
+      $scope.status = 'success';
+      $scope.name = null;
+      $scope.code = null;
+      Accounts.Reload();
+    }).catch(function(response) {
+      if (response.status === 403) {
+        return Accounts.PermissionDenied();
+      }
+      $scope.statusClass = 'danger';
+      $scope.status = response.data.error || 'Unknown Error.';
+    });
+  };
 }]).
 
 controller('LoginController', ['$scope', 'Users', '$timeout',
