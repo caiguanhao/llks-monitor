@@ -27,7 +27,15 @@
               <ul class="nav navbar-nav">
               </ul>
               <ul class="nav navbar-nav navbar-right">
-                <li><a href="/#/login">Login</a></li>
+                <li ng-if="!User.Username"><a href="/#/login">Login</a></li>
+                <li ng-if="User.Username" class="dropdown"
+                  ng-class="{open:dropdown}">
+                  <a href ng-click="dropdown=!dropdown">{{User.Username}}
+                    <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a href ng-click="logout()">Log out</a></li>
+                  </ul>
+                </li>
               </ul>
             </div>
           </div>
@@ -46,15 +54,13 @@
   <script type="text/ng-template" id="login">
     <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
-        <form ng-submit="login()">
-          <div class="alert alert-dismissable alert-{{statusClass}}"
-            ng-show="status" ng-switch on="status">
-            <button type="button" class="close"
-              ng-click="status=null">&times;</button>
-            <span ng-switch-when="loading">Logging in...</span>
-            <span ng-switch-when="success">You are now logged in.</span>
-            <span ng-switch-default ng-bind="status"></span>
-          </div>
+        <div class="alert alert-dismissable alert-{{statusClass}}"
+          ng-show="status" ng-switch on="status">
+          <span ng-switch-when="loading">Logging in...</span>
+          <span ng-switch-when="success">You are now logged in.</span>
+          <span ng-switch-default ng-bind="status"></span>
+        </div>
+        <form ng-submit="login()" ng-show="status!='success'">
           <div class="form-group">
             <label for="username">Username</label>
             <input type="text" class="form-control" id="username"

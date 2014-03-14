@@ -26,7 +26,10 @@ app.post('/login', function(req, res, next) {
       return;
     case db.authConst.SUCCESS:
       res.status(200);
-      res.send({ token: user.token });
+      res.send({
+        username: user.username,
+        token: user.token
+      });
       return;
     default:
       res.writeHead(499, 'Unknown Error');

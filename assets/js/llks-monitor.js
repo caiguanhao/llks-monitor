@@ -18,6 +18,10 @@ config(['$routeProvider', '$locationProvider',
   $locationProvider.html5Mode(false);
 }]).
 
+run(['Users', function(Users) {
+  Users.Init();
+}]).
+
 directive('body', [function() {
   return {
     restrict: 'E',
@@ -25,9 +29,37 @@ directive('body', [function() {
   };
 }]).
 
-service('Users', ['$http', function($http) {
+service('Users', ['$http', '$window', '$rootScope', '$route',
+  function($http, $window, $rootScope, $route) {
+  function ls(key, val) {
+    if (val === undefined) return $window.localStorage[key];
+    if (val === null) {
+      delete $window.localStorage[key];
+    } else {
+      $window.localStorage[key] = val;
+    }
+  }
   this.Authenticate = function(user, pass) {
     return $http.post('/login', { username: user, password: pass });
+  };
+  this.Init = function() {
+    this.GetUser();
+    var self = this;
+    $rootScope.logout = function() {
+      self.SetUser(null, null);
+      $route.reload();
+    };
+  };
+  this.GetUser = function() {
+    $rootScope.User = {
+      Username: ls('llksMonitor.user.username'),
+      Token: ls('llksMonitor.user.token')
+    };
+  };
+  this.SetUser = function(username, token) {
+    ls('llksMonitor.user.username', username);
+    ls('llksMonitor.user.token', token);
+    this.GetUser();
   };
 }]).
 
@@ -37,6 +69,9 @@ controller('MainController', [function() {
 
 controller('LoginController', ['$scope', 'Users', '$timeout',
   function($scope, Users, $timeout) {
+  $scope.username = null;
+  $scope.password = null;
+
   $scope.statusClass = 'info';
   $scope.shouldLoginDisable = function() {
     if ($scope.status === 'loading') return true;
@@ -49,11 +84,14 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
     $scope.status = 'loading';
     Users.Authenticate($scope.username, $scope.password).
     then(function(response) {
-      $scope.username = null;
-      $scope.password = null;
-      $scope.statusClass = 'success';
-      $scope.status = 'success';
-      console.log(response.data.token)
+      $timeout(function() {
+        $scope.username = null;
+        $scope.password = null;
+        $scope.statusClass = 'success';
+        $scope.status = 'success';
+        var data = response.data;
+        Users.SetUser(data.username, data.token);
+      }, 1000);
     }, function(response) {
       $timeout(function() {
         $scope.statusClass = 'danger';
