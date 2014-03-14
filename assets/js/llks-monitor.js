@@ -100,7 +100,13 @@ controller('MainController', ['$scope', 'Accounts', 'Users',
   });
 
   Users.Socket.on('update', function(data) {
-    console.log(data);
+    var accounts = $scope.accounts || [];
+    for (var i = 0; i < accounts.length; i++) {
+      if (data.hasOwnProperty(accounts[i].code)) {
+        accounts[i].miners = data[accounts[i].code];
+      }
+    }
+    $scope.$apply();
   });
   Users.Socket.on('error', function(reason) {
     if (reason === 'handshake unauthorized') {
