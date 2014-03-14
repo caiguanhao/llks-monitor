@@ -179,9 +179,12 @@ function startTimers(socket) {
               speed: miner.speed,
             });
           }
-          var obj = {};
-          obj[account.code] = miners;
-          socket.emit('update', obj);
+          var bundle = {};
+          bundle[account.code] = {
+            updated: +new Date,
+            miners: miners
+          };
+          socket.emit('update', bundle);
         };
       })(accounts[i]);
       promise = promise.then(then);

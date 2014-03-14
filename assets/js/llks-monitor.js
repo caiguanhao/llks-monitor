@@ -29,6 +29,20 @@ directive('body', [function() {
   };
 }]).
 
+directive('secondsAgo', ['$interval', function($interval) {
+  return {
+    scope: {
+      seconds: '=secondsAgo'
+    },
+    link: function($scope, elem, attrs) {
+      $interval(function() {
+        var diff = Math.ceil((+new Date - $scope.seconds) / 1000);
+        elem.text(diff + ' seconds ago');
+      }, 1000);
+    }
+  };
+}]).
+
 service('Accounts', ['$http', 'Users', '$route',
   function($http, Users, $route) {
   this.PermissionDenied = function() {
@@ -103,7 +117,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users',
     var accounts = $scope.accounts || [];
     for (var i = 0; i < accounts.length; i++) {
       if (data.hasOwnProperty(accounts[i].code)) {
-        accounts[i].miners = data[accounts[i].code];
+        angular.extend(accounts[i], data[accounts[i].code]);
       }
     }
     $scope.$apply();
