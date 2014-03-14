@@ -77,7 +77,11 @@
         <div ng-repeat="account in accounts">
           <div class="panel panel-default">
             <div class="panel-heading">
-              <span class="pull-right" seconds-ago="account.updated"></span>
+              <span class="pull-right" seconds-ago="account.updated"
+                seconds-ago-to="account.secondsAgo"
+                ng-show="account.secondsAgo">
+                updated {{account.secondsAgo}} secs ago
+              </span>
               {{account.name}}
             </div>
             <table class="table">

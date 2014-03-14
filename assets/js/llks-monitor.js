@@ -32,13 +32,23 @@ directive('body', [function() {
 directive('secondsAgo', ['$interval', function($interval) {
   return {
     scope: {
-      seconds: '=secondsAgo'
+      seconds: '=secondsAgo',
+      to: '=secondsAgoTo'
     },
     link: function($scope, elem, attrs) {
-      $interval(function() {
-        var diff = Math.ceil((+new Date - $scope.seconds) / 1000);
-        elem.text(diff + ' seconds ago');
-      }, 1000);
+      var interval;
+      $scope.$watch('seconds', function(val) {
+        if (!val) return;
+        $interval.cancel(interval);
+        interval = $interval(function() {
+          var diff = Math.round((+new Date - $scope.seconds) / 1000);
+          $scope.to = diff;
+        }, 1000);
+      });
+      $scope.$on('$destroy', function(e) {
+        console.log(interval)
+        $interval.cancel(interval);
+      });
     }
   };
 }]).

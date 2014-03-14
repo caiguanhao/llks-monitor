@@ -122,11 +122,8 @@ io.configure(function() {
   });
 });
 
-var timers = [];
-
 function resetTimers() {
-  // for (var i = 0; i < timers.length; i++) {
-  // }
+
 }
 
 function restartTimers() {
@@ -134,7 +131,7 @@ function restartTimers() {
   // startTimers();
 }
 
-function startTimers(socket) {
+function startTimers() {
   db.accounts.find({}, function(err, accounts) {
     if (err) return;
     var deferred = Q.defer();
@@ -184,16 +181,15 @@ function startTimers(socket) {
             updated: +new Date,
             miners: miners
           };
-          socket.emit('update', bundle);
+          io.sockets.emit('update', bundle);
         };
       })(accounts[i]);
       promise = promise.then(then);
     }
     promise.then(function() {
+      setTimeout(startTimers, 5000);
     });
   });
 }
 
-io.sockets.on('connection', function (socket) {
-  startTimers(socket);
-});
+startTimers();
