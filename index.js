@@ -103,6 +103,25 @@ var https = require('https');
 var Q = require('q');
 var io = require('socket.io').listen(server);
 
+io.configure(function() {
+  io.set('authorization', function(handshakeData, callback) {
+    var id = handshakeData.query.id;
+    var token = handshakeData.query.token;
+    if (id && token) {
+      db.users.findOne({
+        _id: id,
+        token: token
+      }).exec(function(error, user) {
+        if (error) return callback('Error occurred.', false);
+        if (!user) return callback(null, false);
+        return callback(null, true);
+      });
+      return;
+    }
+    callback('Please provide user id and token!', false);
+  });
+});
+
 var timers = [];
 
 function resetTimers() {

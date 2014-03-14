@@ -80,6 +80,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     };
     $http.defaults.headers.common['x-user-id'] = id;
     $http.defaults.headers.common['x-user-token'] = token;
+    this.Socket = io.connect(null, { query: 'id=' + id + '&token=' + token });
   };
   this.SetUser = function(id, username, token) {
     ls('llksMonitor.user.id', id);
@@ -89,8 +90,8 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   };
 }]).
 
-controller('MainController', ['$scope', 'Accounts',
-  function($scope, Accounts) {
+controller('MainController', ['$scope', 'Accounts', 'Users',
+  function($scope, Accounts, Users) {
   $scope.name = null;
   $scope.code = null;
 
@@ -98,9 +99,13 @@ controller('MainController', ['$scope', 'Accounts',
     $scope.accounts = response.data;
   });
 
-  var socket = io.connect('http://localhost');
-  socket.on('update', function(data) {
+  Users.Socket.on('update', function(data) {
     console.log(data);
+  });
+  Users.Socket.on('error', function(reason) {
+    if (reason === 'handshake unauthorized') {
+      return Accounts.PermissionDenied();
+    }
   });
 
   $scope.create = function() {
