@@ -73,6 +73,70 @@ function authorize(callback) {
   };
 }
 
+var timers = [];
+
+function resetTimers() {
+  // for (var i = 0; i < timers.length; i++) {
+  // }
+}
+
+function restartTimers() {
+  resetTimers();
+  startTimers();
+}
+
+var https = require('https');
+
+var Q = require('q');
+
+function startTimers() {
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return;
+    var deferred = Q.defer();
+    deferred.resolve();
+    var promise = deferred.promise;
+    for (var i = 0; i < accounts.length; i++) {
+      var then = (function(account) {
+        return function() {
+          var deferred = Q.defer();
+          https.get({
+            hostname: 'jiaoyi.yunfan.com',
+            port: 443,
+            path: '/dig/miner/log/',
+            headers: {
+              Cookie: 'ntts_kb_session_id=' + account.code + ';'
+            }
+          }, function (res) {
+            var data = '';
+            res.on('data', function(chunk) {
+              data += chunk;
+            });
+            res.on('end', function() {
+              deferred.resolve(data);
+            });
+            res.on('error', function() {
+              deferred.reject();
+            });
+          });
+          return deferred.promise;
+        };
+      })(accounts[i]);
+      promise = promise.then(then);
+
+      var then = (function(account) {
+        return function(data) {
+          console.log(data);
+        };
+      })(accounts[i]);
+      promise = promise.then(then);
+    }
+    promise.then(function() {
+    });
+  });
+}
+
+startTimers();
+
 app.get('/accounts', authorize(function(req, res, next) {
   db.accounts.find({}, function(err, accounts) {
     if (err) return serverUnavailable(res);
@@ -87,6 +151,7 @@ app.post('/accounts', authorize(function(req, res, next) {
   var user = req.user;
   db.createAccount(name, code, user, function(err, account) {
     if (err) return serverUnavailable(res);
+    restartTimers();
     res.status(201);
     res.send(account);
   });
