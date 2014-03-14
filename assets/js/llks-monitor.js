@@ -29,6 +29,12 @@ directive('body', [function() {
   };
 }]).
 
+service('Accounts', ['$http', 'Users', function($http, Users) {
+  this.save = function() {
+    return $http.post('/accounts');
+  };
+}]).
+
 service('Users', ['$http', '$window', '$rootScope', '$route',
   function($http, $window, $rootScope, $route) {
   function ls(key, val) {
@@ -46,25 +52,32 @@ service('Users', ['$http', '$window', '$rootScope', '$route',
     this.GetUser();
     var self = this;
     $rootScope.logout = function() {
-      self.SetUser(null, null);
+      self.SetUser(null, null, null);
       $route.reload();
     };
   };
   this.GetUser = function() {
+    var id = ls('llksMonitor.user.id');
+    var username = ls('llksMonitor.user.username');
+    var token = ls('llksMonitor.user.token');
     $rootScope.User = {
-      Username: ls('llksMonitor.user.username'),
-      Token: ls('llksMonitor.user.token')
+      Id: id,
+      Username: username,
+      Token: token
     };
+    $http.defaults.headers.common['x-user-id'] = id;
+    $http.defaults.headers.common['x-user-token'] = token;
   };
-  this.SetUser = function(username, token) {
+  this.SetUser = function(id, username, token) {
+    ls('llksMonitor.user.id', id);
     ls('llksMonitor.user.username', username);
     ls('llksMonitor.user.token', token);
     this.GetUser();
   };
 }]).
 
-controller('MainController', [function() {
-
+controller('MainController', ['Accounts', function(Accounts) {
+  Accounts.save();
 }]).
 
 controller('LoginController', ['$scope', 'Users', '$timeout',
@@ -90,7 +103,7 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
         $scope.statusClass = 'success';
         $scope.status = 'success';
         var data = response.data;
-        Users.SetUser(data.username, data.token);
+        Users.SetUser(data.id, data.username, data.token);
       }, 1000);
     }, function(response) {
       $timeout(function() {

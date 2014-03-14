@@ -27,6 +27,7 @@ app.post('/login', function(req, res, next) {
     case db.authConst.SUCCESS:
       res.status(200);
       res.send({
+        id: user._id,
         username: user.username,
         token: user.token
       });
@@ -38,6 +39,38 @@ app.post('/login', function(req, res, next) {
     }
   });
 });
+
+app.use(function(req, res, next) {
+  req._user_id = null;
+  req._user_token = null;
+  if (req.headers) {
+    req._user_id = req.headers['x-user-id'];
+    req._user_token = req.headers['x-user-token'];
+  }
+  next();
+});
+
+function permissionDenied(res) {
+  res.status(403);
+  res.send({ error: 'Permission denied.' });
+}
+
+function authorize(callback) {
+  return function(req, res, next) {
+    var user = db.users.findOne({
+      _id: req.headers['x-user-id'],
+      token: req.headers['x-user-token']
+    }).exec(function(error, user) {
+      if (error || !user) return permissionDenied(res);
+      req.user = user;
+      callback(req, res, next);
+    });
+  };
+}
+
+app.post('/accounts', authorize(function(req, res, next) {
+  res.send({ok:1});
+}));
 
 app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
