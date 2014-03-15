@@ -191,7 +191,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.sort($scope.speedCompare, 'speed');
 
   $scope.speedBg = function(item) {
-    if (!item || item.status !== '在线') return 'dead';
+    if (!item || item.status !== '在线') return 'active';
     if (!item.speed) return '';
     var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
     var speed = parseFloat(item.speed);

@@ -72,7 +72,7 @@
           <div class="panel-heading">
             Status
           </div>
-          <table class="table">
+          <table class="table table-slim table-hover">
             <thead ng-if="miners && miners.length">
               <tr>
                 <th><a href ng-click="sort('account')">Account</a></th>
@@ -92,7 +92,7 @@
             </tbody>
             <tbody>
               <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
-                class="bg-{{speedBg(miner)}}">
+                class="{{speedBg(miner)}}">
                 <td ng-bind="miner.account"></td>
                 <td ng-bind="miner.ip"></td>
                 <td ng-bind="miner.total"></td>
