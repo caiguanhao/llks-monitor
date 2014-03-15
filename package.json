@@ -4,6 +4,8 @@
   "description": "Monitor all your llks accounts.",
   "main": "index.js",
   "scripts": {
+    "start": "pm2 delete index.js && grunt production && NODE_ENV=production PORT=32123 pm2 start index.js",
+    "stop": "pm2 delete index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

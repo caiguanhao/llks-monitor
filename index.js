@@ -5,6 +5,10 @@ var app = express();
 
 app.set('port', process.env.PORT || 3000);
 
+app.configure('development', function() {
+  app.use(express.static(__dirname + '/assets'));
+});
+
 app.use(express.bodyParser());
 app.use(express.static(__dirname + '/public'));
 
@@ -135,6 +139,10 @@ server.listen(app.get('port'), function(){
 
 var https = require('https');
 var io = require('socket.io').listen(server);
+
+app.configure('production', function() {
+  io.disable('browser client');
+});
 
 io.configure(function() {
   io.set('authorization', function(handshakeData, callback) {

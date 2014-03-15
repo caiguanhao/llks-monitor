@@ -62,7 +62,6 @@ module.exports = function(grunt) {
   grunt.registerTask('default', [
     'clean',
     'less',
-    'concat',
     'copy-index',
     'express',
     'watch'
@@ -490,6 +489,26 @@ module.exports = function(grunt) {
     } else {
       to_download(finish);
     }
+  });
+
+  grunt.registerTask('push', 'Update website.', function(where) {
+    if (!where) grunt.fail.fatal('Where? grunt push:example.com');
+    var finish = this.async();
+    var spawn = require('child_process').spawn;
+    var ssh = spawn('ssh', [where, (function script_to_update() {
+      /*!
+        cd /srv/llks-monitor
+        git fetch --all
+        git reset --hard origin/master
+        npm i
+        npm start
+      */
+      return arguments.callee.toString().match(/\/\*!?([\S\s]*?)\*\//)[1]
+        .replace(/^\s{2,}/gm, '').trim();
+    })()]);
+    ssh.stdout.pipe(process.stdout);
+    ssh.stderr.pipe(process.stderr);
+    ssh.on('close', finish);
   });
 
 };

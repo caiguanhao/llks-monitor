@@ -16,9 +16,11 @@
   <script concat="vendors" real-src="node_modules/socket.io/
     node_modules/socket.io-client/dist/socket.io.min.js"></script>
   <script uglify="llks-monitor" dest="/js/llks-monitor.js"></script>
-  <script uglify="llks-monitor" src="/js/llks-monitor.js"></script>
+  <script uglify="llks-monitor" production="/js/llks-monitor.js"></script>
   <script uglify="llks-monitor" real-src="public/js/templates.js"></script>
 
+  <script development src="/js/vendor/angular.js"></script>
+  <script development src="/js/vendor/angular-route.js"></script>
   <script development src="/js/llks-monitor.js"></script>
   <script development src="/socket.io/socket.io.js"></script>
   <script development src="http://localhost:35729/livereload.js"></script>
