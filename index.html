@@ -111,32 +111,39 @@
           <span ng-switch-when="success">Successfully created.</span>
           <span ng-switch-default ng-bind="status"></span>
         </div>
-        <form ng-submit="create()">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              Accounts
-            </div>
-            <table class="table">
-              <thead ng-if="accounts.length">
-                <tr>
-                  <th>Name</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat="account in accounts">
-                  <td ng-bind="account.name"></td>
-                  <td ng-switch on="account.updated">
-                    <span ng-switch-when="false">Expired</span>
-                    <span ng-switch-default seconds-ago="account.updated"
-                      seconds-ago-to="account.secondsAgo"
-                      ng-show="account.secondsAgo">
-                      updated {{account.secondsAgo}} secs ago
-                    </span>
-                  </td>
-                  <td>
-                  <div class="btn-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            Accounts
+          </div>
+          <table class="table">
+            <thead ng-if="accounts.length">
+              <tr>
+                <th>Name</th>
+                <th>Total</th>
+                <th>Unsold</th>
+                <th>Sold</th>
+                <th>Server Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="account in accounts">
+                <td ng-bind="account.name"></td>
+                <td ng-bind="account.total"></td>
+                <td ng-bind="account.unsold"></td>
+                <td ng-bind="account.sold"></td>
+                <td ng-bind="account.servertime"></td>
+                <td ng-switch on="account.updated">
+                  <span ng-switch-when="false">Expired</span>
+                  <span ng-switch-default seconds-ago="account.updated"
+                    seconds-ago-to="account.secondsAgo"
+                    ng-show="account.secondsAgo">
+                    updated {{account.secondsAgo}} secs ago
+                  </span>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-xs">
                     <a class="btn btn-default" ng-click="updateName(account)">
                       <span class="glyphicon glyphicon-pencil"></span>
                     </a>
@@ -145,25 +152,27 @@
                       <span class="glyphicon glyphicon-trash"></span>
                     </a>
                   </div>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td><input type="text" class="form-control" id="name"
-                    placeholder="Name" ng-model="name"></td>
-                  <td><input type="text" class="form-control" id="code"
-                    placeholder="Code" ng-model="code"></td>
-                  <td>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="7">
+                  <form class="form-inline" ng-submit="create()">
+                    <input type="text" class="form-control" id="name"
+                    placeholder="Name" ng-model="name">
+                    <input type="text" class="form-control" id="code"
+                    placeholder="Code" ng-model="code">
                     <div class="btn-group">
                       <button type="submit" class="btn btn-default"
                         ng-disabled="!name || !code">Add</button>
                     </div>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </form>
+                  </form>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
         <p>
           Go to and log in to <a href="https://jiaoyi.yunfan.com/"
           target="_blank">LLKS</a>, then press <code>Control-Shift-J</code>

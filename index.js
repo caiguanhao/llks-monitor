@@ -168,13 +168,13 @@ io.configure(function() {
   // 3 - debug
 });
 
-function getData(account, wait) {
+function getHttpData(location, code, callback) {
   https.get({
     hostname: 'jiaoyi.yunfan.com',
     port: 443,
-    path: '/dig/miner/log/',
+    path: location,
     headers: {
-      Cookie: 'ntts_kb_session_id=' + account.code + ';'
+      Cookie: 'ntts_kb_session_id=' + code + ';'
     }
   }, function (res) {
     var data = '';
@@ -182,13 +182,22 @@ function getData(account, wait) {
       data += chunk;
     });
     res.on('end', function() {
-      processData(account, data);
+      callback(false, data);
+    });
+    res.on('error', function() {
+      callback(true);
+    });
+  });
+}
+
+function getData(account, wait) {
+  getHttpData('/dig/miner/log/', account.code, function(err, data) {
+    processMinerData(account, data);
+    getHttpData('/dig/miner/stats/', account.code, function(err, data) {
+      processAccountData(account, data);
       timers[account._id] = setTimeout(function() {
         getData(account);
       }, wait || 5000);
-    });
-    res.on('error', function() {
-      // error
     });
   });
 }
@@ -204,23 +213,40 @@ function sendData(account, data) {
   io.sockets.emit('update', bundle);
 }
 
-function processData(account, data) {
-  var data = JSON.parse(data);
+function processAccountData(account, data) {
+  try {
+    data = JSON.parse(data);
+    var bundle = {};
+    bundle[account._id] = {
+      total: +data.data.total_flow,
+      unsold: +data.data.flow,
+      sold: +data.data.sold,
+      servertime: prettyTime(data.data.update_time)
+    };
+    io.sockets.emit('updateAccount', bundle);
+  } catch(e) {}
+}
+
+function prettyTime(string) {
+  var date = (new Date(string)).toJSON().split(/[-T:.]/);
+  return date = date[1] + '-' + date[2] + ' ' + date[3] + ':' + date[4];
+}
+
+function processMinerData(account, data) {
+  data = JSON.parse(data);
   if (!data.data.stats) {
     return sendData(account, { error: 'expired' });
   }
   var miners = [];
   for (var i = 0; i < data.data.stats.length; i++) {
     var miner = data.data.stats[i];
-    var date = (new Date(miner.update_time)).toJSON().split(/[-T:.]/);
-    date = date[1] + '-' + date[2] + ' ' + date[3] + ':' + date[4];
     miners.push({
       ip: miner.ip,
       speed: miner.speed,
       total: miner.total_mineral,
       today: miner.today_mineral,
       yesterday: miner.yes_mineral,
-      servertime: date,
+      servertime: prettyTime(miner.update_time),
       status: miner.status
     });
   }

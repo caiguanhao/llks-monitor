@@ -156,6 +156,14 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       angular.extend(allMiners, data);
       updateAllMiners();
     });
+    Users.Socket.on('updateAccount', function(data) {
+      for (var accountId in data) {
+        var account = $filter('filter')($scope.accounts || [],
+          { _id: accountId }, true)[0];
+        if (!account) continue;
+        angular.extend(account, data[accountId]);
+      }
+    });
     Users.Socket.on('error', function(reason) {
       if (reason === 'handshake unauthorized') {
         return Accounts.PermissionDenied();
