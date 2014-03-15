@@ -212,13 +212,15 @@ function processData(account, data) {
   var miners = [];
   for (var i = 0; i < data.data.stats.length; i++) {
     var miner = data.data.stats[i];
+    var date = (new Date(miner.update_time)).toJSON().split(/[-T:.]/);
+    date = date[1] + '-' + date[2] + ' ' + date[3] + ':' + date[4];
     miners.push({
       ip: miner.ip,
       speed: miner.speed,
       total: miner.total_mineral,
       today: miner.today_mineral,
       yesterday: miner.yes_mineral,
-      servertime: miner.update_time,
+      servertime: date,
       status: miner.status
     });
   }
