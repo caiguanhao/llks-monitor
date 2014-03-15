@@ -84,6 +84,7 @@ app.get('/accounts', authorize(function(req, res, next) {
 app.post('/accounts', authorize(function(req, res, next) {
   var name = req.body.name;
   var code = req.body.code;
+  if (!name || !code) return next();
   var user = req.user;
   db.createAccount(name, code, user, function(err, account) {
     if (err) return serverUnavailable(res);
@@ -99,7 +100,15 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
   db.accounts.findOne({ _id: req.params.account_id }, function(err, account) {
     if (err || !account) return next();
     var set = {};
-    if (data.hasOwnProperty('code')) set.code = data.code;
+    if (data.hasOwnProperty('code')) {
+      if (!data.code) return next();
+      set.code = data.code;
+    }
+    if (data.hasOwnProperty('name')) {
+      if (!data.name) return next();
+      set.name = data.name;
+    }
+    if (Object.keys(set).length === 0) return next();
     db.accounts.update({ _id: account._id }, { $set: set }, {}, function(err) {
       if (err) return serverUnavailable(res);
       restartTimers();

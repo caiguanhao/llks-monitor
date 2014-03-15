@@ -46,7 +46,6 @@ directive('secondsAgo', ['$interval', function($interval) {
         }, 1000);
       });
       $scope.$on('$destroy', function(e) {
-        console.log(interval)
         $interval.cancel(interval);
       });
     }
@@ -132,29 +131,26 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
   var allMiners = {};
 
-  Users.Socket.on('update', function(data) {
-    angular.extend(allMiners, data);
+  function updateAllMiners() {
     var miners = [];
     for (var miner in allMiners) {
       var account = $filter('filter')($scope.accounts, { _id: miner }, true)[0];
+      if (!account) continue;
+      if (allMiners[miner].error) {
+        account.updated = false;
+        continue;
+      }
+      account.updated = allMiners[miner].updated;
       allMiners[miner].miners.map(function(s) { s.account = account.name; });
       miners = miners.concat(allMiners[miner].miners);
     }
     $scope.miners = miners;
+    if (!$scope.$$phase) $scope.$apply();
+  }
 
-    var accounts = $scope.accounts || [];
-    for (var i = 0; i < accounts.length; i++) {
-      var account = accounts[i];
-      if (!data.hasOwnProperty(account._id)) continue;
-      var error = data[account._id].error;
-      if (error && error === 'expired') {
-        account.expired = true;
-      } else {
-        account.expired = false;
-        angular.extend(account, data[account._id]);
-      }
-    }
-    $scope.$apply();
+  Users.Socket.on('update', function(data) {
+    angular.extend(allMiners, data);
+    updateAllMiners();
   });
   Users.Socket.on('error', function(reason) {
     if (reason === 'handshake unauthorized') {
@@ -172,6 +168,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     $scope.mOrderReverse = !$scope.mOrderReverse;
   };
   $scope.speedCompare = function(item) {
+    if (!item.speed) return 0;
     var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
     return parseFloat(item.speed) * times;
   };
@@ -179,18 +176,23 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
   $scope.create = function() {
     Accounts.Create($scope.name, $scope.code).then(function(response) {
-      $scope.statusClass = 'success';
-      $scope.status = 'success';
       $scope.name = null;
       $scope.code = null;
       var account = response.data;
       $scope.accounts.push(account);
     }).catch(function(response) {
       if (response.status === 403) {
+        alert('Permission denied.');
         return Accounts.PermissionDenied();
       }
-      $scope.statusClass = 'danger';
-      $scope.status = response.data.error || 'Unknown Error.';
+      alert(response.data.error || 'Unknown Error.');
+    });
+  };
+  $scope.updateName = function(account) {
+    var newName = $window.prompt('Enter new name:', account.name);
+    if (!newName || newName === account.name) return;
+    Accounts.Modify(account._id, { name: newName }).then(function(response) {
+      account.name = newName;
     });
   };
   $scope.updateCode = function(account) {
@@ -201,8 +203,14 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     });
   };
   $scope.delete = function(accounts, index) {
-    Accounts.Delete(accounts[index]._id).then(function(response) {
+    if (!$window.confirm('Are you sure you want to delete this account?')) {
+      return;
+    }
+    var id = accounts[index]._id;
+    Accounts.Delete(id).then(function(response) {
       accounts.splice(index, 1);
+      delete allMiners[id];
+      updateAllMiners();
     });
   };
 }]).

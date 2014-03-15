@@ -20,6 +20,11 @@ var accounts = new Datastore({
   autoload: true
 });
 
+accounts.ensureIndex({
+  fieldName: 'name',
+  unique: true
+});
+
 module.exports.accounts = accounts;
 
 module.exports.createAccount = function(name, code, user, callback) {
