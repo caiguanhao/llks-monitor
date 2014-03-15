@@ -11,6 +11,12 @@ on Mac) and enter the following command:
 
 Then use the code in your clipboard to access your account!
 
+Don't click the log out link in the web page. You can log out the web page
+by entering this line of code:
+
+    document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
+    ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();
+
 Nginx
 -----
 

@@ -169,7 +169,15 @@
           target="_blank">LLKS</a>, then press <code>Control-Shift-J</code>
           (Windows) or <code>Command-Alt-J</code> (Mac), and then enter this
           line of code:
-          <pre>copy(document.cookie.match(/ntts_kb_session_id=(.+?);/)[1])</pre>
+          <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
+          Then paste the text in your clipboard to 'code' text box above to add
+          account.
+        </p>
+        <p>
+          Don't click the log out link in the web page. You can log out the
+          web page by entering this line of code:
+          <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
+';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
         </p>
       </div>
     </div>
