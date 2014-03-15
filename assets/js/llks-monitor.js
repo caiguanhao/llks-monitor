@@ -180,15 +180,18 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     lastByStr = byStr;
   };
   $scope.speedCompare = function(item) {
+    if (!item) return 0;
     if (!item.speed) return 0;
     var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
     var speed = parseFloat(item.speed)
-    return isNaN(speed) ? 0 : speed * times;
+    speed = isNaN(speed) ? 0 : (speed * times);
+    if (item.status !== '在线') speed -= 1024 * 1024;
+    return speed;
   };
-  $scope.sort($scope.speedCompare);
+  $scope.sort($scope.speedCompare, 'speed');
 
   $scope.speedBg = function(item) {
-    if (!item || item.status !== '在线') return 'danger';
+    if (!item || item.status !== '在线') return 'dead';
     if (!item.speed) return '';
     var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
     var speed = parseFloat(item.speed);

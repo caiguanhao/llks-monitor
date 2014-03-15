@@ -75,14 +75,14 @@
           <table class="table">
             <thead ng-if="miners && miners.length">
               <tr>
-                <th>Account</th>
-                <th><a href ng-click="sort('')">IP</a></th>
+                <th><a href ng-click="sort('account')">Account</a></th>
+                <th><a href ng-click="sort('ip')">IP</a></th>
                 <th><a href ng-click="fsort('total')">Total</a></th>
                 <th><a href ng-click="fsort('today')">Today</a></th>
                 <th><a href ng-click="fsort('yesterday')">Yesterday</a></th>
                 <th><a href ng-click="sort('servertime')">Server Time</a></th>
                 <th><a href ng-click="sort(speedCompare, 'speed')">Speed</a></th>
-                <th>Status</th>
+                <th><a href ng-click="sort('status')">Status</a></th>
               </tr>
             </thead>
             <tbody ng-if="!miners.length">
@@ -111,8 +111,6 @@
           <span ng-switch-when="success">Successfully created.</span>
           <span ng-switch-default ng-bind="status"></span>
         </div>
-      </div>
-      <div class="col-sm-8">
         <form ng-submit="create()">
           <div class="panel panel-default">
             <div class="panel-heading">
