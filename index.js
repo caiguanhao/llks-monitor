@@ -243,9 +243,9 @@ function processMinerData(account, data) {
     miners.push({
       ip: miner.ip,
       speed: miner.speed,
-      total: miner.total_mineral,
-      today: miner.today_mineral,
-      yesterday: miner.yes_mineral,
+      total: +miner.total_mineral,
+      today: +miner.today_mineral,
+      yesterday: +miner.yes_mineral,
       servertime: prettyTime(miner.update_time),
       status: miner.status
     });

@@ -77,9 +77,9 @@
               <tr>
                 <th><a href ng-click="sort('account')">Account</a></th>
                 <th><a href ng-click="sort('ip')">IP</a></th>
-                <th><a href ng-click="fsort('total')">Total</a></th>
-                <th><a href ng-click="fsort('today')">Today</a></th>
-                <th><a href ng-click="fsort('yesterday')">Yesterday</a></th>
+                <th><a href ng-click="sort('total')">Total</a></th>
+                <th><a href ng-click="sort('today')">Today</a></th>
+                <th><a href ng-click="sort('yesterday')">Yesterday</a></th>
                 <th><a href ng-click="sort('servertime')">Server Time</a></th>
                 <th><a href ng-click="sort(speedCompare, 'speed')">Speed</a></th>
                 <th><a href ng-click="sort('status')">Status</a></th>
@@ -119,7 +119,9 @@
             <thead ng-if="accounts.length">
               <tr>
                 <th>Name</th>
+                <th>Miners</th>
                 <th>Total</th>
+                <th>Today</th>
                 <th>Unsold</th>
                 <th>Sold</th>
                 <th>Server Time</th>
@@ -130,7 +132,9 @@
             <tbody>
               <tr ng-repeat="account in accounts">
                 <td ng-bind="account.name"></td>
+                <td ng-bind="account.miners"></td>
                 <td ng-bind="account.total"></td>
+                <td ng-bind="account.today"></td>
                 <td ng-bind="account.unsold"></td>
                 <td ng-bind="account.sold"></td>
                 <td ng-bind="account.servertime"></td>
@@ -157,7 +161,7 @@
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="7">
+                <td colspan="9">
                   <form class="form-inline" ng-submit="create()">
                     <input type="text" class="form-control" id="name"
                     placeholder="Name" ng-model="name">

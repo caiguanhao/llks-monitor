@@ -144,7 +144,13 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         continue;
       }
       account.updated = allMiners[miner].updated;
-      allMiners[miner].miners.map(function(s) { s.account = account.name; });
+      var accountTodayTotal = 0;
+      allMiners[miner].miners.map(function(s) {
+        s.account = account.name;
+        accountTodayTotal += s.today
+      });
+      account.miners = allMiners[miner].miners.length;
+      account.today = accountTodayTotal.toFixed(5);
       miners = miners.concat(allMiners[miner].miners);
     }
     $scope.miners = miners;
@@ -171,11 +177,11 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     });
   }
 
-  $scope.fsort = function(by) {
-    $scope.sort(function(item) {
-      return parseFloat(item[by]);
-    }, by);
-  };
+  // $scope.fsort = function(by) {
+  //   $scope.sort(function(item) {
+  //     return parseFloat(item[by]);
+  //   }, by);
+  // };
   var lastByStr;
   $scope.sort = function(by, byStr) {
     if (!byStr && typeof by === 'string') byStr = by;
