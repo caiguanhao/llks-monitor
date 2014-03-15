@@ -109,6 +109,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     };
     $http.defaults.headers.common['x-user-id'] = id;
     $http.defaults.headers.common['x-user-token'] = token;
+    if (!id || !token) return;
     this.Socket = io.connect(null, { query: 'id=' + id + '&token=' + token });
   };
   this.SetUser = function(id, username, token) {
@@ -122,6 +123,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   '$filter',
   function($scope, Accounts, Users, $window, $filter) {
+
   $scope.name = null;
   $scope.code = null;
 
@@ -134,7 +136,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   function updateAllMiners() {
     var miners = [];
     for (var miner in allMiners) {
-      var account = $filter('filter')($scope.accounts, { _id: miner }, true)[0];
+      var account = $filter('filter')($scope.accounts || [],
+        { _id: miner }, true)[0];
       if (!account) continue;
       if (allMiners[miner].error) {
         account.updated = false;
@@ -148,15 +151,17 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     if (!$scope.$$phase) $scope.$apply();
   }
 
-  Users.Socket.on('update', function(data) {
-    angular.extend(allMiners, data);
-    updateAllMiners();
-  });
-  Users.Socket.on('error', function(reason) {
-    if (reason === 'handshake unauthorized') {
-      return Accounts.PermissionDenied();
-    }
-  });
+  if (Users.Socket) {
+    Users.Socket.on('update', function(data) {
+      angular.extend(allMiners, data);
+      updateAllMiners();
+    });
+    Users.Socket.on('error', function(reason) {
+      if (reason === 'handshake unauthorized') {
+        return Accounts.PermissionDenied();
+      }
+    });
+  }
 
   $scope.fsort = function(by) {
     $scope.sort(function(item) {
