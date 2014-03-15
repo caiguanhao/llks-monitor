@@ -102,6 +102,7 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
     if (data.hasOwnProperty('code')) set.code = data.code;
     db.accounts.update({ _id: account._id }, { $set: set }, {}, function(err) {
       if (err) return serverUnavailable(res);
+      restartTimers();
       res.status(200);
       res.send({ status: 'ok' });
     });
@@ -111,6 +112,7 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
 app.delete('/accounts/:account_id', authorize(function(req, res, next) {
   db.accounts.remove({ _id: req.params.account_id }, {}, function(err) {
     if (err) return serverUnavailable(res);
+    restartTimers();
     res.status(200);
     res.send({ status: 'ok' });
   });
@@ -123,7 +125,6 @@ server.listen(app.get('port'), function(){
 });
 
 var https = require('https');
-var Q = require('q');
 var io = require('socket.io').listen(server);
 
 io.configure(function() {
@@ -143,87 +144,89 @@ io.configure(function() {
     }
     callback('Please provide user id and token!', false);
   });
+  io.set('log level', 1);
+  // 0 - error
+  // 1 - warn
+  // 2 - info
+  // 3 - debug
 });
 
-function resetTimers() {
-
-}
-
-function restartTimers() {
-  // resetTimers();
-  // startTimers();
-}
-
-function startTimers() {
-  db.accounts.find({}, function(err, accounts) {
-    if (err) return;
-    var deferred = Q.defer();
-    deferred.resolve();
-    var promise = deferred.promise;
-    for (var i = 0; i < accounts.length; i++) {
-      var then = (function(account) {
-        return function() {
-          var deferred = Q.defer();
-          https.get({
-            hostname: 'jiaoyi.yunfan.com',
-            port: 443,
-            path: '/dig/miner/log/',
-            headers: {
-              Cookie: 'ntts_kb_session_id=' + account.code + ';'
-            }
-          }, function (res) {
-            var data = '';
-            res.on('data', function(chunk) {
-              data += chunk;
-            });
-            res.on('end', function() {
-              deferred.resolve(data);
-            });
-            res.on('error', function() {
-              deferred.reject();
-            });
-          });
-          return deferred.promise;
-        };
-      })(accounts[i]);
-      promise = promise.then(then);
-
-      var then = (function(account) {
-        return function(data) {
-          var data = JSON.parse(data);
-          if (!data.data.stats) {
-            var bundle = {};
-            bundle[account.code] = { error: 'expired' };
-            io.sockets.emit('update', bundle);
-            return;
-          }
-          var miners = [];
-          for (var i = 0; i < data.data.stats.length; i++) {
-            var miner = data.data.stats[i];
-            miners.push({
-              ip: miner.ip,
-              speed: miner.speed,
-              total: miner.total_mineral,
-              today: miner.today_mineral,
-              yesterday: miner.yes_mineral,
-              servertime: miner.update_time,
-              status: miner.status
-            });
-          }
-          var bundle = {};
-          bundle[account.code] = {
-            updated: +new Date,
-            miners: miners
-          };
-          io.sockets.emit('update', bundle);
-        };
-      })(accounts[i]);
-      promise = promise.then(then);
+function getData(account, wait) {
+  https.get({
+    hostname: 'jiaoyi.yunfan.com',
+    port: 443,
+    path: '/dig/miner/log/',
+    headers: {
+      Cookie: 'ntts_kb_session_id=' + account.code + ';'
     }
-    promise.then(function() {
-      setTimeout(startTimers, 5000);
+  }, function (res) {
+    var data = '';
+    res.on('data', function(chunk) {
+      data += chunk;
+    });
+    res.on('end', function() {
+      sendData(account, data);
+      timers[account._id] = setTimeout(function() {
+        getData(account);
+      }, wait || 5000);
+    });
+    res.on('error', function() {
+      // error
     });
   });
 }
 
-startTimers();
+function sendData(account, data) {
+  var data = JSON.parse(data);
+  if (!data.data.stats) {
+    var bundle = {};
+    bundle[account._id] = { error: 'expired' };
+    io.sockets.emit('update', bundle);
+    return;
+  }
+  var miners = [];
+  for (var i = 0; i < data.data.stats.length; i++) {
+    var miner = data.data.stats[i];
+    miners.push({
+      ip: miner.ip,
+      speed: miner.speed,
+      total: miner.total_mineral,
+      today: miner.today_mineral,
+      yesterday: miner.yes_mineral,
+      servertime: miner.update_time,
+      status: miner.status
+    });
+  }
+  var bundle = {};
+  bundle[account._id] = {
+    updated: +new Date,
+    miners: miners
+  };
+  io.sockets.emit('update', bundle);
+}
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function restartTimers() {
+  cancelTimers();
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return;
+    for (var i = 0; i < accounts.length; i++) {
+      var account = accounts[i];
+      getData(account, getRandomInt(0, 5000));
+    }
+  });
+}
+
+var timers = {};
+
+function cancelTimers() {
+  for (var timer in timers) {
+    clearTimeout(timers[timer]);
+  }
+  timers = {};
+}
+
+restartTimers();

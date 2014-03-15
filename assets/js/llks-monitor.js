@@ -133,13 +133,13 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     var accounts = $scope.accounts || [];
     for (var i = 0; i < accounts.length; i++) {
       var account = accounts[i];
-      if (!data.hasOwnProperty(account.code)) continue;
-      var error = data[account.code].error;
+      if (!data.hasOwnProperty(account._id)) continue;
+      var error = data[account._id].error;
       if (error && error === 'expired') {
         account.expired = true;
       } else {
         account.expired = false;
-        angular.extend(account, data[account.code]);
+        angular.extend(account, data[account._id]);
       }
     }
     $scope.$apply();
