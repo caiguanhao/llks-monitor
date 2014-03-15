@@ -67,6 +67,12 @@ service('Accounts', ['$http', 'Users', '$route',
   this.Create = function(name, code) {
     return $http.post('/accounts', { name: name, code: code });
   };
+  this.Modify = function(id, data) {
+    return $http.put('/accounts/' + id, data);
+  };
+  this.Delete = function(id) {
+    return $http.delete('/accounts/' + id);
+  };
 }]).
 
 service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
@@ -114,8 +120,8 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   };
 }]).
 
-controller('MainController', ['$scope', 'Accounts', 'Users',
-  function($scope, Accounts, Users) {
+controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
+  function($scope, Accounts, Users, $window) {
   $scope.name = null;
   $scope.code = null;
 
@@ -126,8 +132,14 @@ controller('MainController', ['$scope', 'Accounts', 'Users',
   Users.Socket.on('update', function(data) {
     var accounts = $scope.accounts || [];
     for (var i = 0; i < accounts.length; i++) {
-      if (data.hasOwnProperty(accounts[i].code)) {
-        angular.extend(accounts[i], data[accounts[i].code]);
+      var account = accounts[i];
+      if (!data.hasOwnProperty(account.code)) continue;
+      var error = data[account.code].error;
+      if (error && error === 'expired') {
+        account.expired = true;
+      } else {
+        account.expired = false;
+        angular.extend(account, data[account.code]);
       }
     }
     $scope.$apply();
@@ -151,6 +163,18 @@ controller('MainController', ['$scope', 'Accounts', 'Users',
       }
       $scope.statusClass = 'danger';
       $scope.status = response.data.error || 'Unknown Error.';
+    });
+  };
+  $scope.updateCode = function(account) {
+    var newCode = $window.prompt('Enter new code:', account.code);
+    if (!newCode || newCode === account.code) return;
+    Accounts.Modify(account._id, { code: newCode }).then(function(response) {
+      account.code = newCode;
+    });
+  };
+  $scope.delete = function(accounts, index) {
+    Accounts.Delete(accounts[index]._id).then(function(response) {
+      accounts.splice(index, 1);
     });
   };
 }]).

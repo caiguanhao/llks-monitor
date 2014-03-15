@@ -93,6 +93,29 @@ app.post('/accounts', authorize(function(req, res, next) {
   });
 }));
 
+app.put('/accounts/:account_id', authorize(function(req, res, next) {
+  var data = req.body;
+  if (!data) return next();
+  db.accounts.findOne({ _id: req.params.account_id }, function(err, account) {
+    if (err || !account) return next();
+    var set = {};
+    if (data.hasOwnProperty('code')) set.code = data.code;
+    db.accounts.update({ _id: account._id }, { $set: set }, {}, function(err) {
+      if (err) return serverUnavailable(res);
+      res.status(200);
+      res.send({ status: 'ok' });
+    });
+  });
+}));
+
+app.delete('/accounts/:account_id', authorize(function(req, res, next) {
+  db.accounts.remove({ _id: req.params.account_id }, {}, function(err) {
+    if (err) return serverUnavailable(res);
+    res.status(200);
+    res.send({ status: 'ok' });
+  });
+}));
+
 var server = require('http').createServer(app);
 
 server.listen(app.get('port'), function(){
@@ -168,12 +191,23 @@ function startTimers() {
       var then = (function(account) {
         return function(data) {
           var data = JSON.parse(data);
+          if (!data.data.stats) {
+            var bundle = {};
+            bundle[account.code] = { error: 'expired' };
+            io.sockets.emit('update', bundle);
+            return;
+          }
           var miners = [];
           for (var i = 0; i < data.data.stats.length; i++) {
             var miner = data.data.stats[i];
             miners.push({
               ip: miner.ip,
               speed: miner.speed,
+              total: miner.total_mineral,
+              today: miner.today_mineral,
+              yesterday: miner.yes_mineral,
+              servertime: miner.update_time,
+              status: miner.status
             });
           }
           var bundle = {};
