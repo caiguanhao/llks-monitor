@@ -22,7 +22,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="/">LLKS Monitor</a>
+              <a class="navbar-brand" href="/#/">LLKS Monitor</a>
             </div>
             <div class="collapse navbar-collapse" id="navbar">
               <ul class="nav navbar-nav">
@@ -76,7 +76,8 @@
               </tr>
             </tbody>
             <tbody>
-              <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse">
+              <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
+                class="bg-{{speedBg(miner)}}">
                 <td ng-bind="miner.account"></td>
                 <td ng-bind="miner.ip"></td>
                 <td ng-bind="miner.total"></td>

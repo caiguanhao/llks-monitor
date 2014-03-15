@@ -179,6 +179,15 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   };
   $scope.sort($scope.speedCompare);
 
+  $scope.speedBg = function(item) {
+    if (!item.speed) return '';
+    var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
+    var speed = parseFloat(item.speed) * times;
+    if (speed >= 1024) return 'success';
+    if (speed >= 512) return 'warning';
+    return 'danger';
+  };
+
   $scope.create = function() {
     Accounts.Create($scope.name, $scope.code).then(function(response) {
       $scope.name = null;
