@@ -121,7 +121,8 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
 }]).
 
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
-  function($scope, Accounts, Users, $window) {
+  '$filter',
+  function($scope, Accounts, Users, $window, $filter) {
   $scope.name = null;
   $scope.code = null;
 
@@ -129,7 +130,18 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     $scope.accounts = response.data;
   });
 
+  var allMiners = {};
+
   Users.Socket.on('update', function(data) {
+    angular.extend(allMiners, data);
+    var miners = [];
+    for (var miner in allMiners) {
+      var account = $filter('filter')($scope.accounts, { _id: miner }, true)[0];
+      allMiners[miner].miners.map(function(s) { s.account = account.name; });
+      miners = miners.concat(allMiners[miner].miners);
+    }
+    $scope.miners = miners;
+
     var accounts = $scope.accounts || [];
     for (var i = 0; i < accounts.length; i++) {
       var account = accounts[i];
@@ -149,6 +161,21 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       return Accounts.PermissionDenied();
     }
   });
+
+  $scope.fsort = function(by) {
+    $scope.sort(function(item) {
+      return parseFloat(item[by]);
+    });
+  };
+  $scope.sort = function(by) {
+    $scope.mOrder = by;
+    $scope.mOrderReverse = !$scope.mOrderReverse;
+  };
+  $scope.speedCompare = function(item) {
+    var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
+    return parseFloat(item.speed) * times;
+  };
+  $scope.sort($scope.speedCompare);
 
   $scope.create = function() {
     Accounts.Create($scope.name, $scope.code).then(function(response) {

@@ -76,6 +76,40 @@
       </div>
       <div class="col-sm-12">
         <h3>Status</h3>
+        <div>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              All
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th><a href ng-click="sort('')">IP</a></th>
+                  <th><a href ng-click="fsort('total')">Total</a></th>
+                  <th><a href ng-click="fsort('today')">Today</a></th>
+                  <th><a href ng-click="fsort('yesterday')">Yesterday</a></th>
+                  <th><a href ng-click="sort('servertime')">Server Time</a></th>
+                  <th><a href ng-click="sort(speedCompare)">Speed</a></th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse">
+                  <td ng-bind="miner.account"></td>
+                  <td ng-bind="miner.ip"></td>
+                  <td ng-bind="miner.total"></td>
+                  <td ng-bind="miner.today"></td>
+                  <td ng-bind="miner.yesterday"></td>
+                  <td ng-bind="miner.servertime"></td>
+                  <td ng-bind="miner.speed"></td>
+                  <td ng-bind="miner.status"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div ng-repeat="account in accounts">
           <div class="panel panel-default">
             <div class="panel-heading">
