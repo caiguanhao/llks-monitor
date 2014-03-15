@@ -58,7 +58,7 @@
             Status
           </div>
           <table class="table">
-            <thead ng-if="miners.length">
+            <thead ng-if="miners && miners.length">
               <tr>
                 <th>Account</th>
                 <th><a href ng-click="sort('')">IP</a></th>
@@ -116,7 +116,8 @@
                   <td ng-switch on="account.updated">
                     <span ng-switch-when="false">Expired</span>
                     <span ng-switch-default seconds-ago="account.updated"
-                      seconds-ago-to="account.secondsAgo">
+                      seconds-ago-to="account.secondsAgo"
+                      ng-show="account.secondsAgo">
                       updated {{account.secondsAgo}} secs ago
                     </span>
                   </td>

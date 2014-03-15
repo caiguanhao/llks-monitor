@@ -174,7 +174,7 @@ function getData(account, wait) {
       data += chunk;
     });
     res.on('end', function() {
-      sendData(account, data);
+      processData(account, data);
       timers[account._id] = setTimeout(function() {
         getData(account);
       }, wait || 5000);
@@ -186,12 +186,20 @@ function getData(account, wait) {
 }
 
 function sendData(account, data) {
+  var bundle = {};
+  bundle[account._id] = data;
+  db.accounts.update({ _id: account._id }, { $set: {
+    data: JSON.stringify(bundle)
+  } }, {}, function() {
+    db.accounts.persistence.compactDatafile();
+  });
+  io.sockets.emit('update', bundle);
+}
+
+function processData(account, data) {
   var data = JSON.parse(data);
   if (!data.data.stats) {
-    var bundle = {};
-    bundle[account._id] = { error: 'expired' };
-    io.sockets.emit('update', bundle);
-    return;
+    return sendData(account, { error: 'expired' });
   }
   var miners = [];
   for (var i = 0; i < data.data.stats.length; i++) {
@@ -206,12 +214,10 @@ function sendData(account, data) {
       status: miner.status
     });
   }
-  var bundle = {};
-  bundle[account._id] = {
+  return sendData(account, {
     updated: +new Date,
     miners: miners
-  };
-  io.sockets.emit('update', bundle);
+  });
 }
 
 function getRandomInt(min, max) {
@@ -228,6 +234,16 @@ function restartTimers() {
     }
   });
 }
+
+io.sockets.on('connection', function(socket) {
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return;
+    for (var i = 0; i < accounts.length; i++) {
+      var data = JSON.parse(accounts[i].data);
+      socket.emit('update', data);
+    }
+  });
+});
 
 var timers = {};
 
