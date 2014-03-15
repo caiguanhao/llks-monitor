@@ -52,14 +52,14 @@
   </script>
   <script type="text/ng-template" id="main">
     <div class="row">
-      <div class="col-sm-6 col-sm-offset-3">
+      <div class="col-sm-12">
         <div class="alert alert-dismissable alert-{{statusClass}}"
           ng-show="status" ng-switch on="status">
           <span ng-switch-when="loading">Loading...</span>
           <span ng-switch-when="success">Successfully created.</span>
           <span ng-switch-default ng-bind="status"></span>
         </div>
-        <form ng-submit="create()">
+        <form class="form-inline" role="form" ng-submit="create()">
           <div class="form-group">
             <label for="name">Name</label>
             <input type="text" class="form-control" id="name"

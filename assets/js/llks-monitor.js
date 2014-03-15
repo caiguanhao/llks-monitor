@@ -156,7 +156,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.status = 'success';
       $scope.name = null;
       $scope.code = null;
-      Accounts.Reload();
+      var account = response.data;
+      $scope.accounts.push(account);
     }).catch(function(response) {
       if (response.status === 403) {
         return Accounts.PermissionDenied();

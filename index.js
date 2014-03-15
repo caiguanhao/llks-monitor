@@ -74,10 +74,10 @@ function authorize(callback) {
 }
 
 app.get('/accounts', authorize(function(req, res, next) {
-  db.accounts.find({}, function(err, accounts) {
+  db.accounts.find({}, function(err, account) {
     if (err) return serverUnavailable(res);
     res.status(200);
-    res.send(accounts);
+    res.send(account);
   });
 }));
 
