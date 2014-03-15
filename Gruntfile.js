@@ -46,8 +46,7 @@ module.exports = function(grunt) {
         tasks: [ 'less' ]
       },
       js: {
-        files: [ 'assets/js/**/*.js' ],
-        tasks: [ 'concat' ]
+        files: [ 'assets/js/**/*.js' ]
       }
     }
   });

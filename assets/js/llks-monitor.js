@@ -166,23 +166,34 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.fsort = function(by) {
     $scope.sort(function(item) {
       return parseFloat(item[by]);
-    });
+    }, by);
   };
-  $scope.sort = function(by) {
+  var lastByStr;
+  $scope.sort = function(by, byStr) {
+    if (!byStr && typeof by === 'string') byStr = by;
+    if (lastByStr === byStr) {
+      $scope.mOrderReverse = !$scope.mOrderReverse;
+    } else {
+      $scope.mOrderReverse = true;
+    }
     $scope.mOrder = by;
-    $scope.mOrderReverse = !$scope.mOrderReverse;
+    lastByStr = byStr;
   };
   $scope.speedCompare = function(item) {
     if (!item.speed) return 0;
     var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
-    return parseFloat(item.speed) * times;
+    var speed = parseFloat(item.speed)
+    return isNaN(speed) ? 0 : speed * times;
   };
   $scope.sort($scope.speedCompare);
 
   $scope.speedBg = function(item) {
+    if (!item || item.status !== '在线') return 'danger';
     if (!item.speed) return '';
     var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
-    var speed = parseFloat(item.speed) * times;
+    var speed = parseFloat(item.speed);
+    if (isNaN(speed)) return 'danger';
+    speed = speed * times;
     if (speed >= 1024) return 'success';
     if (speed >= 512) return 'warning';
     return 'danger';
