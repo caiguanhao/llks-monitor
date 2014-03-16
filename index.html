@@ -18,9 +18,11 @@
   <script uglify="llks-monitor" dest="/js/llks-monitor.js"></script>
   <script uglify="llks-monitor" production="/js/llks-monitor.js"></script>
   <script uglify="llks-monitor" real-src="public/js/templates.js"></script>
+  <script uglify="llks-monitor" real-src="public/js/i18n.js"></script>
   <script development src="/js/vendor/angular.js"></script>
   <script development src="/js/vendor/angular-route.js"></script>
   <script development src="/js/llks-monitor.js"></script>
+  <script development src="/js/i18n.js"></script>
   <script development src="/socket.io/socket.io.js"></script>
   <script development src="http://localhost:35729/livereload.js"></script>
   <script>
@@ -47,6 +49,14 @@
               <ul class="nav navbar-nav">
               </ul>
               <ul class="nav navbar-nav navbar-right">
+                <li>
+                  <a class="btn-group btn-group-xs">
+                    <button type="button" class="btn btn-default"
+                      ng-class="{active:CURRENT_LANG===code}"
+                      ng-repeat="(code, text) in LANGS"
+                      ng-click="setLang(code)">{{text}}</button>
+                  </a>
+                </li>
                 <li ng-if="!User.Username"><a href="/#/login">Login</a></li>
                 <li ng-if="User.Username" class="dropdown"
                   ng-class="{open:dropdown}">
@@ -82,14 +92,17 @@
           <table class="table table-slim table-hover">
             <thead ng-if="miners && miners.length">
               <tr>
-                <th><a href ng-click="sort('account')">Account</a></th>
-                <th><a href ng-click="sort('ip')">IP</a></th>
-                <th><a href ng-click="sort('total')">Total</a></th>
-                <th><a href ng-click="sort('today')">Today</a></th>
-                <th><a href ng-click="sort('yesterday')">Yesterday</a></th>
-                <th><a href ng-click="sort('servertime')">Server Time</a></th>
-                <th><a href ng-click="sort(speedCompare, 'speed')">Speed</a></th>
-                <th><a href ng-click="sort('status')">Status</a></th>
+                <th><a href ng-click="sort('account')" i18n="Account"></a></th>
+                <th><a href ng-click="sort('ip')" i18n="IP"></a></th>
+                <th><a href ng-click="sort('total')" i18n="Total"></a></th>
+                <th><a href ng-click="sort('today')" i18n="Today"></a></th>
+                <th><a href ng-click="sort('yesterday')"
+                  i18n="Yesterday"></a></th>
+                <th><a href ng-click="sort('servertime')"
+                  i18n="Server Time"></a></th>
+                <th><a href ng-click="sort(speedCompare, 'speed')"
+                  i18n="Speed"></a></th>
+                <th><a href ng-click="sort('status')" i18n="Status"></a></th>
               </tr>
             </thead>
             <tbody ng-if="!miners.length">

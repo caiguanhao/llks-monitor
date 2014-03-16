@@ -18,14 +18,38 @@ config(['$routeProvider', '$locationProvider',
   $locationProvider.html5Mode(false);
 }]).
 
-run(['Users', function(Users) {
+run(['Users', '$rootScope', function(Users, $rootScope) {
   Users.Init();
+
+  $rootScope.CURRENT_LANG = 'en';
+  $rootScope.LANGS = {
+    en: 'English',
+    zh: '中文'
+  };
+  $rootScope.setLang = function(code) {
+    if ($rootScope.CURRENT_LANG === code) return;
+    $rootScope.CURRENT_LANG = code;
+    $rootScope.$broadcast('langChange', code);
+  };
 }]).
 
 directive('body', [function() {
   return {
     restrict: 'E',
     templateUrl: 'index'
+  };
+}]).
+
+directive('i18n', ['I18N', function(I18N) {
+  return {
+    link: function($scope, elem, attrs) {
+      var langChange = function(e, code) {
+        var lang = I18N[code] || {};
+        elem.text(lang[attrs.i18n] || attrs.i18n);
+      };
+      langChange();
+      $scope.$on('langChange', langChange);
+    }
   };
 }]).
 

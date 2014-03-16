@@ -13,7 +13,12 @@ module.exports = function(grunt) {
       public_css: [ 'public/css/*.css' ],
       public_js: [ 'public/js/*.js' ],
       compressed: [ 'public/**/*.gz' ],
-      templates: [ 'public/js/templates.js', 'public/js/templates.js.gz' ]
+      generated: [
+        'public/js/i18n.js',
+        'public/js/i18n.js.gz',
+        'public/js/templates.js',
+        'public/js/templates.js.gz'
+      ]
     },
     less: {
       llksMonitor: {
@@ -47,6 +52,10 @@ module.exports = function(grunt) {
       },
       js: {
         files: [ 'assets/js/**/*.js' ]
+      },
+      translations: {
+        files: [ 'translations.json' ],
+        tasks: [ 'translate' ]
       }
     }
   });
@@ -60,6 +69,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', [
     'clean',
+    'translate',
     'less',
     'copy-index',
     'express',
@@ -71,11 +81,12 @@ module.exports = function(grunt) {
     'clean',
     'less',
     'analyze',
+    'translate',
     'uglify',
     'concat',
     'hash',
     'compress',
-    'clean:templates'
+    'clean:generated'
   ]);
 
   grunt.registerTask('p', [
@@ -133,6 +144,47 @@ module.exports = function(grunt) {
   htmlparser.void_elements = ['area', 'base', 'br', 'col', 'embed', 'hr',
     'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track',
     'wbr'];
+
+  grunt.registerTask('gettext', 'Get translations', function(lang) {
+    if (!lang) grunt.fail.fatal('grunt gettext:<lang-code>');
+    var translations = {};
+    try {
+      translations = grunt.file.readJSON('translations.json');
+    } catch(e) {}
+    translations[lang] = translations[lang] || {};
+    var T = {};
+    var parser = new htmlparser.Parser({
+      onopentag: function(name, attribs) {
+        var i18n = attribs.i18n;
+        if (i18n) {
+          T[i18n] = translations[lang][i18n] || '';
+        }
+      },
+      onend: function() {
+        translations[lang] = T;
+        var tStr = JSON.stringify(translations, null, 2);
+        grunt.file.write('translations.json', tStr.trim() + '\n');
+        grunt.log.ok('Done.');
+      }
+    });
+    var index = grunt.file.read('index.html');
+    index = index.replace(new RegExp('<script.*type="text\\/ng-template".*>' +
+      '([\\s\\S]+?)</script>', 'g'), '<div>$1</div>');
+    parser.write(index);
+    parser.end();
+  });
+
+  grunt.registerTask('translate', 'Make i18n js file', function() {
+    var i18n = ';llksMonitor.factory(\'I18N\', [function(){return ';
+    var translations = {};
+    try {
+      translations = grunt.file.readJSON('translations.json');
+    } catch(e) {}
+    i18n += JSON.stringify(translations);
+    i18n += ';}]);'
+    grunt.file.write('public/js/i18n.js', i18n);
+    grunt.log.ok('Generated public/js/i18n.js.');
+  });
 
   grunt.registerTask('hash', 'Hash filenames of assets', function() {
     var prod_index = '';

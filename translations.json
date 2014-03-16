@@ -1,0 +1,12 @@
+{
+  "zh": {
+    "Account": "账号",
+    "IP": "IP地址",
+    "Total": "累计挖矿",
+    "Today": "今日挖矿",
+    "Yesterday": "昨日挖矿",
+    "Server Time": "更新时间",
+    "Speed": "挖矿速度",
+    "Status": "状态"
+  }
+}
