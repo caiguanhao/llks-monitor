@@ -111,7 +111,12 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     $http.defaults.headers.common['x-user-id'] = id;
     $http.defaults.headers.common['x-user-token'] = token;
     if (!id || !token) return;
-    this.Socket = io.connect(null, { query: 'id=' + id + '&token=' + token });
+    this.Socket = io.connect(null, {
+      query: 'id=' + id + '&token=' + token,
+      'reconnect': true,
+      'reconnection delay': 1000,
+      'max reconnection attempts': 100
+    });
   };
   this.SetUser = function(id, username, token) {
     ls('llksMonitor.user.id', id);
@@ -176,6 +181,9 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         if (!account) continue;
         angular.extend(account, data[accountId]);
       }
+    });
+    Users.Socket.on('disconnect', function() {
+      Users.Socket.socket.reconnect();
     });
     Users.Socket.on('error', function(reason) {
       if (reason === 'handshake unauthorized') {
