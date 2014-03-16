@@ -196,7 +196,11 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       getAccounts();
     });
     Users.Socket.on('ServerHasUpdated', function(data) {
+      if (typeof data !== 'object' || typeof $window.ASSETS !== 'object') {
+        return;
+      }
       if (angular.equals($window.ASSETS, {})) return;
+      if (angular.equals(data, {})) return;
       var assetsHasChanged = !angular.equals(data, $window.ASSETS);
       if (assetsHasChanged) {
         $window.location.reload();
@@ -217,11 +221,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     });
   }
 
-  // $scope.fsort = function(by) {
-  //   $scope.sort(function(item) {
-  //     return parseFloat(item[by]);
-  //   }, by);
-  // };
   var lastByStr;
   $scope.sort = function(by, byStr) {
     if (!byStr && typeof by === 'string') byStr = by;

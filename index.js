@@ -35,6 +35,16 @@ app.post('/login', function(req, res, next) {
         username: user.username,
         token: user.token
       });
+
+      try {
+        var clients = io.sockets.clients();
+        for (var i = 0; i < clients.length; i++) {
+          var user_id = clients[i].handshake.user_id;
+          if (user._id === user_id) {
+            clients[i].disconnect();
+          }
+        }
+      } catch(e) {}
       return;
     default:
       res.writeHead(499, 'Unknown Error');
@@ -158,6 +168,7 @@ io.configure(function() {
       }).exec(function(error, user) {
         if (error) return callback('Error occurred.', false);
         if (!user) return callback(null, false);
+        handshakeData.user_id = user._id;
         return callback(null, true);
       });
       return;
