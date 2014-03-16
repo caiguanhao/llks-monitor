@@ -112,7 +112,8 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     $http.defaults.headers.common['x-user-token'] = token;
     if (!id || !token) return;
     this.Socket = io.connect(null, {
-      query: 'id=' + id + '&token=' + token,
+      'query': 'id=' + id + '&token=' + token,
+      'force new connection': true,
       'reconnect': true,
       'reconnection delay': 1000,
       'max reconnection attempts': 100

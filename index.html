@@ -160,8 +160,8 @@
             <tfoot>
               <tr>
                 <td colspan="9">
-                  <form class="form-inline" ng-submit="create()">
-                    <a class="btn btn-default"
+                  <form class="form-inline input-group-sm" ng-submit="create()">
+                    <a class="btn btn-default btn-sm"
                       ng-show="accounts.length"
                       ng-class="{active:accountEditsEnabled}"
                       ng-click="accountEditsEnabled=!accountEditsEnabled">
@@ -171,7 +171,7 @@
                     placeholder="Name" ng-model="name">
                     <input type="text" class="form-control" id="code"
                     placeholder="Code" ng-model="code">
-                    <div class="btn-group">
+                    <div class="btn-group btn-group-sm">
                       <button type="submit" class="btn btn-default"
                         ng-disabled="!name || !code">Add</button>
                     </div>
