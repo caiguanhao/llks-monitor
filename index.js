@@ -313,7 +313,16 @@ function restartTimers() {
   });
 }
 
+var assetsHashes = {};
+
+try {
+  assetsHashes = require('./db/.assets.json');
+} catch(e) {
+  console.log('db/.assets.json not found');
+}
+
 io.sockets.on('connection', function(socket) {
+  socket.emit('ServerHasUpdated', assetsHashes)
   db.accounts.find({}, function(err, accounts) {
     if (err) return;
     for (var i = 0; i < accounts.length; i++) {

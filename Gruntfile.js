@@ -138,6 +138,7 @@ module.exports = function(grunt) {
     var prod_index = '';
     var index = grunt.file.read('public/index.html');
     var crypto = require('crypto'), fs = require('fs');
+    var hashes = {};
     var parser = new htmlparser.Parser({
       onopentag: function(name, attribs) {
         if ((name === 'link' && attribs.rel === 'stylesheet') ||
@@ -150,6 +151,7 @@ module.exports = function(grunt) {
             shasum = crypto.createHash('sha1');
             shasum.update(js);
             var hash = shasum.digest('hex');
+            hashes[attribs[src_tag]] = hash;
             var dot = attribs[src_tag].lastIndexOf('.');
             if (dot === -1) dot = undefined;
             var new_src = attribs[src_tag].slice(0, dot);
@@ -182,6 +184,13 @@ module.exports = function(grunt) {
       },
       onend: function() {
         prod_index = prod_index.trim() + '\n';
+        prod_index = prod_index.replace(/^<\/script>/mg, '  </script>');
+        var hashstr = JSON.stringify(hashes, null, 2);
+        prod_index = prod_index.replace(/^((\s*).*){\/\*%ASSETS%\*\/}/mg,
+          function(a, p1, p2) {
+          return p1 + hashstr.replace(/^/mg, Array(p2.length).join(' ')).trim();
+        });
+        grunt.file.write('db/.assets.json', hashstr);
         grunt.file.write('public/index.html', prod_index);
         grunt.log.ok('File public/index.html generated.');
       }

@@ -116,7 +116,8 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
       'force new connection': true,
       'reconnect': true,
       'reconnection delay': 1000,
-      'max reconnection attempts': 100
+      'reconnection limit': 5000,
+      'max reconnection attempts': 10000
     });
   };
   this.SetUser = function(id, username, token) {
@@ -193,6 +194,13 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     Users.Socket.on('AccountsHasChanged', function() {
       $scope.status = 'connected';
       getAccounts();
+    });
+    Users.Socket.on('ServerHasUpdated', function(data) {
+      if (angular.equals($window.ASSETS, {})) return;
+      var assetsHasChanged = !angular.equals(data, $window.ASSETS);
+      if (assetsHasChanged) {
+        $window.location.reload();
+      }
     });
     Users.Socket.on('connect', function() {
       $scope.status = 'connected';
