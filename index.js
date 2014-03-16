@@ -205,6 +205,9 @@ function getData(account, wait) {
     return getHttpData('/dig/miner/stats/', code);
   }).then(function(data) {
     processAccountData(account, data);
+    return getHttpData('/index.php/transaction/get_current_price', code);
+  }).then(function(data) {
+    processPriceData(account, data);
   }).finally(function() {
     timers[account._id] = setTimeout(function() {
       getData(account);
@@ -221,6 +224,17 @@ function sendData(account, data) {
     db.accounts.persistence.compactDatafile();
   });
   io.sockets.emit('update', bundle);
+}
+
+function processPriceData(account, data) {
+  try {
+    data = JSON.parse(data);
+    var bundle = {};
+    bundle[account._id] = {
+      price: data.data.price
+    };
+    io.sockets.emit('updateAccount', bundle);
+  } catch(e) {}
 }
 
 function processAccountData(account, data) {

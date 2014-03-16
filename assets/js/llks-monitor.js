@@ -237,6 +237,11 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     return 'danger';
   };
 
+  $scope.unsoldWorth = function(account) {
+    if (!account || !account.unsold) return 0;
+    return Math.floor(account.unsold) * account.price;
+  };
+
   $scope.create = function() {
     Accounts.Create($scope.name, $scope.code).then(function(response) {
       $scope.name = null;

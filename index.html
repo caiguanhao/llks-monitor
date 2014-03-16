@@ -112,7 +112,7 @@
           <div class="panel-heading">
             Accounts
           </div>
-          <table class="table">
+          <table class="table table-slim">
             <thead ng-if="accounts.length">
               <tr>
                 <th>Name</th>
@@ -121,6 +121,7 @@
                 <th>Today</th>
                 <th>Unsold</th>
                 <th>Sold</th>
+                <th>Unsold Worth</th>
                 <th>Server Time</th>
                 <th>Updated</th>
               </tr>
@@ -144,6 +145,7 @@
                 <td ng-bind="account.today"></td>
                 <td ng-bind="account.unsold"></td>
                 <td ng-bind="account.sold"></td>
+                <td ng-bind="unsoldWorth(account)|currency:'￥'"></td>
                 <td ng-bind="account.servertime"></td>
                 <td ng-switch on="account.updated">
                   <span ng-switch-when="false">Expired</span>
@@ -157,7 +159,7 @@
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="8">
+                <td colspan="9">
                   <form class="form-inline" ng-submit="create()">
                     <a class="btn btn-default"
                       ng-show="accounts.length"
