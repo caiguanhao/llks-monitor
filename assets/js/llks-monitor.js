@@ -135,8 +135,8 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
 }]).
 
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
-  '$filter',
-  function($scope, Accounts, Users, $window, $filter) {
+  '$filter', 'ASSETS',
+  function($scope, Accounts, Users, $window, $filter, ASSETS) {
 
   $scope.name = null;
   $scope.code = null;
@@ -196,12 +196,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       getAccounts();
     });
     Users.Socket.on('ServerHasUpdated', function(data) {
-      if (typeof data !== 'object' || typeof $window.ASSETS !== 'object') {
+      if (typeof data !== 'object' || typeof ASSETS !== 'object') {
         return;
       }
-      if (angular.equals($window.ASSETS, {})) return;
+      if (angular.equals(ASSETS, {})) return;
       if (angular.equals(data, {})) return;
-      var assetsHasChanged = !angular.equals(data, $window.ASSETS);
+      var assetsHasChanged = !angular.equals(data, ASSETS);
       if (assetsHasChanged) {
         $window.location.reload();
       }

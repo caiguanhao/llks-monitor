@@ -188,7 +188,8 @@ module.exports = function(grunt) {
         var hashstr = JSON.stringify(hashes, null, 2);
         prod_index = prod_index.replace(/^((\s*).*){\/\*%ASSETS%\*\/}/mg,
           function(a, p1, p2) {
-          return p1 + hashstr.replace(/^/mg, Array(p2.length).join(' ')).trim();
+          return p1 + hashstr.replace(/^/mg,
+            Array(p2.length + 1).join(' ')).trim();
         });
         grunt.file.write('db/.assets.json', hashstr);
         grunt.file.write('public/index.html', prod_index);
