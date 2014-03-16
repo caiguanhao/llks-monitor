@@ -37,6 +37,7 @@ run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
     Users.SetLang(code);
   };
   $rootScope.i18n = function(string) {
+    string = string.trim().replace(/[\n\s]{1,}/g, ' ');
     var code = $rootScope.CURRENTLANG;
     var lang = I18N[code] || {};
     var text = string.slice(string.lastIndexOf(':') + 1);
@@ -56,9 +57,10 @@ directive('i18n', ['I18N', function(I18N) {
   return {
     link: function($scope, elem, attrs) {
       var langChange = function(e, code) {
+        var string = attrs.i18n.trim().replace(/[\n\s]{1,}/g, ' ');
         var lang = I18N[code] || {};
-        var text = attrs.i18n.slice(attrs.i18n.lastIndexOf(':') + 1);
-        elem.text(lang[attrs.i18n] || text);
+        var text = string.slice(string.lastIndexOf(':') + 1);
+        elem.text(lang[string] || text);
       };
       langChange(null, $scope.CURRENTLANG);
       $scope.$on('langChange', langChange);
