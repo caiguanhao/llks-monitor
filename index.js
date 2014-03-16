@@ -78,10 +78,13 @@ function authorize(callback) {
 }
 
 app.get('/accounts', authorize(function(req, res, next) {
-  db.accounts.find({}, function(err, account) {
+  db.accounts.find({}, function(err, accounts) {
     if (err) return serverUnavailable(res);
+    accounts.map(function(account) {
+      delete account['data'];
+    });
     res.status(200);
-    res.send(account);
+    res.send(accounts);
   });
 }));
 
@@ -92,7 +95,7 @@ app.post('/accounts', authorize(function(req, res, next) {
   var user = req.user;
   db.createAccount(name, code, user, function(err, account) {
     if (err) return serverUnavailable(res);
-    restartTimers();
+    onAccountChanges();
     res.status(201);
     res.send(account);
   });
@@ -115,7 +118,7 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
     if (Object.keys(set).length === 0) return next();
     db.accounts.update({ _id: account._id }, { $set: set }, {}, function(err) {
       if (err) return serverUnavailable(res);
-      restartTimers();
+      onAccountChanges();
       res.status(200);
       res.send({ status: 'ok' });
     });
@@ -125,7 +128,7 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
 app.delete('/accounts/:account_id', authorize(function(req, res, next) {
   db.accounts.remove({ _id: req.params.account_id }, {}, function(err) {
     if (err) return serverUnavailable(res);
-    restartTimers();
+    onAccountChanges();
     res.status(200);
     res.send({ status: 'ok' });
   });
@@ -241,6 +244,7 @@ function processMarketData(account, data) {
     bundle[account._id] = {
       price: +marketData.data.price
     };
+    db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
     io.sockets.emit('updateAccount', bundle);
   } catch(e) {}
 }
@@ -255,6 +259,7 @@ function processAccountData(account, data) {
       sold: +accountData.data.sold,
       servertime: prettyTime(accountData.data.update_time)
     };
+    db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
     io.sockets.emit('updateAccount', bundle);
   } catch(e) {}
 }
@@ -290,6 +295,11 @@ function processMinerData(account, data) {
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function onAccountChanges() {
+  io.sockets.emit('AccountsHasChanged');
+  restartTimers();
 }
 
 function restartTimers() {

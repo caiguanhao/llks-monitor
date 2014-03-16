@@ -140,9 +140,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.name = null;
   $scope.code = null;
 
-  Accounts.Get().then(function(response) {
-    $scope.accounts = response.data;
-  });
+  function getAccounts() {
+    Accounts.Get().then(function(response) {
+      $scope.accounts = response.data;
+    });
+  }
+  getAccounts();
 
   var allMiners = {};
 
@@ -186,6 +189,10 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         if (!account) continue;
         angular.extend(account, data[accountId]);
       }
+    });
+    Users.Socket.on('AccountsHasChanged', function() {
+      $scope.status = 'connected';
+      getAccounts();
     });
     Users.Socket.on('connect', function() {
       $scope.status = 'connected';
