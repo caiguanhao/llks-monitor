@@ -1,5 +1,7 @@
 {
   "zh": {
+    "header:Login": "登录",
+    "header:Log out": "退出",
     "miner:Account": "账号",
     "miner:IP": "IP地址",
     "miner:Total": "累计挖矿",

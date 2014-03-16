@@ -52,18 +52,20 @@
                 <li>
                   <a class="btn-group btn-group-xs">
                     <button type="button" class="btn btn-default"
-                      ng-class="{active:CURRENT_LANG===code}"
+                      ng-class="{active:CURRENTLANG===code}"
                       ng-repeat="(code, text) in LANGS"
-                      ng-click="setLang(code)">{{text}}</button>
+                      ng-click="setLang(code)" ng-bind="text"></button>
                   </a>
                 </li>
-                <li ng-if="!User.Username"><a href="/#/login">Login</a></li>
+                <li ng-if="!User.Username"><a href="/#/login"
+                  i18n="header:Login"></a></li>
                 <li ng-if="User.Username" class="dropdown"
                   ng-class="{open:dropdown}">
                   <a href ng-click="dropdown=!dropdown">{{User.Username}}
                     <b class="caret"></b></a>
                   <ul class="dropdown-menu">
-                    <li><a href ng-click="logout()">Log out</a></li>
+                    <li><a href ng-click="logout()"
+                      i18n="header:Log out"></a></li>
                   </ul>
                 </li>
               </ul>
@@ -203,21 +205,40 @@
             </tfoot>
           </table>
         </div>
-        <p>
-          Go to and log in to <a href="https://jiaoyi.yunfan.com/"
-          target="_blank">LLKS</a>, then press <code>Control-Shift-J</code>
-          (Windows) or <code>Command-Alt-J</code> (Mac), and then enter this
-          line of code:
-          <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
-          Then paste the text in your clipboard to 'code' text box above to add
-          account.
-        </p>
-        <p>
-          Don't click the log out link in the web page. You can log out the
-          web page by entering this line of code:
-          <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
+        <div ng-switch on="CURRENTLANG">
+          <div ng-switch-default>
+            <p>
+              Open Google Chrome browser, go to and log in to
+              <a href="https://jiaoyi.yunfan.com/" target="_blank">LLKS</a>,
+              then press <code>Control-Shift-J</code> (Windows) or
+              <code>Command-Alt-J</code> (Mac), and then enter this line of code:
+              <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
+              Then paste the text in your clipboard to 'code' text box above to
+              add account.
+            </p>
+            <p>
+              Don't click the log out link in the web page. You can log out the
+              web page by entering this line of code:
+              <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
 ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
-        </p>
+            </p>
+          </div>
+          <div ng-switch-when="zh">
+            <p>
+              使用Google浏览器，前往并登录<a href="https://jiaoyi.yunfan.com/"
+              target="_blank">流量矿石</a>交易系统，然后按下
+              <code>Control-Shift-J</code> (Windows) 或
+              <code>Command-Alt-J</code> (Mac) 按键，复制如下代码，并按回车：
+              <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
+              然后粘贴你剪贴板上的“代码”到上面的文本框添加账户。
+            </p>
+            <p>
+              不要按流量矿石上的退出登录按钮，你可以像刚才一样，通过如下代码退出登录：
+              <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
+';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </script>

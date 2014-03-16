@@ -21,18 +21,18 @@ config(['$routeProvider', '$locationProvider',
 run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
   Users.Init();
 
-  $rootScope.CURRENT_LANG = 'en';
+  $rootScope.CURRENTLANG = 'en';
   $rootScope.LANGS = {
     en: 'English',
     zh: '中文'
   };
   $rootScope.setLang = function(code) {
-    if ($rootScope.CURRENT_LANG === code) return;
-    $rootScope.CURRENT_LANG = code;
+    if ($rootScope.CURRENTLANG === code) return;
+    $rootScope.CURRENTLANG = code;
     $rootScope.$broadcast('langChange', code);
   };
   $rootScope.i18n = function(string) {
-    var code = $rootScope.CURRENT_LANG;
+    var code = $rootScope.CURRENTLANG;
     var lang = I18N[code] || {};
     var text = string.slice(string.lastIndexOf(':') + 1);
     return lang[string] || text;
@@ -54,7 +54,7 @@ directive('i18n', ['I18N', function(I18N) {
         var text = attrs.i18n.slice(attrs.i18n.lastIndexOf(':') + 1);
         elem.text(lang[attrs.i18n] || text);
       };
-      langChange();
+      langChange(null, $scope.CURRENTLANG);
       $scope.$on('langChange', langChange);
     }
   };
