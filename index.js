@@ -170,7 +170,7 @@ io.configure(function() {
 
 var Q = require('q');
 
-function getHttpData(location, code) {
+function getHttpData(location, code, extraData) {
   var deferred = Q.defer();
   var request = https.get({
     hostname: 'jiaoyi.yunfan.com',
@@ -185,7 +185,14 @@ function getHttpData(location, code) {
       data += chunk;
     });
     res.on('end', function() {
-      deferred.resolve(data);
+      if (extraData !== undefined) {
+        deferred.resolve({
+          data: data,
+          extraData: extraData
+        });
+      } else {
+        deferred.resolve(data);
+      }
     });
   });
   request.on('error', function(error) {
@@ -200,15 +207,20 @@ function getHttpData(location, code) {
 
 function getData(account, wait) {
   var code = account.code;
-  getHttpData('/dig/miner/log/', code).then(function(data) {
+  getHttpData('/dig/miner/log/', code).
+  then(function(data) {
     processMinerData(account, data);
-    return getHttpData('/dig/miner/stats/', code);
-  }).then(function(data) {
-    processAccountData(account, data);
+  }).
+  then(function() {
     return getHttpData('/index.php/transaction/get_current_price', code);
-  }).then(function(data) {
-    processPriceData(account, data);
-  }).finally(function() {
+  }).
+  then(function(data) {
+    return getHttpData('/dig/miner/stats/', code, data);
+  }).
+  then(function(bundle) {
+    processAccountData(account, bundle);
+  }).
+  finally(function() {
     timers[account._id] = setTimeout(function() {
       getData(account);
     }, wait || 5000);
@@ -226,26 +238,17 @@ function sendData(account, data) {
   io.sockets.emit('update', bundle);
 }
 
-function processPriceData(account, data) {
+function processAccountData(account, bundle) {
   try {
-    data = JSON.parse(data);
+    var accountData = JSON.parse(bundle.data);
+    var marketData = JSON.parse(bundle.extraData);
     var bundle = {};
     bundle[account._id] = {
-      price: data.data.price
-    };
-    io.sockets.emit('updateAccount', bundle);
-  } catch(e) {}
-}
-
-function processAccountData(account, data) {
-  try {
-    data = JSON.parse(data);
-    var bundle = {};
-    bundle[account._id] = {
-      total: +data.data.total_flow,
-      unsold: +data.data.flow,
-      sold: +data.data.sold,
-      servertime: prettyTime(data.data.update_time)
+      total: +accountData.data.total_flow,
+      unsold: +accountData.data.flow,
+      sold: +accountData.data.sold,
+      price: +marketData.data.price,
+      servertime: prettyTime(accountData.data.update_time)
     };
     io.sockets.emit('updateAccount', bundle);
   } catch(e) {}
