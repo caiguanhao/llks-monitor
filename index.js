@@ -168,8 +168,11 @@ io.configure(function() {
   // 3 - debug
 });
 
-function getHttpData(location, code, callback) {
-  https.get({
+var Q = require('q');
+
+function getHttpData(location, code) {
+  var deferred = Q.defer();
+  var request = https.get({
     hostname: 'jiaoyi.yunfan.com',
     port: 443,
     path: location,
@@ -182,23 +185,30 @@ function getHttpData(location, code, callback) {
       data += chunk;
     });
     res.on('end', function() {
-      callback(false, data);
-    });
-    res.on('error', function() {
-      callback(true);
+      deferred.resolve(data);
     });
   });
+  request.on('error', function(error) {
+    deferred.reject(error);
+  });
+  request.setTimeout(3000, function() {
+    request.abort();
+    deferred.reject('timeout');
+  });
+  return deferred.promise;
 }
 
 function getData(account, wait) {
-  getHttpData('/dig/miner/log/', account.code, function(err, data) {
+  var code = account.code;
+  getHttpData('/dig/miner/log/', code).then(function(data) {
     processMinerData(account, data);
-    getHttpData('/dig/miner/stats/', account.code, function(err, data) {
-      processAccountData(account, data);
-      timers[account._id] = setTimeout(function() {
-        getData(account);
-      }, wait || 5000);
-    });
+    return getHttpData('/dig/miner/stats/', code);
+  }).then(function(data) {
+    processAccountData(account, data);
+  }).finally(function() {
+    timers[account._id] = setTimeout(function() {
+      getData(account);
+    }, wait || 5000);
   });
 }
 
@@ -279,6 +289,13 @@ io.sockets.on('connection', function(socket) {
       socket.emit('update', data);
     }
   });
+});
+
+process.on('SIGINT', function() {
+  for (var s in io.sockets.sockets) {
+    io.sockets.sockets[s].disconnect();
+  }
+  process.exit(0);
 });
 
 var timers = {};

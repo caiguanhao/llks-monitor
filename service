@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+command -v pm2 >/dev/null 2>&1 || {
+  echo "  Error: Please install pm2: npm -g i pm2" >&2
+  exit 1
+}
+
+case "$1" in
+start|restart)
+  printf "Stopping... "
+  pm2 sendSignal SIGINT index.js > /dev/null
+  pm2 delete index.js > /dev/null
+  printf "Compiling assets... "
+  grunt production > /dev/null
+  printf "Starting... "
+  NODE_ENV=production \
+  PORT=32123 \
+  pm2 start index.js --name llksMonitor > /dev/null
+  echo "OK."
+  ;;
+stop)
+  printf "Stopping... "
+  pm2 sendSignal SIGINT index.js > /dev/null
+  pm2 delete index.js > /dev/null
+  echo "OK."
+  ;;
+*)
+  echo "  Usage: ./service [start|restart|stop]"
+esac
+
+exit 0
