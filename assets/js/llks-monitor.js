@@ -42,6 +42,7 @@ run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
     var text = string.slice(string.lastIndexOf(':') + 1);
     return lang[string] || text;
   };
+  $rootScope.i18n$ = $rootScope.i18n;
 }]).
 
 directive('body', [function() {
@@ -313,21 +314,21 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.accounts.push(account);
     }).catch(function(response) {
       if (response.status === 403) {
-        alert('Permission denied.');
+        alert($scope.i18n$('Permission denied.'));
         return Accounts.PermissionDenied();
       }
-      alert(response.data.error || 'Unknown Error.');
+      alert(response.data.error || $scope.i18n$('Unknown Error.'));
     });
   };
   $scope.updateName = function(account) {
-    var newName = $window.prompt('Enter new name:', account.name);
+    var newName = $window.prompt($scope.i18n$('Enter new name:'), account.name);
     if (!newName || newName === account.name) return;
     Accounts.Modify(account._id, { name: newName }).then(function(response) {
       account.name = newName;
     });
   };
   $scope.updateCode = function(account) {
-    var newCode = $window.prompt('Enter new code:', account.code);
+    var newCode = $window.prompt($scope.i18n$('Enter new code:'), account.code);
     if (!newCode || newCode === account.code) return;
     Accounts.Modify(account._id, { code: newCode }).then(function(response) {
       account.code = newCode;
@@ -336,7 +337,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.delete = function(accounts, index) {
     var account = accounts[index];
     if (account.updated !== false &&
-      !$window.confirm('Are you sure you want to delete this account?')) {
+      !$window.confirm($scope.i18n$('Are you sure you want to delete '+
+        'this account?'))) {
       return;
     }
     var id = account._id;
@@ -361,7 +363,7 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
     if ($scope.status === 'loading') return true;
     if ($scope.username && $scope.password) return false;
     return true;
-  }
+  };
 
   $scope.login = function() {
     $scope.statusClass = 'info';
@@ -382,7 +384,7 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
     }, function(response) {
       $timeout(function() {
         $scope.statusClass = 'danger';
-        $scope.status = response.data.error || 'Unknown Error.';
+        $scope.status = response.data.error || $scope.i18n$('Unknown Error.');
       }, 1000);
     });
   };

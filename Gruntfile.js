@@ -178,6 +178,7 @@ module.exports = function(grunt) {
         }
       },
       onend: function() {
+        js();
         translations[lang] = T;
         var tStr = JSON.stringify(translations, null, 2);
         grunt.file.write('translations.json', tStr.trim() + '\n');
@@ -189,6 +190,29 @@ module.exports = function(grunt) {
       '([\\s\\S]+?)</script>', 'g'), '<div>$1</div>');
     parser.write(index);
     parser.end();
+    function js() {
+      var js = grunt.file.read('assets/js/llks-monitor.js');
+      jsgettext(js);
+    }
+    function jsgettext(content) {
+      var r = /\$scope\.i18n\$[\s\t]*\([\s\t]*(['"])([\S\s]+?)\1[\s\t]*\)/;
+      var m = content.match(new RegExp(r.source, 'g'));
+      for (var i = 0; i < m.length; i++) {
+        var t = m[i];
+        // turn oneline concat string to multiline
+        var s = t.split(/['"]/);
+        s = s.map(function(S) {
+          return /^[\s\t]*\+[\s\t]*$/.test(S) ?
+            S.replace(/[\s\t]{1,}/g, '\n') : S });
+        t = s.join('"');
+        // multiline string:
+        t = t.replace(/['"][\s\t]*\+[\s\t]*$/mg, '');
+        t = t.replace(/^[\s\t]*['"][\s\t]*/mg, '');
+        t = t.replace(/\n/g, '');
+        t = t.match(r);
+        add(t[2]);
+      }
+    }
   });
 
   grunt.registerTask('translate', 'Make i18n js file', function() {
