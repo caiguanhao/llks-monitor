@@ -153,11 +153,28 @@ module.exports = function(grunt) {
     } catch(e) {}
     translations[lang] = translations[lang] || {};
     var T = {};
+
+    function add(str) {
+      if (str) {
+        str = str.trim().replace(/[\n\s]{1,}/g, ' ');
+      }
+      if (str) {
+        T[str] = translations[lang][str] || '';
+      }
+    }
+
     var parser = new htmlparser.Parser({
       onopentag: function(name, attribs) {
-        var i18n = attribs.i18n;
-        if (i18n) {
-          T[i18n] = translations[lang][i18n] || '';
+        for (var key in attribs) {
+          if (key === 'i18n') {
+            add(attribs[key]);
+            continue;
+          }
+          var val = attribs[key].match(new RegExp(
+            '{{\\s*i18n\\s*\\(\\s*([\\\'"])([\\S\\s]+?)\\1\\s*\\)\\s*}}'));
+          if (val) {
+            add(val[2]);
+          }
         }
       },
       onend: function() {

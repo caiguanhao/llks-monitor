@@ -68,18 +68,20 @@ directive('i18n', ['I18N', function(I18N) {
 directive('secondsAgo', ['$interval', function($interval) {
   return {
     scope: {
-      seconds: '=secondsAgo',
-      to: '=secondsAgoTo'
+      secondsAgo: '='
     },
     link: function($scope, elem, attrs) {
       var interval;
-      $scope.$watch('seconds', function(val) {
+      $scope.$watch('secondsAgo', function(val) {
         if (!val) return;
         $interval.cancel(interval);
         interval = $interval(function() {
-          var diff = Math.round((+new Date - $scope.seconds) / 1000);
-          $scope.to = diff;
+          var diff = Math.round((+new Date - $scope.secondsAgo) / 1000);
+          if (attrs.secondsAgoTemplate) {
+            elem.text(attrs.secondsAgoTemplate.replace(/{}/g, diff));
+          }
         }, 1000);
+        elem.text(attrs.secondsAgoTemplate.replace(/{}/g, 0));
       });
       $scope.$on('$destroy', function(e) {
         $interval.cancel(interval);
