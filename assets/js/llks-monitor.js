@@ -26,10 +26,15 @@ run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
     en: 'English',
     zh: '中文'
   };
+  var userLang = Users.GetLang();
+  if ($rootScope.LANGS.hasOwnProperty(userLang)) {
+    $rootScope.CURRENTLANG = userLang;
+  }
   $rootScope.setLang = function(code) {
     if ($rootScope.CURRENTLANG === code) return;
     $rootScope.CURRENTLANG = code;
     $rootScope.$broadcast('langChange', code);
+    Users.SetLang(code);
   };
   $rootScope.i18n = function(string) {
     var code = $rootScope.CURRENTLANG;
@@ -129,6 +134,13 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
       self.SetUser(null, null, null);
       $route.reload();
     };
+  };
+  this.GetLang = function() {
+    var lang = ls('llksMonitor.user.lang');
+    return lang;
+  };
+  this.SetLang = function(code) {
+    ls('llksMonitor.user.lang', code);
   };
   this.GetUser = function() {
     var id = ls('llksMonitor.user.id');
