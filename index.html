@@ -108,12 +108,6 @@
             </tbody>
           </table>
         </div>
-        <div class="alert alert-dismissable alert-{{statusClass}}"
-          ng-show="status" ng-switch on="status">
-          <span ng-switch-when="loading">Loading...</span>
-          <span ng-switch-when="success">Successfully created.</span>
-          <span ng-switch-default ng-bind="status"></span>
-        </div>
         <div class="panel panel-default">
           <div class="panel-heading">
             Accounts
@@ -128,13 +122,23 @@
                 <th>Unsold</th>
                 <th>Sold</th>
                 <th>Server Time</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>Updated</th>
               </tr>
             </thead>
             <tbody>
               <tr ng-repeat="account in accounts">
-                <td ng-bind="account.name"></td>
+                <td>
+                  {{account.name}}
+                  <div class="btn-group btn-group-xs" ng-show="accountEditsEnabled">
+                    <a class="btn btn-default" ng-click="updateName(account)">
+                      <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+                    <a class="btn btn-default"
+                      ng-click="delete(accounts, $index)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                    </a>
+                  </div>
+                </td>
                 <td ng-bind="account.miners"></td>
                 <td ng-bind="account.total"></td>
                 <td ng-bind="account.today"></td>
@@ -146,26 +150,21 @@
                   <span ng-switch-default seconds-ago="account.updated"
                     seconds-ago-to="account.secondsAgo"
                     ng-show="account.secondsAgo">
-                    updated {{account.secondsAgo}} secs ago
+                    {{account.secondsAgo}}s ago
                   </span>
-                </td>
-                <td>
-                  <div class="btn-group btn-group-xs">
-                    <a class="btn btn-default" ng-click="updateName(account)">
-                      <span class="glyphicon glyphicon-pencil"></span>
-                    </a>
-                    <a class="btn btn-default"
-                      ng-click="delete(accounts, $index)">
-                      <span class="glyphicon glyphicon-trash"></span>
-                    </a>
-                  </div>
                 </td>
               </tr>
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="9">
+                <td colspan="8">
                   <form class="form-inline" ng-submit="create()">
+                    <a class="btn btn-default"
+                      ng-show="accounts.length"
+                      ng-class="{active:accountEditsEnabled}"
+                      ng-click="accountEditsEnabled=!accountEditsEnabled">
+                      Enable Edits
+                    </a>
                     <input type="text" class="form-control" id="name"
                     placeholder="Name" ng-model="name">
                     <input type="text" class="form-control" id="code"

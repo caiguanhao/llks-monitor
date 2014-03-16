@@ -266,10 +266,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     });
   };
   $scope.delete = function(accounts, index) {
-    if (!$window.confirm('Are you sure you want to delete this account?')) {
+    var account = accounts[index];
+    if (account.updated !== false &&
+      !$window.confirm('Are you sure you want to delete this account?')) {
       return;
     }
-    var id = accounts[index]._id;
+    var id = account._id;
     Accounts.Delete(id).then(function(response) {
       accounts.splice(index, 1);
       delete allMiners[id];
