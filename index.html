@@ -201,14 +201,16 @@
         <div class="alert alert-dismissable alert-{{statusClass}}"
           ng-show="status" ng-switch on="status">
           <span ng-switch-when="loading">Logging in...</span>
-          <span ng-switch-when="success">You are now logged in.</span>
+          <span ng-switch-when="success">You are now logged in.
+            You will be redirected to home page.</span>
           <span ng-switch-default ng-bind="status"></span>
         </div>
-        <form ng-submit="login()" ng-show="status!='success'">
+        <form ng-submit="login()"
+          ng-show="status!='success'&&status!='loading'">
           <div class="form-group">
             <label for="username">Username</label>
             <input type="text" class="form-control" id="username"
-              placeholder="Username" ng-model="username">
+              placeholder="Username" ng-model="username" autofocus="autofocus">
           </div>
           <div class="form-group">
             <label for="password">Password</label>

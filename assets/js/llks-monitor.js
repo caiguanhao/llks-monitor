@@ -85,6 +85,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     }
   }
   this.PermissionDenied = function() {
+    this.SetUser(null, null, null);
     return $location.path('/login');
   };
   this.Authenticate = function(user, pass) {
@@ -117,6 +118,12 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     ls('llksMonitor.user.username', username);
     ls('llksMonitor.user.token', token);
     this.GetUser();
+  };
+  this.Authenticated = function() {
+    var id = ls('llksMonitor.user.id');
+    var token = ls('llksMonitor.user.token');
+    if (!id || !token) return;
+    $location.path('/');
   };
 }]).
 
@@ -259,6 +266,9 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
 controller('LoginController', ['$scope', 'Users', '$timeout',
   function($scope, Users, $timeout) {
+  // if user is authenticated, do not go to login page
+  Users.Authenticated();
+
   $scope.username = null;
   $scope.password = null;
 
@@ -281,6 +291,9 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
         $scope.status = 'success';
         var data = response.data;
         Users.SetUser(data.id, data.username, data.token);
+        $timeout(function() {
+          Users.Authenticated();
+        }, 1000);
       }, 1000);
     }, function(response) {
       $timeout(function() {
