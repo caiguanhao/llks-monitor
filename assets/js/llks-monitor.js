@@ -18,7 +18,7 @@ config(['$routeProvider', '$locationProvider',
   $locationProvider.html5Mode(false);
 }]).
 
-run(['Users', '$rootScope', function(Users, $rootScope) {
+run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
   Users.Init();
 
   $rootScope.CURRENT_LANG = 'en';
@@ -30,6 +30,12 @@ run(['Users', '$rootScope', function(Users, $rootScope) {
     if ($rootScope.CURRENT_LANG === code) return;
     $rootScope.CURRENT_LANG = code;
     $rootScope.$broadcast('langChange', code);
+  };
+  $rootScope.i18n = function(string) {
+    var code = $rootScope.CURRENT_LANG;
+    var lang = I18N[code] || {};
+    var text = string.slice(string.lastIndexOf(':') + 1);
+    return lang[string] || text;
   };
 }]).
 
@@ -45,7 +51,8 @@ directive('i18n', ['I18N', function(I18N) {
     link: function($scope, elem, attrs) {
       var langChange = function(e, code) {
         var lang = I18N[code] || {};
-        elem.text(lang[attrs.i18n] || attrs.i18n);
+        var text = attrs.i18n.slice(attrs.i18n.lastIndexOf(':') + 1);
+        elem.text(lang[attrs.i18n] || text);
       };
       langChange();
       $scope.$on('langChange', langChange);

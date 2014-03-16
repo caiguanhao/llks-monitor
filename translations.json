@@ -1,12 +1,24 @@
 {
   "zh": {
-    "Account": "账号",
-    "IP": "IP地址",
-    "Total": "累计挖矿",
-    "Today": "今日挖矿",
-    "Yesterday": "昨日挖矿",
-    "Server Time": "更新时间",
-    "Speed": "挖矿速度",
-    "Status": "状态"
+    "miner:Account": "账号",
+    "miner:IP": "IP地址",
+    "miner:Total": "累计挖矿",
+    "miner:Today": "今日挖矿",
+    "miner:Yesterday": "昨日挖矿",
+    "miner:Server Time": "更新时间",
+    "miner:Speed": "挖矿速度",
+    "miner:Status": "状态",
+    "account:Name": "账户名",
+    "account:Miners": "矿机数量",
+    "account:Total": "累计总挖矿",
+    "account:Today": "今日总挖矿",
+    "account:Unsold": "尚未卖出",
+    "account:Sold": "已卖出",
+    "account:Unsold Worth": "未卖出矿石价值",
+    "account:Server Time": "数据时间",
+    "account:Updated": "更新时间",
+    "login:Username": "用户名",
+    "login:Password": "密码",
+    "login:Login": "登录"
   }
 }

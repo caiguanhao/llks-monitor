@@ -92,17 +92,22 @@
           <table class="table table-slim table-hover">
             <thead ng-if="miners && miners.length">
               <tr>
-                <th><a href ng-click="sort('account')" i18n="Account"></a></th>
-                <th><a href ng-click="sort('ip')" i18n="IP"></a></th>
-                <th><a href ng-click="sort('total')" i18n="Total"></a></th>
-                <th><a href ng-click="sort('today')" i18n="Today"></a></th>
+                <th><a href ng-click="sort('account')"
+                  i18n="miner:Account"></a></th>
+                <th><a href ng-click="sort('ip')"
+                  i18n="miner:IP"></a></th>
+                <th><a href ng-click="sort('total')"
+                  i18n="miner:Total"></a></th>
+                <th><a href ng-click="sort('today')"
+                  i18n="miner:Today"></a></th>
                 <th><a href ng-click="sort('yesterday')"
-                  i18n="Yesterday"></a></th>
+                  i18n="miner:Yesterday"></a></th>
                 <th><a href ng-click="sort('servertime')"
-                  i18n="Server Time"></a></th>
+                  i18n="miner:Server Time"></a></th>
                 <th><a href ng-click="sort(speedCompare, 'speed')"
-                  i18n="Speed"></a></th>
-                <th><a href ng-click="sort('status')" i18n="Status"></a></th>
+                  i18n="miner:Speed"></a></th>
+                <th><a href ng-click="sort('status')"
+                  i18n="miner:Status"></a></th>
               </tr>
             </thead>
             <tbody ng-if="!miners.length">
@@ -132,15 +137,15 @@
           <table class="table table-slim">
             <thead ng-if="accounts.length">
               <tr>
-                <th>Name</th>
-                <th>Miners</th>
-                <th>Total</th>
-                <th>Today</th>
-                <th>Unsold</th>
-                <th>Sold</th>
-                <th>Unsold Worth</th>
-                <th>Server Time</th>
-                <th>Updated</th>
+                <th i18n="account:Name"></th>
+                <th i18n="account:Miners"></th>
+                <th i18n="account:Total"></th>
+                <th i18n="account:Today"></th>
+                <th i18n="account:Unsold"></th>
+                <th i18n="account:Sold"></th>
+                <th i18n="account:Unsold Worth"></th>
+                <th i18n="account:Server Time"></th>
+                <th i18n="account:Updated"></th>
               </tr>
             </thead>
             <tbody>
@@ -229,17 +234,18 @@
         <form ng-submit="login()"
           ng-show="status!='success'&&status!='loading'">
           <div class="form-group">
-            <label for="username">Username</label>
+            <label for="username" i18n="login:Username"></label>
             <input type="text" class="form-control" id="username"
-              placeholder="Username" ng-model="username" autofocus="autofocus">
+              placeholder="{{i18n('login:Username')}}" ng-model="username"
+              autofocus="autofocus">
           </div>
           <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password" i18n="login:Password"></label>
             <input type="password" class="form-control" id="password"
-              placeholder="Password" ng-model="password">
+              placeholder="{{i18n('login:Password')}}" ng-model="password">
           </div>
           <button type="submit" class="btn btn-default"
-            ng-disabled="shouldLoginDisable()">Login</button>
+            ng-disabled="shouldLoginDisable()" i18n="login:Login"></button>
         </form>
       </div>
     </div>
