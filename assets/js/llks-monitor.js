@@ -169,6 +169,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     if (!$scope.$$phase) $scope.$apply();
   }
 
+  $scope.status = 'unknown';
+
   if (Users.Socket) {
     Users.Socket.on('update', function(data) {
       angular.extend(allMiners, data);
@@ -182,7 +184,11 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         angular.extend(account, data[accountId]);
       }
     });
+    Users.Socket.on('connect', function() {
+      $scope.status = 'connected';
+    });
     Users.Socket.on('disconnect', function() {
+      $scope.status = 'disconnected';
       Users.Socket.socket.reconnect();
     });
     Users.Socket.on('error', function(reason) {
