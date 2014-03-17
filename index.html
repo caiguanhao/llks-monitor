@@ -122,7 +122,6 @@
                 <th i18n="account:Unsold" class="noneSM"></th>
                 <th i18n="account:Price" class="noneXS"></th>
                 <th i18n="account:Unsold Worth"></th>
-                <th i18n="account:Server Time" class="noneXS"></th>
                 <th i18n="account:Updated"></th>
               </tr>
             </thead>
@@ -159,7 +158,6 @@
                 <td ng-bind="account.unsold" class="noneSM"></td>
                 <td ng-bind="account.price|currency:'￥'" class="noneXS"></td>
                 <td ng-bind="unsoldWorth(account)|currency:'￥'"></td>
-                <td ng-bind="account.servertime" class="noneXS"></td>
                 <td ng-switch on="account.updated">
                   <span ng-switch-when="false" i18n="account:Expired"></span>
                   <span ng-switch-default seconds-ago="account.updated"
@@ -172,7 +170,7 @@
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
               <tr>
-                <td colspan="12">
+                <td colspan="11">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <a class="btn btn-default btn-sm"
                       ng-class="{active:accountEditsEnabled}"
