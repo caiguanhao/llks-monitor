@@ -297,7 +297,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       var account = $filter('filter')($scope.accounts || [],
         { _id: miner }, true)[0];
       if (!account) continue;
-      if ($scope.HiddenAccounts.indexOf(account._id) > -1) continue;
       if (allMiners[miner].error) {
         account.updated = false;
         continue;
@@ -322,7 +321,9 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.count.speed += accountSpeedTotal;
       account.today = accountTodayTotal.toFixed(5);
       account.yesterday = accountYesterdayTotal.toFixed(5);
-      miners = miners.concat(allMiners[miner].miners);
+      if ($scope.HiddenAccounts.indexOf(account._id) === -1) {
+        miners = miners.concat(allMiners[miner].miners);
+      }
     }
     $scope.count.total = $scope.count.total.toFixed(5);
     $scope.count.today = $scope.count.today.toFixed(5);

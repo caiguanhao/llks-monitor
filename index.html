@@ -248,7 +248,7 @@
                 <td ng-bind="miner.status" class="noneXS"></td>
               </tr>
             </tbody>
-            <tfoot>
+            <tfoot ng-show="miners && miners.length">
               <tr>
                 <td colspan="2">
                   <span ng-repeat="type in ['success','warning','danger','active']">
