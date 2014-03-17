@@ -327,6 +327,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     delete Users.Socket.$events;
   }
   if (Users.Socket) {
+    Users.Socket.emit('GiveMeAccounts');
     Users.Socket.on('HereAreTheAccounts', function(accounts) {
       var accountIds = [], changed = false;
       accounts.map(function(account) {
@@ -347,7 +348,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.accounts = accounts;
       updateAllMiners();
     });
-    Users.Socket.on('update', function(data) {
+    Users.Socket.on('UpdateMiners', function(data) {
       $scope.status = 'connected';
       angular.extend(allMiners, data);
       updateAllMiners();
@@ -360,10 +361,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         if (!account) continue;
         angular.extend(account, data[accountId]);
       }
-    });
-    Users.Socket.on('AccountsHasChanged', function() {
-      $scope.status = 'connected';
-      getAccounts();
     });
     Users.Socket.on('ServerHasUpdated', function(data) {
       if (typeof data !== 'object' || typeof ASSETS !== 'object') {
@@ -390,12 +387,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       }
     });
   }
-
-  function getAccounts() {
-    if (Users.Socket) Users.Socket.emit('GiveMeAccounts');
-  }
-
-  getAccounts();
 
   var listOfFieldsSortAlphabetically = [ 'name' ];
 

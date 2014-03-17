@@ -150,6 +150,9 @@ app.put('/my', authorize(function(req, res, next) {
   });
 }));
 
+/*
+// Deprecated: use HereAreTheAccounts instead
+
 app.get('/accounts', authorize(function(req, res, next) {
   db.accounts.find({}, function(err, accounts) {
     if (err) return serverError(req, res);
@@ -160,6 +163,7 @@ app.get('/accounts', authorize(function(req, res, next) {
     res.send(accounts);
   });
 }));
+*/
 
 app.post('/accounts', authorize(function(req, res, next) {
   var name = req.body.name;
@@ -308,7 +312,7 @@ function sendData(account, data) {
   } }, {}, function() {
     db.accounts.persistence.compactDatafile();
   });
-  io.sockets.emit('update', bundle);
+  io.sockets.emit('UpdateMiners', bundle);
 }
 
 function processMarketData(account, data) {
@@ -371,8 +375,17 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function HereAreTheAccounts() {
+  var self = this;
+  if (typeof self.emit !== 'function') self = io.sockets;
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return;
+    self.emit('HereAreTheAccounts', accounts);
+  });
+}
+
 function onAccountChanges() {
-  io.sockets.emit('AccountsHasChanged');
+  HereAreTheAccounts();
   restartTimers();
 }
 
@@ -397,12 +410,7 @@ try {
 
 io.sockets.on('connection', function(socket) {
   socket.emit('ServerHasUpdated', assetsHashes);
-  socket.on('GiveMeAccounts', function() {
-    db.accounts.find({}, function(err, accounts) {
-      if (err) return;
-      socket.emit('HereAreTheAccounts', accounts);
-    });
-  });
+  socket.on('GiveMeAccounts', HereAreTheAccounts);
 });
 
 process.on('SIGINT', function() {
