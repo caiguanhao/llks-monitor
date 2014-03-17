@@ -116,29 +116,36 @@
             <span i18n="account:Accounts"></span>
           </div>
           <table class="table table-slim table-hover table-account">
-            <thead ng-if="accounts.length">
+            <thead ng-show="accounts.length">
               <tr>
                 <th><span class="glyphicon glyphicon-eye-open"></span></th>
-                <th i18n="account:Name"></th>
-                <th i18n="account:Miners" class="noneXS"></th>
-                <th i18n="account:Total" class="noneXS"></th>
-                <th i18n="account:Today" class="noneSM"></th>
-                <th i18n="account:Yesterday" class="noneXS"></th>
-                <th i18n="account:Sold" class="noneXS"></th>
-                <th i18n="account:Unsold" class="noneSM"></th>
-                <th i18n="account:Price" class="noneXS"></th>
-                <th i18n="account:Unsold Worth"></th>
+                <th><a href ng-click="asort('name')"
+                  i18n="account:Name"></a></th>
+                <th><a href ng-click="asort('miners')"
+                  i18n="account:Miners" class="noneXS"></a></th>
+                <th><a href ng-click="asort('total')"
+                  i18n="account:Total" class="noneXS"></a></th>
+                <th><a href ng-click="asort('today')"
+                  i18n="account:Today" class="noneSM"></a></th>
+                <th><a href ng-click="asort('yesterday')"
+                  i18n="account:Yesterday" class="noneXS"></a></th>
+                <th><a href ng-click="asort('sold')"
+                  i18n="account:Sold" class="noneXS"></a></th>
+                <th><a href ng-click="asort('unsold')"
+                  i18n="account:Unsold" class="noneSM"></a></th>
+                <th><a href ng-click="asort('price')"
+                  i18n="account:Price" class="noneXS"></a></th>
+                <th><a href ng-click="asort('unsold')"
+                  i18n="account:Unsold Worth"></a></th>
                 <th i18n="account:Updated" ng-show="!accountEditsEnabled"></th>
                 <th i18n="account:Actions" ng-show="accountEditsEnabled"></th>
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="account in accounts">
+              <tr ng-repeat="account in accounts|orderBy:aOrder:aOrderReverse">
                 <td><input type="checkbox" ng-checked="isHidden(account._id)"
                   ng-click="toggleHidden(account._id)"></td>
-                <td>
-                  {{account.name}}
-                </td>
+                <td ng-bind="account.name"></td>
                 <td ng-bind="account.miners" class="noneXS"></td>
                 <td ng-bind="account.total" class="noneXS"></td>
                 <td ng-bind="account.today" class="noneSM"></td>
@@ -172,12 +179,12 @@
                   </div>
                 </td>
               </tr>
-            </tbody>
-            <tfoot>
               <tr ng-show="!accounts||!accounts.length">
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
-              <tr ng-show="accountEditsEnabled">
+            </tbody>
+            <tfoot ng-show="accountEditsEnabled">
+              <tr>
                 <td colspan="12" class="text-center">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <input type="text" class="form-control" id="name"

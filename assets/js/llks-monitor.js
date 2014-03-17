@@ -389,13 +389,28 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     });
   }
 
+  var listOfFieldsSortAlphabetically = [ 'name' ];
+
+  var accountLastByStr;
+  $scope.asort = function(by, byStr) {
+    if (!byStr && typeof by === 'string') byStr = by;
+    if (accountLastByStr === byStr) {
+      $scope.aOrderReverse = !$scope.aOrderReverse;
+    } else {
+      $scope.aOrderReverse = (listOfFieldsSortAlphabetically.indexOf(by) < 0);
+    }
+    $scope.aOrder = by;
+    accountLastByStr = byStr;
+  };
+  $scope.asort('name');
+
   var lastByStr;
   $scope.sort = function(by, byStr) {
     if (!byStr && typeof by === 'string') byStr = by;
     if (lastByStr === byStr) {
       $scope.mOrderReverse = !$scope.mOrderReverse;
     } else {
-      $scope.mOrderReverse = true;
+      $scope.mOrderReverse = (listOfFieldsSortAlphabetically.indexOf(by) < 0);
     }
     $scope.mOrder = by;
     lastByStr = byStr;
