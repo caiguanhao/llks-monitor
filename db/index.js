@@ -81,7 +81,7 @@ var isUserLocked = function(user) {
 };
 
 var CONST = {
-  MAX_ATTEMPTS: 3,
+  MAX_ATTEMPTS: 10,
   LOCK_TIME: 2 * 60 * 60 * 1000,
   INVALID: 1,
   LOCKED: 2,
