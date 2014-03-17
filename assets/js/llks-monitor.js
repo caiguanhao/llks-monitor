@@ -44,7 +44,7 @@ run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
     string = string.trim().replace(/[\n\s]{1,}/g, ' ');
     var code = $rootScope.CURRENTLANG;
     var lang = I18N[code] || {};
-    var text = string.slice(string.lastIndexOf(':') + 1);
+    var text = string.slice(string.lastIndexOf(':') + 1) || string;
     return lang[string] || text;
   };
   $rootScope.i18n$ = $rootScope.i18n;
@@ -63,7 +63,7 @@ directive('i18n', ['I18N', function(I18N) {
       var langChange = function(e, code) {
         var string = attrs.i18n.trim().replace(/[\n\s]{1,}/g, ' ');
         var lang = I18N[code] || {};
-        var text = string.slice(string.lastIndexOf(':') + 1);
+        var text = string.slice(string.lastIndexOf(':') + 1) || string;
         elem.text(lang[string] || text);
       };
       langChange(null, $scope.CURRENTLANG);
