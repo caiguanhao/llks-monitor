@@ -105,9 +105,10 @@ service('Accounts', ['$http', 'Users', '$route',
   this.Reload = function() {
     $route.reload();
   };
-  this.Get = function(name, code) {
-    return $http.get('/accounts');
-  };
+  // Deprecated:
+  // this.Get = function(name, code) {
+  //   return $http.get('/accounts');
+  // };
   this.Create = function(name, code) {
     return $http.post('/accounts', { name: name, code: code });
   };
@@ -246,28 +247,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     updateAllMiners();
   };
 
-  function getAccounts() {
-    Accounts.Get().then(function(response) {
-      $scope.accounts = response.data;
-
-      // remove not existing
-      var accountIds = [], changed = false;
-      for (var i = 0; i < $scope.accounts.length; i++) {
-        accountIds.push($scope.accounts[i]._id);
-      }
-      for (var i = $scope.HiddenAccounts.length - 1; i >= 0; i--) {
-        if (accountIds.indexOf($scope.HiddenAccounts[i]) === -1) {
-          $scope.HiddenAccounts.splice(i, 1);
-          changed = true;
-        }
-      }
-      if (changed) {
-        Users.SetHiddenAccounts($scope.HiddenAccounts);
-      }
-    });
-  }
-  getAccounts();
-
   var allMiners = {};
 
   function speedBg(item) {
@@ -344,7 +323,30 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
   $scope.status = 'unknown';
 
+  if (Users.Socket && Users.Socket.$events) {
+    delete Users.Socket.$events;
+  }
   if (Users.Socket) {
+    Users.Socket.on('HereAreTheAccounts', function(accounts) {
+      var accountIds = [], changed = false;
+      accounts.map(function(account) {
+        angular.extend(allMiners, angular.fromJson(account.data));
+        delete account.data;
+        accountIds.push(account._id);
+      });
+
+      // remove not existing
+      for (var i = $scope.HiddenAccounts.length - 1; i >= 0; i--) {
+        if (accountIds.indexOf($scope.HiddenAccounts[i]) === -1) {
+          $scope.HiddenAccounts.splice(i, 1);
+          changed = true;
+        }
+      }
+      if (changed) Users.SetHiddenAccounts($scope.HiddenAccounts);
+
+      $scope.accounts = accounts;
+      updateAllMiners();
+    });
     Users.Socket.on('update', function(data) {
       $scope.status = 'connected';
       angular.extend(allMiners, data);
@@ -388,6 +390,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       }
     });
   }
+
+  function getAccounts() {
+    if (Users.Socket) Users.Socket.emit('GiveMeAccounts');
+  }
+
+  getAccounts();
 
   var listOfFieldsSortAlphabetically = [ 'name' ];
 

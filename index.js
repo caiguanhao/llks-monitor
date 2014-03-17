@@ -396,13 +396,12 @@ try {
 }
 
 io.sockets.on('connection', function(socket) {
-  socket.emit('ServerHasUpdated', assetsHashes)
-  db.accounts.find({}, function(err, accounts) {
-    if (err) return;
-    for (var i = 0; i < accounts.length; i++) {
-      var data = JSON.parse(accounts[i].data);
-      socket.emit('update', data);
-    }
+  socket.emit('ServerHasUpdated', assetsHashes);
+  socket.on('GiveMeAccounts', function() {
+    db.accounts.find({}, function(err, accounts) {
+      if (err) return;
+      socket.emit('HereAreTheAccounts', accounts);
+    });
   });
 });
 
