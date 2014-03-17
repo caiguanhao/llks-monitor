@@ -106,10 +106,16 @@
     <div class="row">
       <div class="col-sm-12">
         <div class="panel panel-default">
-          <div class="panel-heading">
+          <div class="panel-heading btn-group-xs">
+            <a class="btn btn-default btn-sm pull-right"
+              ng-class="{active:accountEditsEnabled}"
+              ng-click="accountEditsEnabled=!accountEditsEnabled">
+              <span class="glyphicon glyphicon-pencil"></span>
+              <span i18n="account:Enable Edits"></span>
+            </a>
             <span i18n="account:Accounts"></span>
           </div>
-          <table class="table table-slim">
+          <table class="table table-slim table-hover table-account">
             <thead ng-if="accounts.length">
               <tr>
                 <th><span class="glyphicon glyphicon-eye-open"></span></th>
@@ -122,7 +128,8 @@
                 <th i18n="account:Unsold" class="noneSM"></th>
                 <th i18n="account:Price" class="noneXS"></th>
                 <th i18n="account:Unsold Worth"></th>
-                <th i18n="account:Updated"></th>
+                <th i18n="account:Updated" ng-show="!accountEditsEnabled"></th>
+                <th i18n="account:Actions" ng-show="accountEditsEnabled"></th>
               </tr>
             </thead>
             <tbody>
@@ -131,8 +138,22 @@
                   ng-click="toggleHidden(account._id)"></td>
                 <td>
                   {{account.name}}
-                  <div class="btn-group btn-group-xs"
-                    ng-show="accountEditsEnabled">
+                </td>
+                <td ng-bind="account.miners" class="noneXS"></td>
+                <td ng-bind="account.total" class="noneXS"></td>
+                <td ng-bind="account.today" class="noneSM"></td>
+                <td ng-bind="account.yesterday" class="noneXS"></td>
+                <td ng-bind="account.sold" class="noneXS"></td>
+                <td ng-bind="account.unsold" class="noneSM"></td>
+                <td ng-bind="account.price|currency:'￥'" class="noneXS"></td>
+                <td ng-bind="unsoldWorth(account)|currency:'￥'"></td>
+                <td ng-show="!accountEditsEnabled" ng-switch on="account.updated">
+                  <span ng-switch-when="false" i18n="account:Expired"></span>
+                  <span ng-switch-default seconds-ago="account.updated"
+                    seconds-ago-template="{{i18n('{}s ago')}}"></span>
+                </td>
+                <td ng-show="accountEditsEnabled">
+                  <div class="btn-group btn-group-xs">
                     <a class="btn btn-default"
                       title="{{i18n('account:Edit name')}}"
                       ng-if="account.updated" ng-click="updateName(account)">
@@ -150,34 +171,15 @@
                     </a>
                   </div>
                 </td>
-                <td ng-bind="account.miners" class="noneXS"></td>
-                <td ng-bind="account.total" class="noneXS"></td>
-                <td ng-bind="account.today" class="noneSM"></td>
-                <td ng-bind="account.yesterday" class="noneXS"></td>
-                <td ng-bind="account.sold" class="noneXS"></td>
-                <td ng-bind="account.unsold" class="noneSM"></td>
-                <td ng-bind="account.price|currency:'￥'" class="noneXS"></td>
-                <td ng-bind="unsoldWorth(account)|currency:'￥'"></td>
-                <td ng-switch on="account.updated">
-                  <span ng-switch-when="false" i18n="account:Expired"></span>
-                  <span ng-switch-default seconds-ago="account.updated"
-                    seconds-ago-template="{{i18n('{}s ago')}}"></span>
-                </td>
               </tr>
             </tbody>
             <tfoot>
               <tr ng-show="!accounts||!accounts.length">
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
-              <tr>
-                <td colspan="11">
+              <tr ng-show="accountEditsEnabled">
+                <td colspan="12" class="text-center">
                   <form class="form-inline input-group-sm" ng-submit="create()">
-                    <a class="btn btn-default btn-sm"
-                      ng-class="{active:accountEditsEnabled}"
-                      ng-click="accountEditsEnabled=!accountEditsEnabled">
-                      <span class="glyphicon glyphicon-pencil"></span>
-                      <span i18n="account:Enable Edits"></span>
-                    </a>
                     <input type="text" class="form-control" id="name"
                       placeholder="{{i18n('account:Name')}}" ng-model="name"
                       ng-show="accountEditsEnabled">
