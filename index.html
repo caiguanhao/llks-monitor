@@ -207,10 +207,10 @@
               </tr>
             </tbody>
             <tfoot>
-              <tr ng-if="!accounts||!accounts.length">
+              <tr ng-show="!accounts||!accounts.length">
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
-              <tr ng-if="accounts&&accounts.length">
+              <tr ng-show="accounts&&accounts.length">
                 <td colspan="9">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <a class="btn btn-default btn-sm"
