@@ -193,6 +193,7 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
       set.name = data.name;
     }
     if (Object.keys(set).length === 0) return next();
+    set.updated_at = new Date;
     db.accounts.update({ _id: account._id }, { $set: set }, {}, function(err) {
       if (err) return serverError(req, res);
       onAccountChanges();
@@ -380,6 +381,9 @@ function HereAreTheAccounts() {
   if (typeof self.emit !== 'function') self = io.sockets;
   db.accounts.find({}, function(err, accounts) {
     if (err) return;
+    accounts.map(function(account) {
+      delete account.code;
+    });
     self.emit('HereAreTheAccounts', accounts);
   });
 }

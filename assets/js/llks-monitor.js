@@ -310,12 +310,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         $scope.count.speed += accountSpeedTotal;
       }
       account.miners = allMiners[miner].miners.length;
-      account.today = accountTodayTotal.toFixed(5);
-      account.yesterday = accountYesterdayTotal.toFixed(5);
+      account.today = +accountTodayTotal.toFixed(5);
+      account.yesterday = +accountYesterdayTotal.toFixed(5);
     }
-    $scope.count.total = $scope.count.total.toFixed(5);
-    $scope.count.today = $scope.count.today.toFixed(5);
-    $scope.count.yesterday = $scope.count.yesterday.toFixed(5);
+    $scope.count.total = +$scope.count.total.toFixed(5);
+    $scope.count.today = +$scope.count.today.toFixed(5);
+    $scope.count.yesterday = +$scope.count.yesterday.toFixed(5);
     $scope.count.speed = ($scope.count.speed / 1024).toFixed(3) + ' M/S';
     $scope.miners = miners;
     if (!$scope.$$phase) $scope.$apply();
