@@ -160,6 +160,17 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   this.SetLang = function(code) {
     ls('llksMonitor.user.lang', code);
   };
+  this.GetHiddenAccounts = function() {
+    var acc = [];
+    try {
+      var _acc = angular.fromJson(ls('llksMonitor.user.hiddenaccounts'));
+      if (_acc instanceof Array) acc = _acc;
+    } catch(e) {}
+    return acc;
+  };
+  this.SetHiddenAccounts = function(acc) {
+    ls('llksMonitor.user.hiddenaccounts', angular.toJson(acc));
+  };
   this.GetUser = function() {
     var id = ls('llksMonitor.user.id');
     var username = ls('llksMonitor.user.username');
@@ -217,7 +228,11 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.name = null;
   $scope.code = null;
 
-  $scope.HiddenAccounts = [];
+  $scope.HiddenAccounts = Users.GetHiddenAccounts();
+  $scope.isHidden = function(id) {
+    var index = $scope.HiddenAccounts.indexOf(id);
+    return index === -1;
+  };
   $scope.toggleHidden = function(id) {
     var index = $scope.HiddenAccounts.indexOf(id);
     if (index === -1) {
@@ -225,12 +240,28 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     } else {
       $scope.HiddenAccounts.splice(index, 1);
     }
+    Users.SetHiddenAccounts($scope.HiddenAccounts);
     updateAllMiners();
   };
 
   function getAccounts() {
     Accounts.Get().then(function(response) {
       $scope.accounts = response.data;
+
+      // remove not existing
+      var accountIds = [], changed = false;
+      for (var i = 0; i < $scope.accounts.length; i++) {
+        accountIds.push($scope.accounts[i]._id);
+      }
+      for (var i = $scope.HiddenAccounts.length - 1; i >= 0; i--) {
+        if (accountIds.indexOf($scope.HiddenAccounts[i]) === -1) {
+          $scope.HiddenAccounts.splice(i, 1);
+          changed = true;
+        }
+      }
+      if (changed) {
+        Users.SetHiddenAccounts($scope.HiddenAccounts);
+      }
     });
   }
   getAccounts();

@@ -128,7 +128,7 @@
             </thead>
             <tbody>
               <tr ng-repeat="account in accounts">
-                <td><input type="checkbox" checked
+                <td><input type="checkbox" ng-checked="isHidden(account._id)"
                   ng-click="toggleHidden(account._id)"></td>
                 <td>
                   {{account.name}}
