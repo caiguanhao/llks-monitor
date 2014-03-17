@@ -106,74 +106,6 @@
     <div class="row">
       <div class="col-sm-12">
         <div class="panel panel-default">
-          <div class="panel-heading" ng-switch on="status">
-            <span i18n="miner:Status"></span>:
-            <span ng-switch-when="connected" i18n="miner:Connected"></span>
-            <span ng-switch-when="disconnected"
-              i18n="miner:Disconnected"></span>
-            <span ng-switch-default i18n="miner:Unknown"></span>
-          </div>
-          <table class="table table-slim table-hover">
-            <thead ng-if="miners && miners.length">
-              <tr>
-                <th><a href ng-click="sort('account')"
-                  i18n="miner:Account"></a></th>
-                <th><a href ng-click="sort('ip')"
-                  i18n="miner:IP"></a></th>
-                <th class="noneSM"><a href ng-click="sort('total')"
-                  i18n="miner:Total"></a></th>
-                <th><a href ng-click="sort('today')"
-                  i18n="miner:Today"></a></th>
-                <th class="noneXS"><a href ng-click="sort('yesterday')"
-                  i18n="miner:Yesterday"></a></th>
-                <th class="noneXS"><a href ng-click="sort('servertime')"
-                  i18n="miner:Server Time"></a></th>
-                <th><a href ng-click="sort(speedCompare, 'speed')"
-                  i18n="miner:Speed"></a></th>
-                <th class="noneXS"><a href ng-click="sort('status')"
-                  i18n="miner:Status"></a></th>
-              </tr>
-            </thead>
-            <tbody ng-if="!miners.length">
-              <tr>
-                <td class="notice" colspan="8"
-                  i18n="No miners at the moment."></td>
-              </tr>
-            </tbody>
-            <tbody>
-              <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
-                class="{{miner.bg}}">
-                <td>
-                  <span ng-bind="miner.account" class="accountName"></span>
-                </td>
-                <td ng-bind="miner.ip"></td>
-                <td ng-bind="miner.total" class="noneSM"></td>
-                <td ng-bind="miner.today"></td>
-                <td ng-bind="miner.yesterday" class="noneXS"></td>
-                <td ng-bind="miner.servertime" class="noneXS"></td>
-                <td ng-bind="miner.speed"></td>
-                <td ng-bind="miner.status" class="noneXS"></td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="2">
-                  <span ng-repeat="type in ['success','warning','danger','active']">
-                    <span class="legend {{type}}"></span>
-                    {{count[type]}}
-                  </span>
-                </td>
-                <td>{{count.total}}</td>
-                <td>{{count.today}}</td>
-                <td>{{count.yesterday}}</td>
-                <td></td>
-                <td>{{count.speed}}</td>
-                <td>在线 {{count.online}}/{{miners.length}}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-        <div class="panel panel-default">
           <div class="panel-heading">
             <span i18n="account:Accounts"></span>
           </div>
@@ -264,6 +196,74 @@
                     </div>
                   </form>
                 </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" ng-switch on="status">
+            <span i18n="miner:Status"></span>:
+            <span ng-switch-when="connected" i18n="miner:Connected"></span>
+            <span ng-switch-when="disconnected"
+              i18n="miner:Disconnected"></span>
+            <span ng-switch-default i18n="miner:Unknown"></span>
+          </div>
+          <table class="table table-slim table-hover">
+            <thead ng-if="miners && miners.length">
+              <tr>
+                <th><a href ng-click="sort('account')"
+                  i18n="miner:Account"></a></th>
+                <th><a href ng-click="sort('ip')"
+                  i18n="miner:IP"></a></th>
+                <th class="noneSM"><a href ng-click="sort('total')"
+                  i18n="miner:Total"></a></th>
+                <th><a href ng-click="sort('today')"
+                  i18n="miner:Today"></a></th>
+                <th class="noneXS"><a href ng-click="sort('yesterday')"
+                  i18n="miner:Yesterday"></a></th>
+                <th class="noneXS"><a href ng-click="sort('servertime')"
+                  i18n="miner:Server Time"></a></th>
+                <th><a href ng-click="sort(speedCompare, 'speed')"
+                  i18n="miner:Speed"></a></th>
+                <th class="noneXS"><a href ng-click="sort('status')"
+                  i18n="miner:Status"></a></th>
+              </tr>
+            </thead>
+            <tbody ng-if="!miners.length">
+              <tr>
+                <td class="notice" colspan="8"
+                  i18n="No miners at the moment."></td>
+              </tr>
+            </tbody>
+            <tbody>
+              <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
+                class="{{miner.bg}}">
+                <td>
+                  <span ng-bind="miner.account" class="accountName"></span>
+                </td>
+                <td ng-bind="miner.ip"></td>
+                <td ng-bind="miner.total" class="noneSM"></td>
+                <td ng-bind="miner.today"></td>
+                <td ng-bind="miner.yesterday" class="noneXS"></td>
+                <td ng-bind="miner.servertime" class="noneXS"></td>
+                <td ng-bind="miner.speed"></td>
+                <td ng-bind="miner.status" class="noneXS"></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">
+                  <span ng-repeat="type in ['success','warning','danger','active']">
+                    <span class="legend {{type}}"></span>
+                    {{count[type]}}
+                  </span>
+                </td>
+                <td class="noneSM">{{count.total}}</td>
+                <td>{{count.today}}</td>
+                <td class="noneXS">{{count.yesterday}}</td>
+                <td class="noneXS"></td>
+                <td>{{count.speed}}</td>
+                <td class="noneXS">在线 {{count.online}}/{{miners.length}}</td>
               </tr>
             </tfoot>
           </table>
