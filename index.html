@@ -53,30 +53,32 @@
               </ul>
               <ul class="nav navbar-nav navbar-right">
                 <li>
-                  <a class="btn-group btn-group-xs">
+                  <a class="btn-group btn-group-xs clearfix">
                     <button type="button" class="btn btn-default"
                       ng-class="{active:CURRENTLANG===code}"
                       ng-repeat="(code, text) in LANGS"
                       ng-click="setLang(code)" ng-bind="text"></button>
                   </a>
-                  <div class="clearfix"></div>
                 </li>
-                <li ng-if="!User.Username"><a href="/#/login">
+                <li ng-show="!User.Username"><a href="/#/login"
+                  ng-click="navbarIn=false">
                   <span class="glyphicon glyphicon-log-in"></span>
                   <span i18n="header:Login"></span>
                 </a></li>
-                <li ng-if="User.Username" class="dropdown"
+                <li ng-show="User.Username" class="dropdown"
                   ng-class="{open:dropdown}">
                   <a href ng-click="dropdown=!dropdown">
                     <span class="glyphicon glyphicon-user"></span>
                     {{User.Username}}
                     <b class="caret"></b></a>
                   <ul class="dropdown-menu">
-                    <li><a href="/#/myaccount" ng-click="dropdown=false">
+                    <li><a href="/#/myaccount"
+                      ng-click="navbarIn=false;dropdown=false">
                       <span class="glyphicon glyphicon-cog"></span>
                       <span i18n="header:My account"></span>
                     </a></li>
-                    <li><a href ng-click="logout()">
+                    <li class="divider"></li>
+                    <li><a href ng-click="navbarIn=false;logout()">
                       <span class="glyphicon glyphicon-log-out"></span>
                       <span i18n="header:Log out"></span>
                     </a></li>
@@ -93,7 +95,10 @@
     <footer>
       <div class="footer container">
         <span i18n="footer:Copyright"></span> &copy; 2014
-        <a href="http://cgh.io/">cgh.io</a>
+        <a href="http://cgh.io/" target="_blank">cgh.io</a>
+        |
+        <a href="https://github.com/caiguanhao/llks-monitor" target="_blank"
+          i18n="footer:View source code"></a>
       </div>
     </footer>
   </script>
