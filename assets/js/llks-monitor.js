@@ -237,13 +237,15 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         continue;
       }
       account.updated = allMiners[miner].updated;
-      var accountTodayTotal = 0;
+      var accountTodayTotal = 0, accountYesterdayTotal = 0;
       allMiners[miner].miners.map(function(s) {
         s.account = account.name;
-        accountTodayTotal += s.today
+        accountTodayTotal += s.today;
+        accountYesterdayTotal += s.yesterday;
       });
       account.miners = allMiners[miner].miners.length;
       account.today = accountTodayTotal.toFixed(5);
+      account.yesterday = accountYesterdayTotal.toFixed(5);
       miners = miners.concat(allMiners[miner].miners);
     }
     $scope.miners = miners;
