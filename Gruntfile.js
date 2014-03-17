@@ -192,11 +192,15 @@ module.exports = function(grunt) {
     parser.end();
     function js() {
       var js = grunt.file.read('assets/js/llks-monitor.js');
-      jsgettext(js);
+      jsgettext(js, '\\$scope\\.i18n\\$');
+      js = grunt.file.read('index.js');
+      jsgettext(js, '\\$\\$');
     }
-    function jsgettext(content) {
-      var r = /\$scope\.i18n\$[\s\t]*\([\s\t]*(['"])([\S\s]+?)\1[\s\t]*\)/;
-      var m = content.match(new RegExp(r.source, 'g'));
+    function jsgettext(content, funcName) {
+      funcName = funcName || '\\$scope\\.i18n\\$';
+      var r = funcName +
+        '[\\s\\t]*\\([\\s\\t]*([\'"])([\\S\\s]+?)\\1[\\s\\t]*\\)';
+      var m = content.match(new RegExp(r, 'g'));
       for (var i = 0; i < m.length; i++) {
         var t = m[i];
         // turn oneline concat string to multiline
@@ -209,7 +213,7 @@ module.exports = function(grunt) {
         t = t.replace(/['"][\s\t]*\+[\s\t]*$/mg, '');
         t = t.replace(/^[\s\t]*['"][\s\t]*/mg, '');
         t = t.replace(/\n/g, '');
-        t = t.match(r);
+        t = t.match(new RegExp(r));
         add(t[2]);
       }
     }

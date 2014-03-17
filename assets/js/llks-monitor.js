@@ -155,10 +155,12 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   };
   this.GetLang = function() {
     var lang = ls('llksMonitor.user.lang');
+    $http.defaults.headers.common['x-user-lang'] = lang;
     return lang;
   };
   this.SetLang = function(code) {
     ls('llksMonitor.user.lang', code);
+    this.GetLang();
   };
   this.GetHiddenAccounts = function() {
     var acc = [];

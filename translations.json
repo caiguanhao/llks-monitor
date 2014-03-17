@@ -59,6 +59,11 @@
     "Enter new code:": "输入新的代码：",
     "Are you sure you want to delete this account?": "确定要删除这个账号吗？",
     "Your password has been updated. It is recommended you log out now and then log in again.": "你的密码已更新，建议你重新登录。",
-    "Fail to change password. You may have entered a wrong password or the server refused to change password at the moment.": "无法更改密码。这可能是你输入了错误的密码或是服务器暂时拒绝更改密码。"
+    "Fail to change password. You may have entered a wrong password or the server refused to change password at the moment.": "无法更改密码。这可能是你输入了错误的密码或是服务器暂时拒绝更改密码。",
+    "Invalid username or password.": "错误的用户名或密码。",
+    "The account is temporarily locked due to too many failed login attempts.": "因为输入太多错误密码，账户暂时被锁定。",
+    "You are banned by administrators.": "账户已被管理员封锁。",
+    "Server error.": "服务器发生错误。",
+    "OK": "OK"
   }
 }

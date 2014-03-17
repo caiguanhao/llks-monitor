@@ -12,22 +12,41 @@ app.configure('development', function() {
 app.use(express.bodyParser());
 app.use(express.static(__dirname + '/public'));
 
+var I18N = require('./translations');
+
+app.use(function(req, res, next) {
+  req.userLang = null;
+  if (req.headers) {
+    req.userLang = req.headers['x-user-lang'];
+  }
+  req.$$ = function(string) {
+    string = string.trim().replace(/[\n\s]{1,}/g, ' ');
+    var code = req.userLang;
+    var lang = I18N[code] || {};
+    var text = string.slice(string.lastIndexOf(':') + 1) || string;
+    return lang[string] || text;
+  };
+  next();
+});
+
 app.post('/login', function(req, res, next) {
   db.authenticate(req.body.username, req.body.password, null,
     function(code, user) {
     switch (code) {
     case db.authConst.INVALID:
       res.status(401);
-      res.send({ error: 'Invalid username or password.' });
+      res.send({ error: req.$$('Invalid username or password.') });
       return;
     case db.authConst.LOCKED:
       res.writeHead(466, 'User Is Banned');
-      res.end(JSON.stringify({ error: 'The account is temporarily locked ' +
-        'due to too many failed login attempts.' }));
+      res.end(JSON.stringify({ error: req.$$('The account is temporarily ' +
+        'locked due to too many failed login attempts.') }));
       return;
     case db.authConst.BANNED:
       res.writeHead(466, 'User Is Banned');
-      res.end(JSON.stringify({ error: 'You are banned by administrators.' }));
+      res.end(JSON.stringify({
+        error: req.$$('You are banned by administrators.')
+      }));
       return;
     case db.authConst.SUCCESS:
       res.status(200);
@@ -49,7 +68,7 @@ app.post('/login', function(req, res, next) {
       return;
     default:
       res.writeHead(499, 'Unknown Error');
-      res.end(JSON.stringify({ error: 'Unknown Error.' }));
+      res.end(JSON.stringify({ error: req.$$('Unknown Error.') }));
       return;
     }
   });
@@ -65,14 +84,14 @@ app.use(function(req, res, next) {
   next();
 });
 
-function serverUnavailable(res) {
+function serverError(res) {
   res.status(500);
-  res.send({ error: 'Server unavailable.' });
+  res.send({ error: req.$$('Server error.') });
 }
 
 function permissionDenied(res) {
   res.status(403);
-  res.send({ error: 'Permission denied.' });
+  res.send({ error: req.$$('Permission denied.') });
 }
 
 function authorize(callback) {
@@ -126,14 +145,14 @@ app.put('/my', authorize(function(req, res, next) {
     } }, {}, function(err) {
       if (err) return next();
       res.status(200);
-      res.send({ status: 'ok' });
+      res.send({ status: req.$$('OK') });
     });
   });
 }));
 
 app.get('/accounts', authorize(function(req, res, next) {
   db.accounts.find({}, function(err, accounts) {
-    if (err) return serverUnavailable(res);
+    if (err) return serverError(res);
     accounts.map(function(account) {
       delete account['data'];
     });
@@ -148,7 +167,7 @@ app.post('/accounts', authorize(function(req, res, next) {
   if (!name || !code) return next();
   var user = req.user;
   db.createAccount(name, code, user, function(err, account) {
-    if (err) return serverUnavailable(res);
+    if (err) return serverError(res);
     onAccountChanges();
     res.status(201);
     res.send(account);
@@ -171,20 +190,20 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
     }
     if (Object.keys(set).length === 0) return next();
     db.accounts.update({ _id: account._id }, { $set: set }, {}, function(err) {
-      if (err) return serverUnavailable(res);
+      if (err) return serverError(res);
       onAccountChanges();
       res.status(200);
-      res.send({ status: 'ok' });
+      res.send({ status: req.$$('OK') });
     });
   });
 }));
 
 app.delete('/accounts/:account_id', authorize(function(req, res, next) {
   db.accounts.remove({ _id: req.params.account_id }, {}, function(err) {
-    if (err) return serverUnavailable(res);
+    if (err) return serverError(res);
     onAccountChanges();
     res.status(200);
-    res.send({ status: 'ok' });
+    res.send({ status: req.$$('OK') });
   });
 }));
 
