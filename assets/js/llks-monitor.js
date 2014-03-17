@@ -299,6 +299,10 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       var account = $filter('filter')($scope.accounts || [],
         { _id: miner }, true)[0];
       if (!account) continue;
+      var shouldIncludeAccountInList = false;
+      if ($scope.HiddenAccounts.indexOf(account._id) === -1) {
+        shouldIncludeAccountInList = true;
+      }
       if (allMiners[miner].error) {
         account.updated = false;
         continue;
@@ -306,24 +310,27 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.updated = allMiners[miner].updated;
       var accountTotalTotal = 0, accountTodayTotal = 0;
       var accountYesterdayTotal = 0, accountSpeedTotal = 0;
-      if ($scope.HiddenAccounts.indexOf(account._id) === -1) {
-        allMiners[miner].miners.map(function(s) {
+
+      allMiners[miner].miners.map(function(s) {
+        if (shouldIncludeAccountInList) {
           s.account = account.name;
           s.bg = speedBg(s);
           $scope.count[s.bg] += 1;
           if (s.status === '在线') $scope.count.online += 1;
-          accountTotalTotal += s.total;
-          accountTodayTotal += s.today;
-          accountYesterdayTotal += s.yesterday;
           if (s.speednum) accountSpeedTotal += s.speednum;
-        });
+        }
+        accountTotalTotal += s.total;
+        accountTodayTotal += s.today;
+        accountYesterdayTotal += s.yesterday;
+      });
+      if (shouldIncludeAccountInList) {
         miners = miners.concat(allMiners[miner].miners);
+        $scope.count.total += accountTotalTotal;
+        $scope.count.today += accountTodayTotal;
+        $scope.count.yesterday += accountYesterdayTotal;
+        $scope.count.speed += accountSpeedTotal;
       }
       account.miners = allMiners[miner].miners.length;
-      $scope.count.total += accountTotalTotal;
-      $scope.count.today += accountTodayTotal;
-      $scope.count.yesterday += accountYesterdayTotal;
-      $scope.count.speed += accountSpeedTotal;
       account.today = accountTodayTotal.toFixed(5);
       account.yesterday = accountYesterdayTotal.toFixed(5);
     }
