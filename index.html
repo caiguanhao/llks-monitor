@@ -141,7 +141,7 @@
             </tbody>
             <tbody>
               <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
-                class="{{speedBg(miner)}}">
+                class="{{miner.bg}}">
                 <td>
                   <span ng-bind="miner.account" class="accountName"></span>
                 </td>
@@ -154,6 +154,22 @@
                 <td ng-bind="miner.status" class="noneXS"></td>
               </tr>
             </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">
+                  <span ng-repeat="type in ['success','warning','danger','active']">
+                    <span class="legend {{type}}"></span>
+                    {{count[type]}}
+                  </span>
+                </td>
+                <td>{{count.total}}</td>
+                <td>{{count.today}}</td>
+                <td>{{count.yesterday}}</td>
+                <td></td>
+                <td>{{count.speed}}</td>
+                <td>在线 {{count.online}}/{{miners.length}}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
         <div class="panel panel-default">

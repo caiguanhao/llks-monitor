@@ -226,8 +226,31 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
   var allMiners = {};
 
+  function speedBg(item) {
+    if (!item || item.status !== '在线') return 'active';
+    if (!item.speed) return '';
+    var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
+    var speed = parseFloat(item.speed);
+    if (isNaN(speed)) return 'danger';
+    speed = speed * times;
+    item.speednum = speed;
+    if (speed >= 1024) return 'success';
+    if (speed >= 512) return 'warning';
+    return 'danger';
+  };
   function updateAllMiners() {
     var miners = [];
+    $scope.count = {
+      danger: 0,
+      warning: 0,
+      active: 0,
+      success: 0,
+      total: 0,
+      today: 0,
+      yesterday: 0,
+      speed: 0,
+      online: 0
+    };
     for (var miner in allMiners) {
       var account = $filter('filter')($scope.accounts || [],
         { _id: miner }, true)[0];
@@ -237,17 +260,31 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         continue;
       }
       account.updated = allMiners[miner].updated;
-      var accountTodayTotal = 0, accountYesterdayTotal = 0;
+      var accountTotalTotal = 0, accountTodayTotal = 0;
+      var accountYesterdayTotal = 0, accountSpeedTotal = 0;
       allMiners[miner].miners.map(function(s) {
         s.account = account.name;
+        s.bg = speedBg(s);
+        $scope.count[s.bg] += 1;
+        if (s.status === '在线') $scope.count.online += 1;
+        accountTotalTotal += s.total;
         accountTodayTotal += s.today;
         accountYesterdayTotal += s.yesterday;
+        if (s.speednum) accountSpeedTotal += s.speednum;
       });
       account.miners = allMiners[miner].miners.length;
+      $scope.count.total += accountTotalTotal;
+      $scope.count.today += accountTodayTotal;
+      $scope.count.yesterday += accountYesterdayTotal;
+      $scope.count.speed += accountSpeedTotal;
       account.today = accountTodayTotal.toFixed(5);
       account.yesterday = accountYesterdayTotal.toFixed(5);
       miners = miners.concat(allMiners[miner].miners);
     }
+    $scope.count.total = $scope.count.total.toFixed(5);
+    $scope.count.today = $scope.count.today.toFixed(5);
+    $scope.count.yesterday = $scope.count.yesterday.toFixed(5);
+    $scope.count.speed = ($scope.count.speed / 1024).toFixed(3) + ' M/S';
     $scope.miners = miners;
     if (!$scope.$$phase) $scope.$apply();
   }
@@ -320,18 +357,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     return speed;
   };
   $scope.sort($scope.speedCompare, 'speed');
-
-  $scope.speedBg = function(item) {
-    if (!item || item.status !== '在线') return 'active';
-    if (!item.speed) return '';
-    var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
-    var speed = parseFloat(item.speed);
-    if (isNaN(speed)) return 'danger';
-    speed = speed * times;
-    if (speed >= 1024) return 'success';
-    if (speed >= 512) return 'warning';
-    return 'danger';
-  };
 
   $scope.unsoldWorth = function(account) {
     if (!account || !account.unsold) return 0;
