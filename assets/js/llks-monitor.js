@@ -217,6 +217,17 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.name = null;
   $scope.code = null;
 
+  $scope.HiddenAccounts = [];
+  $scope.toggleHidden = function(id) {
+    var index = $scope.HiddenAccounts.indexOf(id);
+    if (index === -1) {
+      $scope.HiddenAccounts.push(id);
+    } else {
+      $scope.HiddenAccounts.splice(index, 1);
+    }
+    updateAllMiners();
+  };
+
   function getAccounts() {
     Accounts.Get().then(function(response) {
       $scope.accounts = response.data;
@@ -255,6 +266,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       var account = $filter('filter')($scope.accounts || [],
         { _id: miner }, true)[0];
       if (!account) continue;
+      if ($scope.HiddenAccounts.indexOf(account._id) > -1) continue;
       if (allMiners[miner].error) {
         account.updated = false;
         continue;

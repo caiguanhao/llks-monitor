@@ -136,7 +136,8 @@
             </thead>
             <tbody ng-if="!miners.length">
               <tr>
-                <td class="notice" i18n="No miners at the moment."></td>
+                <td class="notice" colspan="8"
+                  i18n="No miners at the moment."></td>
               </tr>
             </tbody>
             <tbody>
@@ -179,6 +180,7 @@
           <table class="table table-slim">
             <thead ng-if="accounts.length">
               <tr>
+                <th><span class="glyphicon glyphicon-eye-open"></span></th>
                 <th i18n="account:Name"></th>
                 <th i18n="account:Miners" class="noneXS"></th>
                 <th i18n="account:Total" class="noneXS"></th>
@@ -194,6 +196,8 @@
             </thead>
             <tbody>
               <tr ng-repeat="account in accounts">
+                <td><input type="checkbox" checked
+                  ng-click="toggleHidden(account._id)"></td>
                 <td>
                   {{account.name}}
                   <div class="btn-group btn-group-xs"
@@ -236,7 +240,7 @@
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
               <tr>
-                <td colspan="11">
+                <td colspan="12">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <a class="btn btn-default btn-sm"
                       ng-class="{active:accountEditsEnabled}"
