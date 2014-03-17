@@ -212,11 +212,10 @@
               <tr ng-show="!accounts||!accounts.length">
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
-              <tr ng-show="accounts&&accounts.length">
+              <tr>
                 <td colspan="10">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <a class="btn btn-default btn-sm"
-                      ng-show="accounts.length"
                       ng-class="{active:accountEditsEnabled}"
                       ng-click="accountEditsEnabled=!accountEditsEnabled">
                       <span class="glyphicon glyphicon-pencil"></span>
