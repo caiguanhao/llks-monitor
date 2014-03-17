@@ -1,9 +1,13 @@
 llks-monitor
 ============
 
-Monitor all your llks accounts.
+Near real-time LLKS (流量矿石) activity monitoring powered by Socket.IO and
+Angular.js.
 
-You just need to log in to [llks](https://jiaoyi.yunfan.com) using Google
+Usage
+-----
+
+You just need to log in to [LLKS](https://jiaoyi.yunfan.com) using Google
 Chrome, then open console (press Control-Shift-J on Windows or Command-Alt-J
 on Mac) and enter the following command:
 
@@ -16,6 +20,11 @@ by entering this line of code:
 
     document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
     ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();
+
+Screenshot
+----------
+
+![llks monitor](https://f.cloud.github.com/assets/1284703/2438232/5d558e8c-adef-11e3-94e4-8e2c29de8839.png)
 
 Nginx
 -----
