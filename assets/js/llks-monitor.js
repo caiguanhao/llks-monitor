@@ -7,6 +7,10 @@ config(['$routeProvider', '$locationProvider',
     templateUrl: 'main',
     controller: 'MainController'
   }).
+  when('/myaccount', {
+    templateUrl: 'myaccount',
+    controller: 'MyAccountController'
+  }).
   when('/login', {
     templateUrl: 'login',
     controller: 'LoginController'
@@ -131,6 +135,9 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   };
   this.Authenticate = function(user, pass) {
     return $http.post('/login', { username: user, password: pass });
+  };
+  this.GetMyInfo = function() {
+    return $http.get('/my');
   };
   this.Init = function() {
     this.GetUser();
@@ -356,6 +363,14 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       updateAllMiners();
     });
   };
+}]).
+
+controller('MyAccountController', ['$scope', 'Users',
+  function($scope, Users) {
+  $scope.my = null;
+  Users.GetMyInfo().then(function(response) {
+    $scope.my = response.data;
+  });
 }]).
 
 controller('LoginController', ['$scope', 'Users', '$timeout',

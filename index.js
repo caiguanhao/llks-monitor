@@ -87,6 +87,25 @@ function authorize(callback) {
   };
 }
 
+app.get('/my', authorize(function(req, res, next) {
+  db.users.findOne({ _id: req.user._id }, function(err, user) {
+    if (err) return next();
+    var llia = user.last_logged_in_at || [];
+    llia = llia.map(function(l) {
+      return +l;
+    });
+    res.status(200);
+    res.send({
+      _id: user._id,
+      username: user.username,
+      created_at: +user.created_at,
+      updated_at: +user.updated_at,
+      last_logged_in_at: llia,
+      password_updated_at: +user.password_updated_at
+    });
+  });
+}));
+
 app.get('/accounts', authorize(function(req, res, next) {
   db.accounts.find({}, function(err, accounts) {
     if (err) return serverUnavailable(res);

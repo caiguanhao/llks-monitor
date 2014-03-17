@@ -68,6 +68,10 @@
                     {{User.Username}}
                     <b class="caret"></b></a>
                   <ul class="dropdown-menu">
+                    <li><a href="/#/myaccount">
+                      <span class="glyphicon glyphicon-cog"></span>
+                      <span i18n="header:My account"></span>
+                    </a></li>
                     <li><a href ng-click="logout()">
                       <span class="glyphicon glyphicon-log-out"></span>
                       <span i18n="header:Log out"></span>
@@ -266,6 +270,40 @@
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="myaccount">
+    <div class="row">
+      <div class="col-sm-6 col-sm-offset-3">
+        <h3 i18n="My account"></h3>
+        <table class="table table-hover">
+          <tbody>
+            <tr>
+              <th i18n="my:Name"></th>
+              <td ng-bind="my.username"></td>
+            </tr>
+            <tr>
+              <th i18n="my:Created At"></th>
+              <td ng-bind="my.created_at|date:'yyyy-MM-dd HH:mm:ss'"></td>
+            </tr>
+            <tr>
+              <th i18n="my:Updated At"></th>
+              <td ng-bind="my.updated_at|date:'yyyy-MM-dd HH:mm:ss'"></td>
+            </tr>
+            <tr>
+              <th i18n="my:Last Logged In At"></th>
+              <td>
+                <div ng-repeat="llia in my.last_logged_in_at"
+                  ng-bind="llia|date:'yyyy-MM-dd HH:mm:ss'"></div>
+              </td>
+            </tr>
+            <tr>
+              <th i18n="my:Password Updated At"></th>
+              <td ng-bind="my.password_updated_at|date:'yyyy-MM-dd HH:mm:ss'"></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </script>
