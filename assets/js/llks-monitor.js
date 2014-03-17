@@ -306,16 +306,19 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.updated = allMiners[miner].updated;
       var accountTotalTotal = 0, accountTodayTotal = 0;
       var accountYesterdayTotal = 0, accountSpeedTotal = 0;
-      allMiners[miner].miners.map(function(s) {
-        s.account = account.name;
-        s.bg = speedBg(s);
-        $scope.count[s.bg] += 1;
-        if (s.status === '在线') $scope.count.online += 1;
-        accountTotalTotal += s.total;
-        accountTodayTotal += s.today;
-        accountYesterdayTotal += s.yesterday;
-        if (s.speednum) accountSpeedTotal += s.speednum;
-      });
+      if ($scope.HiddenAccounts.indexOf(account._id) === -1) {
+        allMiners[miner].miners.map(function(s) {
+          s.account = account.name;
+          s.bg = speedBg(s);
+          $scope.count[s.bg] += 1;
+          if (s.status === '在线') $scope.count.online += 1;
+          accountTotalTotal += s.total;
+          accountTodayTotal += s.today;
+          accountYesterdayTotal += s.yesterday;
+          if (s.speednum) accountSpeedTotal += s.speednum;
+        });
+        miners = miners.concat(allMiners[miner].miners);
+      }
       account.miners = allMiners[miner].miners.length;
       $scope.count.total += accountTotalTotal;
       $scope.count.today += accountTodayTotal;
@@ -323,9 +326,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.count.speed += accountSpeedTotal;
       account.today = accountTodayTotal.toFixed(5);
       account.yesterday = accountYesterdayTotal.toFixed(5);
-      if ($scope.HiddenAccounts.indexOf(account._id) === -1) {
-        miners = miners.concat(allMiners[miner].miners);
-      }
     }
     $scope.count.total = $scope.count.total.toFixed(5);
     $scope.count.today = $scope.count.today.toFixed(5);
