@@ -57,18 +57,25 @@
                       ng-click="setLang(code)" ng-bind="text"></button>
                   </a>
                 </li>
-                <li ng-if="!User.Username"><a href="/#/login"
-                  i18n="header:Login"></a></li>
+                <li ng-if="!User.Username"><a href="/#/login">
+                  <span class="glyphicon glyphicon-log-in"></span>
+                  <span i18n="header:Login"></span>
+                </a></li>
                 <li ng-if="User.Username" class="dropdown"
                   ng-class="{open:dropdown}">
-                  <a href ng-click="dropdown=!dropdown">{{User.Username}}
+                  <a href ng-click="dropdown=!dropdown">
+                    <span class="glyphicon glyphicon-user"></span>
+                    {{User.Username}}
                     <b class="caret"></b></a>
                   <ul class="dropdown-menu">
-                    <li><a href ng-click="logout()"
-                      i18n="header:Log out"></a></li>
+                    <li><a href ng-click="logout()">
+                      <span class="glyphicon glyphicon-log-out"></span>
+                      <span i18n="header:Log out"></span>
+                    </a></li>
                   </ul>
                 </li>
               </ul>
+              <div class="navbar-right"></div>
             </div>
           </div>
         </nav>
@@ -116,7 +123,7 @@
             </thead>
             <tbody ng-if="!miners.length">
               <tr>
-                <td class="text-center" i18n="No miners at the moment."></td>
+                <td class="notice" i18n="No miners at the moment."></td>
               </tr>
             </tbody>
             <tbody>
@@ -160,10 +167,18 @@
                   {{account.name}}
                   <div class="btn-group btn-group-xs"
                     ng-show="accountEditsEnabled">
-                    <a class="btn btn-default" ng-click="updateName(account)">
+                    <a class="btn btn-default"
+                      title="{{i18n('account:Edit name')}}"
+                      ng-if="account.updated" ng-click="updateName(account)">
                       <span class="glyphicon glyphicon-pencil"></span>
                     </a>
                     <a class="btn btn-default"
+                      title="{{i18n('account:Edit code')}}"
+                      ng-if="!account.updated" ng-click="updateCode(account)">
+                      <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+                    <a class="btn btn-default"
+                      title="{{i18n('account:Delete account')}}"
                       ng-click="delete(accounts, $index)">
                       <span class="glyphicon glyphicon-trash"></span>
                     </a>
@@ -184,14 +199,19 @@
               </tr>
             </tbody>
             <tfoot>
-              <tr>
+              <tr ng-if="!accounts||!accounts.length">
+                <td class="notice" i18n="No accounts at the moment."></td>
+              </tr>
+              <tr ng-if="accounts&&accounts.length">
                 <td colspan="9">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <a class="btn btn-default btn-sm"
                       ng-show="accounts.length"
                       ng-class="{active:accountEditsEnabled}"
-                      ng-click="accountEditsEnabled=!accountEditsEnabled"
-                      i18n="account:Enable Edits"></a>
+                      ng-click="accountEditsEnabled=!accountEditsEnabled">
+                      <span class="glyphicon glyphicon-pencil"></span>
+                      <span i18n="account:Enable Edits"></span>
+                    </a>
                     <input type="text" class="form-control" id="name"
                       placeholder="{{i18n('account:Name')}}" ng-model="name"
                       ng-show="accountEditsEnabled">
@@ -201,8 +221,10 @@
                     <div class="btn-group btn-group-sm"
                       ng-show="accountEditsEnabled">
                       <button type="submit" class="btn btn-default"
-                        ng-disabled="!name || !code"
-                        i18n="account:Add"></button>
+                        ng-disabled="!name || !code">
+                        <span class="glyphicon glyphicon-plus-sign"></span>
+                        <span i18n="account:Add"></span>
+                      </button>
                     </div>
                   </form>
                 </td>
@@ -271,7 +293,10 @@
               placeholder="{{i18n('login:Password')}}" ng-model="password">
           </div>
           <button type="submit" class="btn btn-default"
-            ng-disabled="shouldLoginDisable()" i18n="login:Login"></button>
+            ng-disabled="shouldLoginDisable()">
+            <span class="glyphicon glyphicon-log-in"></span>
+            <span i18n="login:Login"></span>
+          </button>
         </form>
       </div>
     </div>
