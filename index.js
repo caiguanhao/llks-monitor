@@ -84,12 +84,12 @@ app.use(function(req, res, next) {
   next();
 });
 
-function serverError(res) {
+function serverError(req, res) {
   res.status(500);
   res.send({ error: req.$$('Server error.') });
 }
 
-function permissionDenied(res) {
+function permissionDenied(req, res) {
   res.status(403);
   res.send({ error: req.$$('Permission denied.') });
 }
@@ -100,7 +100,7 @@ function authorize(callback) {
       _id: req.headers['x-user-id'],
       token: req.headers['x-user-token']
     }).exec(function(error, user) {
-      if (error || !user) return permissionDenied(res);
+      if (error || !user) return permissionDenied(req, res);
       req.user = user;
       callback(req, res, next);
     });
@@ -152,7 +152,7 @@ app.put('/my', authorize(function(req, res, next) {
 
 app.get('/accounts', authorize(function(req, res, next) {
   db.accounts.find({}, function(err, accounts) {
-    if (err) return serverError(res);
+    if (err) return serverError(req, res);
     accounts.map(function(account) {
       delete account['data'];
     });
@@ -167,7 +167,7 @@ app.post('/accounts', authorize(function(req, res, next) {
   if (!name || !code) return next();
   var user = req.user;
   db.createAccount(name, code, user, function(err, account) {
-    if (err) return serverError(res);
+    if (err) return serverError(req, res);
     onAccountChanges();
     res.status(201);
     res.send(account);
@@ -190,7 +190,7 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
     }
     if (Object.keys(set).length === 0) return next();
     db.accounts.update({ _id: account._id }, { $set: set }, {}, function(err) {
-      if (err) return serverError(res);
+      if (err) return serverError(req, res);
       onAccountChanges();
       res.status(200);
       res.send({ status: req.$$('OK') });
@@ -200,7 +200,7 @@ app.put('/accounts/:account_id', authorize(function(req, res, next) {
 
 app.delete('/accounts/:account_id', authorize(function(req, res, next) {
   db.accounts.remove({ _id: req.params.account_id }, {}, function(err) {
-    if (err) return serverError(res);
+    if (err) return serverError(req, res);
     onAccountChanges();
     res.status(200);
     res.send({ status: req.$$('OK') });
