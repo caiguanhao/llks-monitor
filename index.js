@@ -13,7 +13,8 @@ app.use(express.bodyParser());
 app.use(express.static(__dirname + '/public'));
 
 app.post('/login', function(req, res, next) {
-  db.authenticate(req.body.username, req.body.password, function(code, user) {
+  db.authenticate(req.body.username, req.body.password, null,
+    function(code, user) {
     switch (code) {
     case db.authConst.INVALID:
       res.status(401);
@@ -102,6 +103,30 @@ app.get('/my', authorize(function(req, res, next) {
       updated_at: +user.updated_at,
       last_logged_in_at: llia,
       password_updated_at: +user.password_updated_at
+    });
+  });
+}));
+
+app.put('/my', authorize(function(req, res, next) {
+  var oldPassword = req.body.oldpassword;
+  var newPassword = req.body.newpassword;
+  if (!db.checkPassword(oldPassword) || !db.checkPassword(newPassword)) {
+    return next();
+  }
+  db.authenticate(req.user.username, oldPassword, { dry: true },
+    function(code, user) {
+    if (code !== db.authConst.SUCCESS) return next();
+    var new_date = new Date;
+    db.users.update({
+      _id: user._id
+    }, { $set: {
+      password: db.hashPassword(newPassword),
+      password_updated_at: new_date,
+      updated_at: new_date
+    } }, {}, function(err) {
+      if (err) return next();
+      res.status(200);
+      res.send({ status: 'ok' });
     });
   });
 }));

@@ -42,6 +42,10 @@
     "my:Updated At": "更新于",
     "my:Last Logged In At": "最后登录时间",
     "my:Password Updated At": "密码修改时间",
+    "my:Old Password": "旧密码",
+    "my:New Password": "新密码",
+    "my:Re-type New Password": "重输新密码",
+    "my:Change Password": "修改密码",
     "login:Logging in...": "登录中...",
     "login:You are now logged in. You will be redirected to home page.": "成功登录。即将自动跳转到主页。",
     "login:Username": "用户名",
@@ -51,6 +55,8 @@
     "Unknown Error.": "未知错误。",
     "Enter new name:": "输入新的账户名：",
     "Enter new code:": "输入新的代码：",
-    "Are you sure you want to delete this account?": "确定要删除这个账号吗？"
+    "Are you sure you want to delete this account?": "确定要删除这个账号吗？",
+    "Your password has been updated. It is recommended you log out now and then log in again.": "你的密码已更新，建议你重新登录。",
+    "Fail to change password. You may have entered a wrong password or the server refused to change password at the moment.": "无法更改密码。这可能是你输入了错误的密码或是服务器暂时拒绝更改密码。"
   }
 }

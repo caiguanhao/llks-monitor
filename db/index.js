@@ -42,6 +42,14 @@ var hashPassword = function(password) {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 };
 
+module.exports.hashPassword = hashPassword;
+
+var checkPassword = function(value) {
+  return value.length >= 3 && value.length <= 20;
+};
+
+module.exports.checkPassword = checkPassword;
+
 module.exports.createUser = function(username, password, callback) {
   var newDate = new Date;
   users.insert({
@@ -83,7 +91,8 @@ var CONST = {
 
 module.exports.authConst = CONST;
 
-module.exports.authenticate = function(username, password, callback) {
+module.exports.authenticate = function(username, password, options, callback) {
+  options = options || {};
   users.findOne({ username: username }, function(err, user) {
     if (err || !user) return callback(CONST.INVALID);
 
@@ -124,6 +133,10 @@ module.exports.authenticate = function(username, password, callback) {
     }
 
     if (user.banned) return callback(CONST.BANNED);
+
+    if (options.dry) {
+      return callback(CONST.SUCCESS, user);
+    }
 
     // update user login info:
 

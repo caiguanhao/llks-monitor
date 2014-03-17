@@ -139,6 +139,12 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   this.GetMyInfo = function() {
     return $http.get('/my');
   };
+  this.ChangePassword = function(oldPassword, newPassword) {
+    return $http.put('/my', {
+      oldpassword: oldPassword,
+      newpassword: newPassword
+    });
+  };
   this.Init = function() {
     this.GetUser();
     var self = this;
@@ -193,6 +199,15 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     if (!id || !token) return;
     $location.path('/');
   };
+  this.RequiresLogin = function() {
+    var id = ls('llksMonitor.user.id');
+    var token = ls('llksMonitor.user.token');
+    if (!id || !token) {
+      $location.path('/login');
+      return false;
+    };
+    return true;
+  }
 }]).
 
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
@@ -367,10 +382,47 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
 controller('MyAccountController', ['$scope', 'Users',
   function($scope, Users) {
+  if (!Users.RequiresLogin()) return;
+
   $scope.my = null;
-  Users.GetMyInfo().then(function(response) {
-    $scope.my = response.data;
-  });
+  $scope.password = null;
+  $scope.newpassword = null;
+  $scope.retypenewpassword = null;
+
+  function getInfo() {
+    Users.GetMyInfo().then(function(response) {
+      $scope.my = response.data;
+    });
+  }
+  getInfo();
+
+  $scope.changePassword = function() {
+    Users.ChangePassword($scope.password, $scope.newpassword).
+    then(function(response) {
+      alert($scope.i18n$('Your password has been updated. ' +
+        'It is recommended you log out now and then log in again.'));
+      getInfo();
+    }).
+    catch(function() {
+      alert($scope.i18n$('Fail to change password. You may have entered a ' +
+        'wrong password or the server refused to change password at the ' +
+        'moment.'));
+    }).
+    finally(function() {
+      $scope.password = null;
+      $scope.newpassword = null;
+      $scope.retypenewpassword = null;
+    });
+  };
+  function checkPassword(value) {
+    return typeof value === 'string' && value.length >= 3 && value.length <= 20;
+  }
+  $scope.shouldChangePasswordDisable = function() {
+    return !(checkPassword($scope.password) &&
+      checkPassword($scope.newpassword) &&
+      $scope.password !== $scope.newpassword &&
+      $scope.newpassword === $scope.retypenewpassword);
+  };
 }]).
 
 controller('LoginController', ['$scope', 'Users', '$timeout',
