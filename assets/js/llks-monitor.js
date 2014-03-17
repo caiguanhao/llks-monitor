@@ -159,8 +159,14 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     $http.defaults.headers.common['x-user-id'] = id;
     $http.defaults.headers.common['x-user-token'] = token;
     if (!id || !token) return;
+    var query = 'id=' + id + '&token=' + token;
+    if (this.Socket) {
+      // if it is going to reconnect, update query object
+      // since it won't update automatically
+      this.Socket.socket.options.query = query;
+    }
     this.Socket = io.connect(null, {
-      'query': 'id=' + id + '&token=' + token,
+      'query': query,
       'force new connection': true,
       'reconnect': true,
       'reconnection delay': 1000,
