@@ -50,3 +50,32 @@ footer {
     font-size: 12px;
   }
 }
+
+@media (max-width: 767px) {
+  .form-inline .form-control,
+  .form-inline .btn {
+    margin-top: 3px;
+    margin-bottom: 3px;
+  }
+  .noneXS {
+    display: none;
+  }
+}
+@media (max-width: 400px) {
+  .noneSM {
+    display: none;
+  }
+  .table-slim {
+    td, th {
+      padding-left: 3px !important;
+      padding-right: 3px !important;
+    }
+  }
+  .accountName {
+    display: block;
+    width: 36px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

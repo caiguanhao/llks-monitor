@@ -100,17 +100,17 @@
                   i18n="miner:Account"></a></th>
                 <th><a href ng-click="sort('ip')"
                   i18n="miner:IP"></a></th>
-                <th><a href ng-click="sort('total')"
+                <th class="noneSM"><a href ng-click="sort('total')"
                   i18n="miner:Total"></a></th>
                 <th><a href ng-click="sort('today')"
                   i18n="miner:Today"></a></th>
-                <th><a href ng-click="sort('yesterday')"
+                <th class="noneXS"><a href ng-click="sort('yesterday')"
                   i18n="miner:Yesterday"></a></th>
-                <th><a href ng-click="sort('servertime')"
+                <th class="noneXS"><a href ng-click="sort('servertime')"
                   i18n="miner:Server Time"></a></th>
                 <th><a href ng-click="sort(speedCompare, 'speed')"
                   i18n="miner:Speed"></a></th>
-                <th><a href ng-click="sort('status')"
+                <th class="noneXS"><a href ng-click="sort('status')"
                   i18n="miner:Status"></a></th>
               </tr>
             </thead>
@@ -122,14 +122,16 @@
             <tbody>
               <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
                 class="{{speedBg(miner)}}">
-                <td ng-bind="miner.account"></td>
+                <td>
+                  <span ng-bind="miner.account" class="accountName"></span>
+                </td>
                 <td ng-bind="miner.ip"></td>
-                <td ng-bind="miner.total"></td>
+                <td ng-bind="miner.total" class="noneSM"></td>
                 <td ng-bind="miner.today"></td>
-                <td ng-bind="miner.yesterday"></td>
-                <td ng-bind="miner.servertime"></td>
+                <td ng-bind="miner.yesterday" class="noneXS"></td>
+                <td ng-bind="miner.servertime" class="noneXS"></td>
                 <td ng-bind="miner.speed"></td>
-                <td ng-bind="miner.status"></td>
+                <td ng-bind="miner.status" class="noneXS"></td>
               </tr>
             </tbody>
           </table>
@@ -142,13 +144,13 @@
             <thead ng-if="accounts.length">
               <tr>
                 <th i18n="account:Name"></th>
-                <th i18n="account:Miners"></th>
-                <th i18n="account:Total"></th>
-                <th i18n="account:Today"></th>
-                <th i18n="account:Unsold"></th>
-                <th i18n="account:Sold"></th>
+                <th i18n="account:Miners" class="noneXS"></th>
+                <th i18n="account:Total" class="noneXS"></th>
+                <th i18n="account:Today" class="noneSM"></th>
+                <th i18n="account:Unsold" class="noneSM"></th>
+                <th i18n="account:Sold" class="noneXS"></th>
                 <th i18n="account:Unsold Worth"></th>
-                <th i18n="account:Server Time"></th>
+                <th i18n="account:Server Time" class="noneXS"></th>
                 <th i18n="account:Updated"></th>
               </tr>
             </thead>
@@ -167,13 +169,13 @@
                     </a>
                   </div>
                 </td>
-                <td ng-bind="account.miners"></td>
-                <td ng-bind="account.total"></td>
-                <td ng-bind="account.today"></td>
-                <td ng-bind="account.unsold"></td>
-                <td ng-bind="account.sold"></td>
+                <td ng-bind="account.miners" class="noneXS"></td>
+                <td ng-bind="account.total" class="noneXS"></td>
+                <td ng-bind="account.today" class="noneSM"></td>
+                <td ng-bind="account.unsold" class="noneSM"></td>
+                <td ng-bind="account.sold" class="noneXS"></td>
                 <td ng-bind="unsoldWorth(account)|currency:'￥'"></td>
-                <td ng-bind="account.servertime"></td>
+                <td ng-bind="account.servertime" class="noneXS"></td>
                 <td ng-switch on="account.updated">
                   <span ng-switch-when="false" i18n="account:Expired"></span>
                   <span ng-switch-default seconds-ago="account.updated"
@@ -191,10 +193,13 @@
                       ng-click="accountEditsEnabled=!accountEditsEnabled"
                       i18n="account:Enable Edits"></a>
                     <input type="text" class="form-control" id="name"
-                    placeholder="{{i18n('account:Name')}}" ng-model="name">
+                      placeholder="{{i18n('account:Name')}}" ng-model="name"
+                      ng-show="accountEditsEnabled">
                     <input type="text" class="form-control" id="code"
-                    placeholder="{{i18n('account:Code')}}" ng-model="code">
-                    <div class="btn-group btn-group-sm">
+                      placeholder="{{i18n('account:Code')}}" ng-model="code"
+                      ng-show="accountEditsEnabled">
+                    <div class="btn-group btn-group-sm"
+                      ng-show="accountEditsEnabled">
                       <button type="submit" class="btn btn-default"
                         ng-disabled="!name || !code"
                         i18n="account:Add"></button>
@@ -213,8 +218,8 @@
               then press <code>Control-Shift-J</code> (Windows) or
               <code>Command-Alt-J</code> (Mac), and then enter this line of code:
               <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
-              Then paste the text in your clipboard to 'code' text box above to
-              add account.
+              Click Enable Edit button above, then paste the text in your
+              clipboard to the 'code' text box to add account.
             </p>
             <p>
               Don't click the log out link in the web page. You can log out the
@@ -230,7 +235,7 @@
               <code>Control-Shift-J</code> (Windows) 或
               <code>Command-Alt-J</code> (Mac) 按键，复制如下代码，并按回车：
               <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
-              然后粘贴你剪贴板上的“代码”到上面的文本框添加账户。
+              点击启用编辑按钮，然后粘贴你剪贴板上的文本到“代码”文本框添加账户。
             </p>
             <p>
               不要按流量矿石上的退出登录按钮，你可以像刚才一样，通过如下代码退出登录：
