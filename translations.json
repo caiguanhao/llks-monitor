@@ -1,6 +1,7 @@
 {
   "zh": {
     "header:LLKS Monitor": "流量矿石监视器",
+    "header:History": "历史数据",
     "header:Login": "登录",
     "header:My account": "我的账号",
     "header:Log out": "退出",
@@ -39,6 +40,13 @@
     "miner:Server Time": "更新时间",
     "miner:Speed": "挖矿速度",
     "No miners at the moment.": "暂无可用的矿机显示。",
+    "history:History": "历史数据",
+    "history:Date": "日期",
+    "history:Price": "价格",
+    "history:Previous": "上个交易日",
+    "history:Difference": "变化",
+    "history:Volume": "成交量",
+    "No history at the moment.": "暂无可用的历史数据显示。",
     "My account": "我的账号",
     "my:Name": "账号名",
     "my:Created At": "创建于",

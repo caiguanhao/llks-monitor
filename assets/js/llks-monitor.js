@@ -61,6 +61,22 @@ directive('body', [function() {
   };
 }]).
 
+directive('navbarLink', ['$location', function($location) {
+  return function($scope, elem, attrs) {
+    $scope.$on('$routeChangeSuccess', function(event, current, previous) {
+      var links = elem.find('a');
+      if (links.length === 0) return;
+      var href = links[0].getAttribute('href').replace(/^\/#!?/, '');
+      var url = $location.url();
+      if (url.substr(0, href.length) === href) {
+        elem.addClass('active');
+      } else {
+        elem.removeClass('active');
+      }
+    });
+  };
+}]).
+
 directive('i18n', ['I18N', function(I18N) {
   return {
     link: function($scope, elem, attrs) {
@@ -510,6 +526,10 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
       split('').reverse().join('');
   }
 
+  function prettyDate(string) {
+    var date = (new Date(string)).toJSON().split(/[-T:.]/);
+    return date = date[1] + '-' + date[2];
+  }
 
   if (Users.Socket && Users.Socket.$events) {
     delete Users.Socket.$events;
@@ -517,10 +537,11 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
   if (Users.Socket) {
     Users.Socket.on('HereAreTheHistoryData', function(data) {
       data.map(function(d) {
+        d.dateText = prettyDate(d.date);
         d.diff = d.previous ? (+d.price - +d.previous) : 0;
         d.increase = d.diff >= 0;
         d.diffAbs = Math.abs(d.diff).toFixed(2);
-        d.mineralText = prettyNumber(d.mineral);
+        d.volumeText = prettyNumber(d.volume);
         d.diffPercent = d.previous ? (+d.diffAbs / d.previous * 100).toFixed(2) : 0;
         d.previous = d.previous || 'N/A';
       });

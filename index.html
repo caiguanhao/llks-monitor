@@ -50,7 +50,8 @@
             <div class="collapse navbar-collapse" ng-class="{in:navbarIn}"
               id="navbar">
               <ul class="nav navbar-nav">
-                <li><a href="/#/history" i18n="header:History"></a></li>
+                <li navbar-link><a href="/#/history"
+                  i18n="header:History"></a></li>
               </ul>
               <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -336,11 +337,11 @@
                   i18n="history:Date"></a></th>
                 <th><a href ng-click="sort('price')"
                   i18n="history:Price"></a></th>
-                <th i18n="history:Previous"></th>
+                <th class="noneXS" i18n="history:Previous"></th>
                 <th><a href ng-click="sort('diff')"
                   i18n="history:Difference"></a></th>
-                <th><a href ng-click="sort('mineral')"
-                  i18n="history:Mineral"></a></th>
+                <th><a href ng-click="sort('volume')"
+                  i18n="history:Volume"></a></th>
               </tr>
             </thead>
             <tbody ng-show="!history.length">
@@ -350,9 +351,9 @@
             </tbody>
             <tbody ng-show="history.length">
               <tr ng-repeat="his in history|orderBy:hOrder:hOrderReverse">
-                <td ng-bind="his.date"></td>
+                <td ng-bind="his.dateText"></td>
                 <td>￥<span ng-bind="his.price"></span></td>
-                <td>￥<span ng-bind="his.previous"></span></td>
+                <td class="noneXS">￥<span ng-bind="his.previous"></span></td>
                 <td ng-if="his.diff == 0">
                   <span class="glyphicon glyphicon glyphicon-minus"></span>
                 </td>
@@ -363,7 +364,7 @@
                   ￥<span ng-bind="his.diffAbs"></span>
                   (<span ng-bind="his.diffPercent"></span>%)
                 </td>
-                <td ng-bind="his.mineralText"></td>
+                <td ng-bind="his.volumeText"></td>
               </tr>
             </tbody>
           </table>

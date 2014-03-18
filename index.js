@@ -348,11 +348,6 @@ function prettyTime(string) {
   return date = date[1] + '-' + date[2] + ' ' + date[3] + ':' + date[4];
 }
 
-function prettyDate(string) {
-  var date = (new Date(string)).toJSON().split(/[-T:.]/);
-  return date = date[0] + '-' + date[1] + '-' + date[2];
-}
-
 function processMinerData(account, data) {
   data = JSON.parse(data);
   if (!data.data.stats) {
@@ -412,10 +407,10 @@ function HereAreTheHistoryData(length) {
         var d = data.data[i];
         var n = data.data[i-1];
         H.push({
-          date: prettyDate(d.createtime),
+          date: +new Date(d.createtime),
           price: (+d.price).toFixed(2),
           previous: n ? (+n.price).toFixed(2) : null,
-          mineral: +d.mineral
+          volume: +d.mineral
         });
       }
       self.emit('HereAreTheHistoryData', H);
