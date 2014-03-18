@@ -406,7 +406,9 @@ function HereAreTheHistoryData(length) {
   if (typeof self.emit !== 'function') self = io.sockets;
 
   var length;
+  if (length === 14) length = 14;
   if (length === 30) length = 30;
+  if (length === 60) length = 60;
   if (!length) length = 7;
 
   getHttpData('/index.php/transaction/get_market_overview_day/' + length).

@@ -480,11 +480,23 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 }]).
 
 controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
+
+  $scope.range = 7;
+
+  $scope.$watch('range', function(val) {
+    if (Users.Socket) {
+      Users.Socket.emit('GiveMeHistoryData', val);
+    }
+  });
+
+  $scope.setRange = function(range) {
+    $scope.range = range;
+  };
+
   if (Users.Socket && Users.Socket.$events) {
     delete Users.Socket.$events;
   }
   if (Users.Socket) {
-    Users.Socket.emit('GiveMeHistoryData', 30);
     Users.Socket.on('HereAreTheHistoryData', function(data) {
       $scope.history = data;
       $scope.$apply();
