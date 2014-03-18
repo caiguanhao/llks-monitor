@@ -353,14 +353,6 @@ function prettyDate(string) {
   return date = date[0] + '-' + date[1] + '-' + date[2];
 }
 
-function prettyNumber(num) {
-  return String(num).
-    split('').reverse().join('').
-    replace(/(\d{3})/g, '$1,').
-    replace(/^,|,([^\d]*)$/g, '$1').
-    split('').reverse().join('');
-}
-
 function processMinerData(account, data) {
   data = JSON.parse(data);
   if (!data.data.stats) {
@@ -416,13 +408,16 @@ function HereAreTheHistoryData(length) {
     try {
       data = JSON.parse(data);
       var H = [];
-      data.data.forEach(function(d) {
+      for (var i = 0; i < data.data.length; i++) {
+        var d = data.data[i];
+        var n = data.data[i-1];
         H.push({
           date: prettyDate(d.createtime),
           price: (+d.price).toFixed(2),
-          mineral: prettyNumber(d.mineral)
+          previous: n ? (+n.price).toFixed(2) : null,
+          mineral: +d.mineral
         });
-      });
+      }
       self.emit('HereAreTheHistoryData', H);
     } catch(e) {}
   });

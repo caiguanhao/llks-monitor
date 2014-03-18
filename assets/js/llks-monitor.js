@@ -493,11 +493,28 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
     $scope.range = range;
   };
 
+  function prettyNumber(num) {
+    return String(num).
+      split('').reverse().join('').
+      replace(/(\d{3})/g, '$1,').
+      replace(/^,|,([^\d]*)$/g, '$1').
+      split('').reverse().join('');
+  }
+
+
   if (Users.Socket && Users.Socket.$events) {
     delete Users.Socket.$events;
   }
   if (Users.Socket) {
     Users.Socket.on('HereAreTheHistoryData', function(data) {
+      data.map(function(d) {
+        d.diff = d.previous ? (+d.price - +d.previous) : 0;
+        d.increase = d.diff >= 0;
+        d.diffAbs = Math.abs(d.diff).toFixed(2);
+        d.mineralText = prettyNumber(d.mineral);
+        d.diffPercent = d.previous ? (+d.diffAbs / d.previous * 100).toFixed(2) : 0;
+        d.previous = d.previous || 'N/A';
+      });
       $scope.history = data;
       $scope.$apply();
     });

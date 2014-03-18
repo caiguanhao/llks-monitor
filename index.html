@@ -336,23 +336,34 @@
                   i18n="history:Date"></a></th>
                 <th><a href ng-click="sort('price')"
                   i18n="history:Price"></a></th>
+                <th i18n="history:Previous"></th>
+                <th><a href ng-click="sort('diff')"
+                  i18n="history:Difference"></a></th>
                 <th><a href ng-click="sort('mineral')"
                   i18n="history:Mineral"></a></th>
               </tr>
             </thead>
             <tbody ng-show="!history.length">
               <tr>
-                <td class="notice" colspan="8"
-                  i18n="No history at the moment."></td>
+                <td class="notice" i18n="No history at the moment."></td>
               </tr>
             </tbody>
             <tbody ng-show="history.length">
               <tr ng-repeat="his in history|orderBy:hOrder:hOrderReverse">
                 <td ng-bind="his.date"></td>
-                <td>
-                  ￥<span ng-bind="his.price"></span>
+                <td>￥<span ng-bind="his.price"></span></td>
+                <td>￥<span ng-bind="his.previous"></span></td>
+                <td ng-if="his.diff == 0">
+                  <span class="glyphicon glyphicon glyphicon-minus"></span>
                 </td>
-                <td ng-bind="his.mineral"></td>
+                <td ng-if="his.diff != 0"
+                  class="text-{{his.increase&&'success'||'danger'}}">
+                  <span class="glyphicon
+                    glyphicon-chevron-{{his.increase&&'up'||'down'}}"></span>
+                  ￥<span ng-bind="his.diffAbs"></span>
+                  (<span ng-bind="his.diffPercent"></span>%)
+                </td>
+                <td ng-bind="his.mineralText"></td>
               </tr>
             </tbody>
           </table>
