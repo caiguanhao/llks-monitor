@@ -539,12 +539,16 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
     Users.Socket.on('HereAreTheHistoryData', function(data) {
       data.map(function(d) {
         d.dateText = prettyDate(d.date);
-        d.diff = d.previous ? (+d.price - +d.previous) : 0;
+        d.diff = d._price ? (+d.price - +d._price) : 0;
         d.increase = d.diff >= 0;
         d.diffAbs = Math.abs(d.diff).toFixed(2);
         d.volumeText = prettyNumber(d.volume);
-        d.diffPercent = d.previous ? (+d.diffAbs / d.previous * 100).toFixed(2) : 0;
-        d.previous = d.previous || 'N/A';
+        d.diffPercent = d._price ? (+d.diffAbs / d._price * 100).toFixed(2) : 0;
+        d.volumeDiff = d._volume ? (+d.volume - +d._volume) : 0;
+        d.volumeIncrease = d.volumeDiff >= 0;
+        d.volumeDiffAbs = Math.abs(d.volumeDiff);
+        d.volumeDiffPercent = d._volume ? (+d.volumeDiffAbs / d._volume * 100).toFixed(2) : 0;
+        d._price = d._price || 'N/A';
       });
       $scope.history = data;
       $scope.loading = false;

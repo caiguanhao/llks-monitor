@@ -409,8 +409,9 @@ function HereAreTheHistoryData(length) {
         H.push({
           date: +new Date(d.createtime),
           price: (+d.price).toFixed(2),
-          previous: n ? (+n.price).toFixed(2) : null,
-          volume: +d.mineral
+          _price: n ? (+n.price).toFixed(2) : null,
+          volume: +d.mineral,
+          _volume: n ? +n.mineral : null
         });
       }
       self.emit('HereAreTheHistoryData', H);

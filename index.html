@@ -343,6 +343,8 @@
                   i18n="history:Difference"></a></th>
                 <th><a href ng-click="sort('volume')"
                   i18n="history:Volume"></a></th>
+                <th class="noneXS"><a href ng-click="sort('volumeDiff')"
+                  i18n="history:Difference"></a></th>
               </tr>
             </thead>
             <tbody ng-show="!history.length">
@@ -354,7 +356,7 @@
               <tr ng-repeat="his in history|orderBy:hOrder:hOrderReverse">
                 <td ng-bind="his.dateText"></td>
                 <td>￥<span ng-bind="his.price"></span></td>
-                <td class="noneXS">￥<span ng-bind="his.previous"></span></td>
+                <td class="noneXS">￥<span ng-bind="his._price"></span></td>
                 <td ng-if="his.diff == 0">
                   <span class="glyphicon glyphicon glyphicon-minus"></span>
                 </td>
@@ -366,6 +368,15 @@
                   (<span ng-bind="his.diffPercent"></span>%)
                 </td>
                 <td ng-bind="his.volumeText"></td>
+                <td ng-if="his.volumeDiff == 0" class="noneXS">
+                  <span class="glyphicon glyphicon glyphicon-minus"></span>
+                </td>
+                <td ng-if="his.volumeDiff != 0"
+                  class="noneXS text-{{his.volumeIncrease&&'success'||'danger'}}">
+                  <span class="glyphicon
+                    glyphicon-chevron-{{his.volumeIncrease&&'up'||'down'}}"></span>
+                  <span ng-bind="his.volumeDiffPercent"></span>%
+                </td>
               </tr>
             </tbody>
           </table>
