@@ -168,6 +168,12 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     ls('llksMonitor.user.lang', code);
     this.GetLang();
   };
+  this.GetHistoryRange = function() {
+    return ls('llksMonitor.user.historyrange');
+  };
+  this.SetHistoryRange = function(range) {
+    ls('llksMonitor.user.historyrange', range);
+  };
   this.GetHiddenAccounts = function() {
     var acc = [];
     try {
@@ -481,7 +487,9 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
 controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
-  $scope.range = 7;
+  $scope.ranges = [ 7, 14, 30, 60 ];
+  $scope.range = parseInt(Users.GetHistoryRange());
+  if ($scope.ranges.indexOf($scope.range) === -1) $scope.range = 7;
 
   $scope.$watch('range', function(val) {
     if (Users.Socket) {
@@ -491,6 +499,7 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
   $scope.setRange = function(range) {
     $scope.range = range;
+    Users.SetHistoryRange(range);
   };
 
   function prettyNumber(num) {

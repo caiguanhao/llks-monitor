@@ -321,7 +321,7 @@
           <div class="panel-heading">
             <div class="pull-right btn-group btn-group-xs">
               <a class="btn btn-default btn-sm"
-                ng-repeat="r in [7,14,30,60]"
+                ng-repeat="r in ranges"
                 ng-class="{active:range===r}"
                 ng-click="setRange(r)">
                 <span>{{r}}d</span>
