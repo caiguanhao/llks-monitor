@@ -151,6 +151,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     var self = this;
     $rootScope.logout = function() {
       self.SetUser(null, null, null);
+      self.Socket = null;
       $route.reload();
     };
   };
@@ -378,7 +379,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     });
     Users.Socket.on('disconnect', function() {
       $scope.status = 'disconnected';
-      Users.Socket.socket.reconnect();
+      if (Users.Socket) Users.Socket.socket.reconnect();
     });
     Users.Socket.on('error', function(reason) {
       $scope.status = 'error';
