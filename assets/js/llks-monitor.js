@@ -509,6 +509,7 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
   $scope.$watch('range', function(val) {
     if (Users.Socket) {
+      $scope.loading = true;
       Users.Socket.emit('GiveMeHistoryData', val);
     }
   });
@@ -546,6 +547,7 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
         d.previous = d.previous || 'N/A';
       });
       $scope.history = data;
+      $scope.loading = false;
       $scope.$apply();
     });
   }
