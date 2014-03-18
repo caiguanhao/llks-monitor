@@ -7,6 +7,10 @@ config(['$routeProvider', '$locationProvider',
     templateUrl: 'main',
     controller: 'MainController'
   }).
+  when('/history', {
+    templateUrl: 'history',
+    controller: 'HistoryController'
+  }).
   when('/myaccount', {
     templateUrl: 'myaccount',
     controller: 'MyAccountController'
@@ -473,6 +477,32 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       updateAllMiners();
     });
   };
+}]).
+
+controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
+  if (Users.Socket && Users.Socket.$events) {
+    delete Users.Socket.$events;
+  }
+  if (Users.Socket) {
+    Users.Socket.emit('GiveMeHistoryData', 30);
+    Users.Socket.on('HereAreTheHistoryData', function(data) {
+      $scope.history = data;
+      $scope.$apply();
+    });
+  }
+
+  var lastByStr;
+  $scope.sort = function(by, byStr) {
+    if (!byStr && typeof by === 'string') byStr = by;
+    if (lastByStr === byStr) {
+      $scope.hOrderReverse = !$scope.hOrderReverse;
+    } else {
+      $scope.hOrderReverse = true;
+    }
+    $scope.hOrder = by;
+    lastByStr = byStr;
+  };
+  $scope.sort('date');
 }]).
 
 controller('MyAccountController', ['$scope', 'Users',

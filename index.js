@@ -348,6 +348,19 @@ function prettyTime(string) {
   return date = date[1] + '-' + date[2] + ' ' + date[3] + ':' + date[4];
 }
 
+function prettyDate(string) {
+  var date = (new Date(string)).toJSON().split(/[-T:.]/);
+  return date = date[0] + '-' + date[1] + '-' + date[2];
+}
+
+function prettyNumber(num) {
+  return String(num).
+    split('').reverse().join('').
+    replace(/(\d{3})/g, '$1,').
+    replace(/^,|,([^\d]*)$/g, '$1').
+    split('').reverse().join('');
+}
+
 function processMinerData(account, data) {
   data = JSON.parse(data);
   if (!data.data.stats) {
@@ -388,6 +401,31 @@ function HereAreTheAccounts() {
   });
 }
 
+function HereAreTheHistoryData(length) {
+  var self = this;
+  if (typeof self.emit !== 'function') self = io.sockets;
+
+  var length;
+  if (length === 30) length = 30;
+  if (!length) length = 7;
+
+  getHttpData('/index.php/transaction/get_market_overview_day/' + length).
+  then(function(data) {
+    try {
+      data = JSON.parse(data);
+      var H = [];
+      data.data.forEach(function(d) {
+        H.push({
+          date: prettyDate(d.createtime),
+          price: (+d.price).toFixed(2),
+          mineral: prettyNumber(d.mineral)
+        });
+      });
+      self.emit('HereAreTheHistoryData', H);
+    } catch(e) {}
+  });
+}
+
 function onAccountChanges() {
   HereAreTheAccounts();
   restartTimers();
@@ -415,6 +453,7 @@ try {
 io.sockets.on('connection', function(socket) {
   socket.emit('ServerHasUpdated', assetsHashes);
   socket.on('GiveMeAccounts', HereAreTheAccounts);
+  socket.on('GiveMeHistoryData', HereAreTheHistoryData);
 });
 
 process.on('SIGINT', function() {

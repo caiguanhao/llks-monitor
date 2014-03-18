@@ -50,6 +50,7 @@
             <div class="collapse navbar-collapse" ng-class="{in:navbarIn}"
               id="navbar">
               <ul class="nav navbar-nav">
+                <li><a href="/#/history" i18n="header:History"></a></li>
               </ul>
               <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -309,6 +310,44 @@
 ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="history">
+    <div class="row">
+      <div class="col-sm-6 col-sm-offset-3">
+        <div class="panel panel-default">
+          <div class="panel-heading btn-group-xs">
+            <span i18n="history:History"></span>
+          </div>
+          <table class="table table-striped">
+            <thead ng-show="history && history.length">
+              <tr>
+                <th><a href ng-click="sort('date')"
+                  i18n="history:Date"></a></th>
+                <th><a href ng-click="sort('price')"
+                  i18n="history:Price"></a></th>
+                <th><a href ng-click="sort('mineral')"
+                  i18n="history:Mineral"></a></th>
+              </tr>
+            </thead>
+            <tbody ng-show="!history.length">
+              <tr>
+                <td class="notice" colspan="8"
+                  i18n="No history at the moment."></td>
+              </tr>
+            </tbody>
+            <tbody ng-show="history.length">
+              <tr ng-repeat="his in history|orderBy:hOrder:hOrderReverse">
+                <td ng-bind="his.date"></td>
+                <td>
+                  ￥<span ng-bind="his.price"></span>
+                </td>
+                <td ng-bind="his.mineral"></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
