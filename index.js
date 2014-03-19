@@ -335,17 +335,11 @@ function processAccountData(account, data) {
     bundle[account._id] = {
       total: +accountData.data.total_flow,
       unsold: +accountData.data.flow,
-      sold: +accountData.data.sold,
-      servertime: prettyTime(accountData.data.update_time)
+      sold: +accountData.data.sold
     };
     db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
     io.sockets.emit('updateAccount', bundle);
   } catch(e) {}
-}
-
-function prettyTime(string) {
-  var date = (new Date(string)).toJSON().split(/[-T:.]/);
-  return date = date[1] + '-' + date[2] + ' ' + date[3] + ':' + date[4];
 }
 
 function processMinerData(account, data) {
@@ -362,7 +356,7 @@ function processMinerData(account, data) {
       total: +miner.total_mineral,
       today: +miner.today_mineral,
       yesterday: +miner.yes_mineral,
-      servertime: prettyTime(miner.update_time),
+      servertime: +new Date(miner.update_time),
       status: miner.status
     });
   }

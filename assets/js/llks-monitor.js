@@ -303,7 +303,13 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     if (speed >= 1024) return 'success';
     if (speed >= 512) return 'warning';
     return 'danger';
-  };
+  }
+  function f(n) { return n < 10 ? '0' + n : n; }
+  function prettyTime(t) {
+    var time = new Date(t);
+    return f(time.getMonth() + 1) + '-' + f(time.getDate()) + ' ' +
+      f(time.getHours()) + ':' + f(time.getMinutes());
+  }
   function updateAllMiners() {
     var miners = [];
     $scope.count = {
@@ -338,6 +344,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         s.bg = speedBg(s);
         if (shouldIncludeAccountInList) {
           s.account = account.name;
+          s.servertimeText = prettyTime(s.servertime);
           $scope.count[s.bg] += 1;
           if (s.status === '在线') $scope.count.online += 1;
         }
