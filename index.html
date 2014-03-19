@@ -288,6 +288,7 @@
             <span i18n="help:Help"></span>
           </div>
           <div class="panel-body" ng-switch-default>
+            <h4>Add account</h4>
             <p>
               Open Google Chrome browser, go to and log in to
               <a href="https://jiaoyi.yunfan.com/" target="_blank">LLKS</a>,
@@ -303,8 +304,33 @@
               <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
 ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
             </p>
+            <h4>Open Remote Desktop from browser</h4>
+            <p>
+              Right click Notepad and choose Run as Administrator, copy and
+              paste the following content and save it to
+              <code>C:\llksMonitor.js</code>
+              <pre>var ws = new ActiveXObject("WScript.Shell")
+ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
+              Then create another new file in Notepad, copy and paste the
+              following content and save it to <code>C:\llksMonitor.reg</code>
+            </p>
+            <p>
+              <pre>Windows Registry Editor Version 5.00
+[HKEY_CLASSES_ROOT\llksmonitor]
+"URL Protocol"=""
+@="URL:LLKS Monitor Protocol"
+[HKEY_CLASSES_ROOT\llksmonitor\shell]
+[HKEY_CLASSES_ROOT\llksmonitor\shell\open]
+[HKEY_CLASSES_ROOT\llksmonitor\shell\open\command]
+@="wscript.exe \"C:\\llksMonitor.js\" %1"</pre>
+              Double click the .reg file to open and import it to Windows
+              Registry. After that, you can delete the .reg file, but you
+              shouldn't delete the .js file as it is necessary to open
+              Remote Desktop.
+            </p>
           </div>
           <div class="panel-body" ng-switch-when="zh">
+            <h4>添加账户</h4>
             <p>
               使用Google浏览器，前往并登录<a href="https://jiaoyi.yunfan.com/"
               target="_blank">流量矿石</a>交易系统，然后按下
@@ -317,6 +343,27 @@
               不要按流量矿石上的退出登录按钮，你可以像刚才一样，通过如下代码退出登录：
               <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
 ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
+            </p>
+            <h4>从浏览器打开“远程桌面连接”程序</h4>
+            <p>
+              右击记事本，选择以管理员身份运行，复制粘贴下面代码，并保存到
+              <code>C:\llksMonitor.js</code>
+              <pre>var ws = new ActiveXObject("WScript.Shell")
+ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
+              接着新建新的文件，复制粘贴下面内容，然后保存到
+              <code>C:\llksMonitor.reg</code>
+            </p>
+            <p>
+              <pre>Windows Registry Editor Version 5.00
+[HKEY_CLASSES_ROOT\llksmonitor]
+"URL Protocol"=""
+@="URL:LLKS Monitor Protocol"
+[HKEY_CLASSES_ROOT\llksmonitor\shell]
+[HKEY_CLASSES_ROOT\llksmonitor\shell\open]
+[HKEY_CLASSES_ROOT\llksmonitor\shell\open\command]
+@="wscript.exe \"C:\\llksMonitor.js\" %1"</pre>
+              双击打开.reg文件并将其导入到Windows注册表。
+              之后你可以删除.reg文件，但请勿删除用于启动远程桌面连接程序的.js文件。
             </p>
           </div>
         </div>
