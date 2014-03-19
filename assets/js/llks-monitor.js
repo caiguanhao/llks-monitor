@@ -168,9 +168,14 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
       $window.localStorage[key] = val;
     }
   }
-  this.PermissionDenied = function() {
+  this.LogOut = function() {
     this.SetUser(null, null, null);
-    return $location.path('/login');
+    this.SetIPAddresses(null);
+    this.Socket = null;
+    $route.reload();
+  };
+  this.PermissionDenied = function() {
+    this.LogOut();
   };
   this.Authenticate = function(user, pass) {
     return $http.post('/login', { username: user, password: pass });
@@ -191,10 +196,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     this.GetUser();
     var self = this;
     $rootScope.logout = function() {
-      self.SetUser(null, null, null);
-      self.SetIPAddresses(null);
-      self.Socket = null;
-      $route.reload();
+      self.LogOut();
     };
   };
   this.GetLang = function() {
