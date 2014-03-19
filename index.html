@@ -124,7 +124,7 @@
                   i18n="account:Name"></a></th>
                 <th class="noneXS"><a href ng-click="asort('miners')"
                   i18n="account:Miners"></a></th>
-                <th class="noneXS"><a href ng-click="asort('speed')"
+                <th><a href ng-click="asort('speed')"
                   i18n="account:Speed"></a></th>
                 <th class="noneXS"><a href ng-click="asort('total')"
                   i18n="account:Total"></a></th>
@@ -139,7 +139,7 @@
                 <th class="noneXS"><a href ng-click="asort('price')"
                   i18n="account:Price"></a></th>
                 <th><a href ng-click="asort('unsold')"
-                  i18n="account:Unsold Worth"></a></th>
+                  i18n="account:Worth"></a></th>
                 <th i18n="account:Updated" ng-show="!accountEditsEnabled"></th>
                 <th i18n="account:Actions" ng-show="accountEditsEnabled"></th>
               </tr>
@@ -149,8 +149,9 @@
                 <td><input type="checkbox" ng-checked="isHidden(account._id)"
                   ng-click="toggleHidden(account._id)"></td>
                 <td ng-bind="account.name"></td>
-                <td ng-bind="account.miners" class="noneXS"></td>
-                <td ng-bind="account.speedText" class="noneXS"></td>
+                <td ng-bind="account.minersOnline + ' / ' + account.miners"
+                  class="noneXS"></td>
+                <td ng-bind="account.speedText"></td>
                 <td ng-bind="account.total" class="noneXS"></td>
                 <td ng-bind="account.today" class="noneSM"></td>
                 <td ng-bind="account.yesterday" class="noneXS"></td>
@@ -266,15 +267,16 @@
                 <td colspan="2">
                   <span ng-repeat="type in ['success','warning','danger','active']">
                     <span class="legend {{type}}"></span>
-                    {{count[type]}}
+                    <span ng-bind="count[type]"></span>
                   </span>
                 </td>
-                <td class="noneSM">{{count.total}}</td>
-                <td>{{count.today}}</td>
-                <td class="noneXS">{{count.yesterday}}</td>
+                <td class="noneSM" ng-bind="count.total"></td>
+                <td ng-bind="count.today"></td>
+                <td class="noneXS" ng-bind="count.yesterday"></td>
                 <td class="noneXS"></td>
-                <td>{{count.speed}}</td>
-                <td class="noneXS">在线 {{count.online}}/{{miners.length}}</td>
+                <td ng-bind="count.speed"></td>
+                <td class="noneXS"
+                  ng-bind="count.online + ' / ' + miners.length"></td>
               </tr>
             </tfoot>
           </table>

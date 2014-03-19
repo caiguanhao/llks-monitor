@@ -332,6 +332,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.updated = allMiners[miner].updated;
       var accountTotalTotal = 0, accountTodayTotal = 0;
       var accountYesterdayTotal = 0, accountSpeedTotal = 0;
+      var minersOnline = 0;
 
       allMiners[miner].miners.map(function(s) {
         s.bg = speedBg(s);
@@ -340,6 +341,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
           $scope.count[s.bg] += 1;
           if (s.status === '在线') $scope.count.online += 1;
         }
+        if (s.status === '在线') minersOnline += 1;
         if (s.speednum) accountSpeedTotal += s.speednum;
         accountTotalTotal += s.total;
         accountTodayTotal += s.today;
@@ -352,6 +354,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         $scope.count.yesterday += accountYesterdayTotal;
         $scope.count.speed += accountSpeedTotal;
       }
+      account.minersOnline = minersOnline;
       account.miners = allMiners[miner].miners.length;
       account.speed = +accountSpeedTotal;
       account.speedText = (account.speed / 1024).toFixed(3) + ' M/S';
