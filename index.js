@@ -150,21 +150,6 @@ app.put('/my', authorize(function(req, res, next) {
   });
 }));
 
-/*
-// Deprecated: use HereAreTheAccounts instead
-
-app.get('/accounts', authorize(function(req, res, next) {
-  db.accounts.find({}, function(err, accounts) {
-    if (err) return serverError(req, res);
-    accounts.map(function(account) {
-      delete account['data'];
-    });
-    res.status(200);
-    res.send(accounts);
-  });
-}));
-*/
-
 app.post('/accounts', authorize(function(req, res, next) {
   var name = req.body.name;
   var code = req.body.code;
@@ -211,6 +196,11 @@ app.delete('/accounts/:account_id', authorize(function(req, res, next) {
     res.send({ status: req.$$('OK') });
   });
 }));
+
+function onAccountChanges() {
+  HereAreTheAccounts();
+  minerMonitor.restart();
+}
 
 var server = require('http').createServer(app);
 
@@ -280,92 +270,6 @@ function getHttpData(location, code) {
   return deferred.promise;
 }
 
-function getData(account, wait) {
-  var code = account.code;
-  getHttpData('/dig/miner/log/', code).
-  then(function(data) {
-    processMinerData(account, data);
-  }).
-  then(function() {
-    return getHttpData('/index.php/transaction/get_current_price');
-  }).
-  then(function(data) {
-    processMarketData(account, data);
-  }).
-  then(function(data) {
-    return getHttpData('/dig/miner/stats/', code);
-  }).
-  then(function(data) {
-    processAccountData(account, data);
-  }).
-  finally(function() {
-    timers[account._id] = setTimeout(function() {
-      getData(account);
-    }, wait || 5000);
-  });
-}
-
-function sendData(account, data) {
-  var bundle = {};
-  bundle[account._id] = data;
-  db.accounts.update({ _id: account._id }, { $set: {
-    data: JSON.stringify(bundle)
-  } }, {}, function() {
-    db.accounts.persistence.compactDatafile();
-  });
-  io.sockets.emit('UpdateMiners', bundle);
-}
-
-function processMarketData(account, data) {
-  try {
-    var marketData = JSON.parse(data);
-    var bundle = {};
-    bundle[account._id] = {
-      price: +marketData.data.price
-    };
-    db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-    io.sockets.emit('updateAccount', bundle);
-  } catch(e) {}
-}
-
-function processAccountData(account, data) {
-  try {
-    var accountData = JSON.parse(data);
-    var bundle = {};
-    bundle[account._id] = {
-      total: +accountData.data.total_flow,
-      unsold: +accountData.data.flow,
-      sold: +accountData.data.sold
-    };
-    db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-    io.sockets.emit('updateAccount', bundle);
-  } catch(e) {}
-}
-
-function processMinerData(account, data) {
-  data = JSON.parse(data);
-  if (!data.data.stats) {
-    return sendData(account, { error: 'expired' });
-  }
-  var miners = [];
-  for (var i = 0; i < data.data.stats.length; i++) {
-    var miner = data.data.stats[i];
-    miners.push({
-      ip: miner.ip,
-      speed: miner.speed,
-      total: +miner.total_mineral,
-      today: +miner.today_mineral,
-      yesterday: +miner.yes_mineral,
-      servertime: +new Date(miner.update_time),
-      status: miner.status
-    });
-  }
-  return sendData(account, {
-    updated: +new Date,
-    miners: miners
-  });
-}
-
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -413,22 +317,6 @@ function HereAreTheHistoryData(length) {
   });
 }
 
-function onAccountChanges() {
-  HereAreTheAccounts();
-  restartTimers();
-}
-
-function restartTimers() {
-  cancelTimers();
-  db.accounts.find({}, function(err, accounts) {
-    if (err) return;
-    for (var i = 0; i < accounts.length; i++) {
-      var account = accounts[i];
-      getData(account, getRandomInt(0, 5000));
-    }
-  });
-}
-
 var assetsHashes = {};
 
 try {
@@ -450,13 +338,133 @@ process.on('SIGINT', function() {
   process.exit(0);
 });
 
-var timers = {};
 
-function cancelTimers() {
-  for (var timer in timers) {
-    clearTimeout(timers[timer]);
+function Monitor(startFunction, loopFunction) {
+
+  var timeouts = {};
+
+  this.start = function() {};
+  if (typeof startFunction === 'function') {
+    this.start = startFunction;
   }
-  timers = {};
+
+  this.loop = function() {};
+  if (typeof loopFunction === 'function') {
+    this.loop = loopFunction;
+  }
+
+  this.stop = function() {
+    for (var timeout in timeouts) {
+      clearTimeout(timeouts[timeout]);
+    }
+    timeouts = {};
+  };
+
+  this.restart = function() {
+    this.stop.call(this);
+    this.start.call(this);
+  };
+
+  this.add = function(key, timeout) {
+    timeouts[key] = timeout;
+  };
+
 }
 
-restartTimers();
+// Get miners every 5 seconds
+
+var startFunction = function() {
+  var self = this;
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return;
+    for (var i = 0; i < accounts.length; i++) {
+      var account = accounts[i];
+      self.loop(account, getRandomInt(0, 5000));
+    }
+  });
+};
+
+var loopFunction = function(account, wait) {
+  var self = this;
+  var code = account.code;
+
+  getHttpData('/dig/miner/log/', code).
+
+  then(function(data) {
+    data = JSON.parse(data);
+    if (!data.data.stats) return { error: 'expired' };
+    var miners = [];
+    for (var i = 0; i < data.data.stats.length; i++) {
+      var miner = data.data.stats[i];
+      miners.push({
+        ip: miner.ip,
+        speed: miner.speed,
+        total: +miner.total_mineral,
+        today: +miner.today_mineral,
+        yesterday: +miner.yes_mineral,
+        servertime: +new Date(miner.update_time),
+        status: miner.status
+      });
+    }
+    return {
+      updated: +new Date,
+      miners: miners
+    };
+  }).
+
+  then(function(data) {
+    var bundle = {};
+    bundle[account._id] = data;
+    db.accounts.update({ _id: account._id }, { $set: {
+      data: JSON.stringify(bundle)
+    } }, {}, function() {
+      db.accounts.persistence.compactDatafile();
+    });
+    io.sockets.emit('UpdateMiners', bundle);
+  }).
+
+  then(function() {
+    return getHttpData('/index.php/transaction/get_current_price');
+  }).
+
+  then(function(data) {
+    try {
+      var marketData = JSON.parse(data);
+      var bundle = {};
+      bundle[account._id] = {
+        price: +marketData.data.price
+      };
+      db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
+      io.sockets.emit('updateAccount', bundle);
+    } catch(e) {}
+  }).
+
+  then(function(data) {
+    return getHttpData('/dig/miner/stats/', code);
+  }).
+
+  then(function(data) {
+    try {
+      var accountData = JSON.parse(data);
+      var bundle = {};
+      bundle[account._id] = {
+        total: +accountData.data.total_flow,
+        unsold: +accountData.data.flow,
+        sold: +accountData.data.sold
+      };
+      db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
+      io.sockets.emit('updateAccount', bundle);
+    } catch(e) {}
+  }).
+
+  finally(function() {
+    var timeout = setTimeout(function() {
+      self.loop(account);
+    }, wait || 5000);
+    minerMonitor.add(account._id, timeout);
+  });
+}
+
+var minerMonitor = new Monitor(startFunction, loopFunction);
+
+minerMonitor.start();
