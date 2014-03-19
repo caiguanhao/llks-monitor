@@ -53,7 +53,8 @@ app.post('/login', function(req, res, next) {
       res.send({
         id: user._id,
         username: user.username,
-        token: user.token
+        token: user.token,
+        ipaddresses: user.ipaddresses
       });
 
       try {
@@ -118,6 +119,7 @@ app.get('/my', authorize(function(req, res, next) {
     res.send({
       _id: user._id,
       username: user.username,
+      ipaddresses: user.ipaddresses,
       created_at: +user.created_at,
       updated_at: +user.updated_at,
       last_logged_in_at: llia,
@@ -127,6 +129,22 @@ app.get('/my', authorize(function(req, res, next) {
 }));
 
 app.put('/my', authorize(function(req, res, next) {
+  var ipaddresses = req.body.ipaddresses;
+  if (typeof ipaddresses === 'string') {
+    var new_date = new Date;
+    db.users.update({
+      _id: req.user._id
+    }, { $set: {
+      ipaddresses: ipaddresses,
+      updated_at: new_date
+    } }, {}, function(err) {
+      if (err) return next();
+      res.status(200);
+      res.send({ status: req.$$('OK') });
+    });
+    return;
+  }
+
   var oldPassword = req.body.oldpassword;
   var newPassword = req.body.newpassword;
   if (!db.checkPassword(oldPassword) || !db.checkPassword(newPassword)) {

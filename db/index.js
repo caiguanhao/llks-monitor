@@ -57,6 +57,7 @@ var hashPassword = function(password) {
 module.exports.hashPassword = hashPassword;
 
 var checkPassword = function(value) {
+  if (!value || typeof value !== 'string') return false;
   return value.length >= 3 && value.length <= 20;
 };
 

@@ -184,11 +184,15 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
       newpassword: newPassword
     });
   };
+  this.SaveIPAddresses = function(data) {
+    return $http.put('/my', { ipaddresses: data });
+  };
   this.Init = function() {
     this.GetUser();
     var self = this;
     $rootScope.logout = function() {
       self.SetUser(null, null, null);
+      self.SetIPAddresses(null);
       self.Socket = null;
       $route.reload();
     };
@@ -622,6 +626,8 @@ controller('MyAccountController', ['$scope', 'Users',
   function getInfo() {
     Users.GetMyInfo().then(function(response) {
       $scope.my = response.data;
+      Users.SetIPAddresses($scope.my.ipaddresses);
+      $scope.iplist = Users.GetIPAddresses();
     });
   }
   getInfo();
@@ -629,9 +635,15 @@ controller('MyAccountController', ['$scope', 'Users',
   $scope.iplist = Users.GetIPAddresses();
   $scope.saveIPList = function() {
     Users.SetIPAddresses($scope.iplist);
+    Users.SaveIPAddresses($scope.iplist);
   };
   $scope.shouldSaveIPAddressesDisable = function() {
-    return !$scope.iplist || $scope.iplist === Users.GetIPAddresses();
+    var old = Users.GetIPAddresses();
+    if (old) {
+      return $scope.iplist === old;
+    } else {
+      return !$scope.iplist;
+    }
   };
   $scope.changePassword = function() {
     Users.ChangePassword($scope.password, $scope.newpassword).
@@ -689,6 +701,7 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
         $scope.status = 'success';
         var data = response.data;
         Users.SetUser(data.id, data.username, data.token);
+        Users.SetIPAddresses(data.ipaddresses);
         $timeout(function() {
           Users.Authenticated();
         }, 1000);
