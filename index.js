@@ -304,5 +304,5 @@ minerMonitor.start();
 
 // update market data
 var marketMonitor = new Monitor(marketHistory);
-minerMonitor.db = db;
+marketMonitor.db = db;
 marketMonitor.start();

@@ -12,7 +12,7 @@ module.exports.loop = function(wait) {
   var promise;
 
   // 17:00 ~ 17:30
-  if (1) {
+  if (hour === 17 && minute <= 30) {
     promise = self.getHttpData('/index.php/transaction/' +
       'get_market_overview_day/180');
   } else {
