@@ -124,6 +124,8 @@
                   i18n="account:Name"></a></th>
                 <th class="noneXS"><a href ng-click="asort('miners')"
                   i18n="account:Miners"></a></th>
+                <th class="noneXS"><a href ng-click="asort('speed')"
+                  i18n="account:Speed"></a></th>
                 <th class="noneXS"><a href ng-click="asort('total')"
                   i18n="account:Total"></a></th>
                 <th class="noneSM"><a href ng-click="asort('today')"
@@ -148,6 +150,7 @@
                   ng-click="toggleHidden(account._id)"></td>
                 <td ng-bind="account.name"></td>
                 <td ng-bind="account.miners" class="noneXS"></td>
+                <td ng-bind="account.speedText" class="noneXS"></td>
                 <td ng-bind="account.total" class="noneXS"></td>
                 <td ng-bind="account.today" class="noneSM"></td>
                 <td ng-bind="account.yesterday" class="noneXS"></td>
@@ -186,7 +189,7 @@
             </tbody>
             <tfoot ng-show="accountEditsEnabled">
               <tr>
-                <td colspan="12" class="text-center">
+                <td colspan="13" class="text-center">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <input type="text" class="form-control" id="name"
                       placeholder="{{i18n('account:Name')}}" ng-model="name"

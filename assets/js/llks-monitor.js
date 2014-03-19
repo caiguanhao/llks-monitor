@@ -334,13 +334,13 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       var accountYesterdayTotal = 0, accountSpeedTotal = 0;
 
       allMiners[miner].miners.map(function(s) {
+        s.bg = speedBg(s);
         if (shouldIncludeAccountInList) {
           s.account = account.name;
-          s.bg = speedBg(s);
           $scope.count[s.bg] += 1;
           if (s.status === '在线') $scope.count.online += 1;
-          if (s.speednum) accountSpeedTotal += s.speednum;
         }
+        if (s.speednum) accountSpeedTotal += s.speednum;
         accountTotalTotal += s.total;
         accountTodayTotal += s.today;
         accountYesterdayTotal += s.yesterday;
@@ -353,6 +353,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         $scope.count.speed += accountSpeedTotal;
       }
       account.miners = allMiners[miner].miners.length;
+      account.speed = +accountSpeedTotal;
+      account.speedText = (account.speed / 1024).toFixed(3) + ' M/S';
       account.today = +accountTodayTotal.toFixed(5);
       account.yesterday = +accountYesterdayTotal.toFixed(5);
     }
