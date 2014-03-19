@@ -1,9 +1,14 @@
 var https = require('https');
 var Q = require('q');
 
-function Monitor(options) {
+function Monitor(options, dependencies) {
 
   options = options || {};
+  dependencies = dependencies || {};
+
+  for (var dependency in dependencies) {
+    this[dependency] = dependencies[dependency];
+  }
 
   this.timeouts = {};
 

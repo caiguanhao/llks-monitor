@@ -297,12 +297,9 @@ var miner = require('./monitor/miner');
 var marketHistory = require('./monitor/market-history');
 
 // get miners and accounts
-var minerMonitor = new Monitor(miner);
-minerMonitor.io = io;
-minerMonitor.db = db;
+var minerMonitor = new Monitor(miner, { io: io, db: db });
 minerMonitor.start();
 
 // update market data
-var marketMonitor = new Monitor(marketHistory);
-marketMonitor.db = db;
+var marketMonitor = new Monitor(marketHistory, { db: db });
 marketMonitor.start();
