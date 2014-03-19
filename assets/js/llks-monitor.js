@@ -1,7 +1,7 @@
 var llksMonitor = angular.module('llksMonitor', [ 'ngRoute' ]).
 
-config(['$routeProvider', '$locationProvider',
-  function($routeProvider, $locationProvider) {
+config(['$routeProvider', '$locationProvider', '$compileProvider',
+  function($routeProvider, $locationProvider, $compileProvider) {
   $routeProvider.
   when('/', {
     templateUrl: 'main',
@@ -24,6 +24,8 @@ config(['$routeProvider', '$locationProvider',
     templateUrl: '_404'
   });
   $locationProvider.html5Mode(false);
+  var whiteList = /^\s*(https?|ftp|mailto|tel|file|llksmonitor):/;
+  $compileProvider.aHrefSanitizationWhitelist(whiteList);
 }]).
 
 run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
@@ -200,6 +202,12 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     ls('llksMonitor.user.lang', code);
     this.GetLang();
   };
+  this.GetIPAddresses = function() {
+    return ls('llksMonitor.user.ipaddresses');
+  };
+  this.SetIPAddresses = function(list) {
+    ls('llksMonitor.user.ipaddresses', list);
+  };
   this.GetHistoryRange = function() {
     return ls('llksMonitor.user.historyrange');
   };
@@ -323,6 +331,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       speed: 0,
       online: 0
     };
+    var ipAddreses = Users.GetIPAddresses() || '';
     for (var miner in allMiners) {
       var account = $filter('filter')($scope.accounts || [],
         { _id: miner }, true)[0];
@@ -343,6 +352,9 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       allMiners[miner].miners.map(function(s) {
         s.bg = speedBg(s);
         if (shouldIncludeAccountInList) {
+          var match = new RegExp('\\b'+s.ip.replace(/\*+/g, '\\d+').
+            replace(/\./g, '\\.')+'\\b').exec(ipAddreses);
+          if (match) s.ipreal = match[0];
           s.account = account.name;
           s.servertimeText = prettyTime(s.servertime);
           $scope.count[s.bg] += 1;
@@ -614,6 +626,13 @@ controller('MyAccountController', ['$scope', 'Users',
   }
   getInfo();
 
+  $scope.iplist = Users.GetIPAddresses();
+  $scope.saveIPList = function() {
+    Users.SetIPAddresses($scope.iplist);
+  };
+  $scope.shouldSaveIPAddressesDisable = function() {
+    return !$scope.iplist || $scope.iplist === Users.GetIPAddresses();
+  };
   $scope.changePassword = function() {
     Users.ChangePassword($scope.password, $scope.newpassword).
     then(function(response) {

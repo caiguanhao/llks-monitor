@@ -255,7 +255,10 @@
                 <td>
                   <span ng-bind="miner.account" class="accountName"></span>
                 </td>
-                <td ng-bind="miner.ip"></td>
+                <td ng-if="miner.ipreal">
+                  <a href="llksmonitor:{{miner.ipreal}}"
+                    ng-bind="miner.ip"></a></td>
+                <td ng-if="!miner.ipreal" ng-bind="miner.ip"></td>
                 <td ng-bind="miner.total" class="noneSM"></td>
                 <td ng-bind="miner.today"></td>
                 <td ng-bind="miner.yesterday" class="noneXS"></td>
@@ -467,6 +470,23 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
             <tr>
               <th i18n="my:Password Updated At"></th>
               <td ng-bind="my.password_updated_at|date:'yyyy-MM-dd HH:mm:ss'">
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <textarea class="form-control" rows="5" ng-model="iplist"
+                  placeholder="{{i18n('my:List of IP addresses')}}"></textarea>
+              </td>
+            </tr>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button type="submit" class="btn btn-default"
+                  ng-click="saveIPList()"
+                  ng-disabled="shouldSaveIPAddressesDisable()">
+                  <span class="glyphicon glyphicon-floppy-disk"></span>
+                  <span i18n="my:Save IP Addresses"></span>
+                </button>
               </td>
             </tr>
             <tr>
