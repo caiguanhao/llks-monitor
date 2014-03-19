@@ -38,19 +38,19 @@
           <div class="container">
             <div class="navbar-header">
               <button type="button" class="navbar-toggle"
-                ng-click="navbarIn=!navbarIn">
+                ng-click="navbar=!navbar">
                 <span class="sr-only"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="/#/" ng-click="navbarIn=false"
+              <a class="navbar-brand" href="/#/" close="navbar,dropdown"
                 i18n="header:LLKS Monitor"></a>
             </div>
-            <div class="collapse navbar-collapse" ng-class="{in:navbarIn}"
+            <div class="collapse navbar-collapse" ng-class="{in:navbar}"
               id="navbar">
               <ul class="nav navbar-nav">
-                <li navbar-link><a href="/#/history"
+                <li navbar-link><a href="/#/history" close="navbar,dropdown"
                   i18n="header:History"></a></li>
               </ul>
               <ul class="nav navbar-nav navbar-right">
@@ -63,7 +63,7 @@
                   </a>
                 </li>
                 <li ng-show="!User.Username"><a href="/#/login"
-                  ng-click="navbarIn=false">
+                  close="navbar">
                   <span class="glyphicon glyphicon-log-in"></span>
                   <span i18n="header:Login"></span>
                 </a></li>
@@ -74,14 +74,12 @@
                     {{User.Username}}
                     <b class="caret"></b></a>
                   <ul class="dropdown-menu">
-                    <li><a href="/#/myaccount"
-                      ng-click="navbarIn=false;dropdown=false">
+                    <li><a href="/#/myaccount" close="navbar,dropdown">
                       <span class="glyphicon glyphicon-cog"></span>
                       <span i18n="header:My account"></span>
                     </a></li>
                     <li class="divider"></li>
-                    <li><a href
-                      ng-click="navbarIn=false;dropdown=false;logout()">
+                    <li><a href close="navbar,dropdown" ng-click="logout()">
                       <span class="glyphicon glyphicon-log-out"></span>
                       <span i18n="header:Log out"></span>
                     </a></li>
@@ -124,20 +122,20 @@
                 <th><span class="glyphicon glyphicon-eye-open"></span></th>
                 <th><a href ng-click="asort('name')"
                   i18n="account:Name"></a></th>
-                <th><a href ng-click="asort('miners')"
-                  i18n="account:Miners" class="noneXS"></a></th>
-                <th><a href ng-click="asort('total')"
-                  i18n="account:Total" class="noneXS"></a></th>
-                <th><a href ng-click="asort('today')"
-                  i18n="account:Today" class="noneSM"></a></th>
-                <th><a href ng-click="asort('yesterday')"
-                  i18n="account:Yesterday" class="noneXS"></a></th>
-                <th><a href ng-click="asort('sold')"
-                  i18n="account:Sold" class="noneXS"></a></th>
-                <th><a href ng-click="asort('unsold')"
-                  i18n="account:Unsold" class="noneSM"></a></th>
-                <th><a href ng-click="asort('price')"
-                  i18n="account:Price" class="noneXS"></a></th>
+                <th class="noneXS"><a href ng-click="asort('miners')"
+                  i18n="account:Miners"></a></th>
+                <th class="noneXS"><a href ng-click="asort('total')"
+                  i18n="account:Total"></a></th>
+                <th class="noneSM"><a href ng-click="asort('today')"
+                  i18n="account:Today"></a></th>
+                <th class="noneXS"><a href ng-click="asort('yesterday')"
+                  i18n="account:Yesterday"></a></th>
+                <th class="noneXS"><a href ng-click="asort('sold')"
+                  i18n="account:Sold"></a></th>
+                <th class="noneSM"><a href ng-click="asort('unsold')"
+                  i18n="account:Unsold"></a></th>
+                <th class="noneXS"><a href ng-click="asort('price')"
+                  i18n="account:Price"></a></th>
                 <th><a href ng-click="asort('unsold')"
                   i18n="account:Unsold Worth"></a></th>
                 <th i18n="account:Updated" ng-show="!accountEditsEnabled"></th>

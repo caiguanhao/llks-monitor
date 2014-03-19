@@ -61,6 +61,22 @@ directive('body', [function() {
   };
 }]).
 
+directive('close', [function() {
+  return {
+    link: function($scope, elem, attrs) {
+      elem.on('click', function(e) {
+        if (attrs.close.indexOf('navbar') !== -1) {
+          $scope.navbar = false;
+        }
+        if (attrs.close.indexOf('dropdown') !== -1) {
+          $scope.dropdown = false;
+        }
+        $scope.$apply();
+      });
+    }
+  };
+}]).
+
 directive('navbarLink', ['$location', function($location) {
   return function($scope, elem, attrs) {
     $scope.$on('$routeChangeSuccess', function(event, current, previous) {
