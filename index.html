@@ -281,8 +281,11 @@
             </tfoot>
           </table>
         </div>
-        <div ng-switch on="CURRENTLANG">
-          <div ng-switch-default>
+        <div class="panel panel-default" ng-switch on="CURRENTLANG">
+          <div class="panel-heading">
+            <span i18n="help:Help"></span>
+          </div>
+          <div class="panel-body" ng-switch-default>
             <p>
               Open Google Chrome browser, go to and log in to
               <a href="https://jiaoyi.yunfan.com/" target="_blank">LLKS</a>,
@@ -299,7 +302,7 @@
 ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
             </p>
           </div>
-          <div ng-switch-when="zh">
+          <div class="panel-body" ng-switch-when="zh">
             <p>
               使用Google浏览器，前往并登录<a href="https://jiaoyi.yunfan.com/"
               target="_blank">流量矿石</a>交易系统，然后按下

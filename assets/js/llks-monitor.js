@@ -669,6 +669,7 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
       }, 1000);
     }, function(response) {
       $timeout(function() {
+        $scope.password = null;
         $scope.statusClass = 'danger';
         $scope.status = response.data.error || $scope.i18n$('Unknown Error.');
       }, 1000);
