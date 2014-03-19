@@ -290,29 +290,18 @@ function HereAreTheHistoryData(length) {
   var self = this;
   if (typeof self.emit !== 'function') self = io.sockets;
 
-  var length;
-  if (length === 14) length = 14;
-  if (length === 30) length = 30;
-  if (length === 60) length = 60;
-  if (!length) length = 7;
+  if (typeof length === 'number' && length > 0 && length <= 180) {
+    length = Math.round(length);
+  } else {
+    length = 7;
+  }
 
-  getHttpData('/index.php/transaction/get_market_overview_day/' + length).
-  then(function(data) {
+  db.market.findOne({ name: 'market-overiew-180' }, function(err, doc) {
+    if (!doc) return;
     try {
-      data = JSON.parse(data);
-      var H = [];
-      for (var i = 0; i < data.data.length; i++) {
-        var d = data.data[i];
-        var n = data.data[i-1];
-        H.push({
-          date: +new Date(d.createtime),
-          price: (+d.price).toFixed(2),
-          _price: n ? (+n.price).toFixed(2) : null,
-          volume: +d.mineral,
-          _volume: n ? +n.mineral : null
-        });
-      }
-      self.emit('HereAreTheHistoryData', H);
+      var data = JSON.parse(doc.data);
+      data.splice(0, data.length - length);
+      self.emit('HereAreTheHistoryData', data);
     } catch(e) {}
   });
 }
@@ -341,7 +330,7 @@ process.on('SIGINT', function() {
 
 function Monitor(startFunction, loopFunction) {
 
-  var timeouts = {};
+  this.timeouts = {};
 
   this.start = function() {};
   if (typeof startFunction === 'function') {
@@ -353,11 +342,16 @@ function Monitor(startFunction, loopFunction) {
     this.loop = loopFunction;
   }
 
+  this.reset = function() {
+    this.timeouts = {};
+    return this;
+  };
+
   this.stop = function() {
-    for (var timeout in timeouts) {
-      clearTimeout(timeouts[timeout]);
+    for (var timeout in this.timeouts) {
+      clearTimeout(this.timeouts[timeout]);
     }
-    timeouts = {};
+    this.reset();
   };
 
   this.restart = function() {
@@ -366,7 +360,8 @@ function Monitor(startFunction, loopFunction) {
   };
 
   this.add = function(key, timeout) {
-    timeouts[key] = timeout;
+    this.timeouts[key] = timeout;
+    return this;
   };
 
 }
@@ -461,10 +456,72 @@ var loopFunction = function(account, wait) {
     var timeout = setTimeout(function() {
       self.loop(account);
     }, wait || 5000);
-    minerMonitor.add(account._id, timeout);
+    self.add(account._id, timeout);
   });
-}
+};
 
 var minerMonitor = new Monitor(startFunction, loopFunction);
 
 minerMonitor.start();
+
+
+// update market data
+
+var startFunction = function() {
+  this.loop(30000);
+};
+
+var loopFunction = function(wait) {
+  var self = this;
+  var now = new Date;
+  var hour = now.getHours();
+  var minute = now.getMinutes();
+  var promise;
+
+  // 17:00 ~ 17:30
+  if (hour === 17 && minute < 30) {
+    promise = getHttpData('/index.php/transaction/get_market_overview_day/180');
+  } else {
+    var deferred = Q.defer();
+    deferred.resolve();
+    promise = deferred.promise;
+  }
+
+  promise = promise.then(function(data) {
+    if (!data) return;
+
+    data = JSON.parse(data);
+    var H = [];
+    for (var i = 0; i < data.data.length; i++) {
+      var d = data.data[i];
+      var n = data.data[i-1];
+      H.push({
+        date: +new Date(d.createtime),
+        price: (+d.price).toFixed(2),
+        _price: n ? (+n.price).toFixed(2) : null,
+        volume: +d.mineral,
+        _volume: n ? +n.mineral : null
+      });
+    }
+    db.market.update({
+      name: 'market-overiew-180'
+    }, {
+      name: 'market-overiew-180',
+      data: JSON.stringify(H)
+    }, {
+      upsert: true
+    });
+  });
+
+  promise.finally(function() {
+    var timeout = setTimeout(function() {
+      self.loop(wait);
+    }, wait);
+
+    self.reset().add(+(new Date), timeout);
+  });
+};
+
+var marketMonitor = new Monitor(startFunction, loopFunction);
+
+marketMonitor.start();

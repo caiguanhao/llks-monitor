@@ -27,6 +27,18 @@ accounts.ensureIndex({
 
 module.exports.accounts = accounts;
 
+var market = new Datastore({
+  filename: __dirname + '/.market',
+  autoload: true
+});
+
+market.ensureIndex({
+  fieldName: 'name',
+  unique: true
+});
+
+module.exports.market = market;
+
 module.exports.createAccount = function(name, code, user, callback) {
   var newDate = new Date;
   accounts.insert({
