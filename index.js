@@ -208,7 +208,6 @@ server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-var https = require('https');
 var io = require('socket.io').listen(server);
 
 app.configure('production', function() {
@@ -239,40 +238,6 @@ io.configure(function() {
   // 2 - info
   // 3 - debug
 });
-
-var Q = require('q');
-
-function getHttpData(location, code) {
-  var deferred = Q.defer();
-  var request = https.get({
-    hostname: 'jiaoyi.yunfan.com',
-    port: 443,
-    path: location,
-    headers: code ? {
-      Cookie: 'ntts_kb_session_id=' + code + ';'
-    } : undefined
-  }, function (res) {
-    var data = '';
-    res.on('data', function(chunk) {
-      data += chunk;
-    });
-    res.on('end', function() {
-      deferred.resolve(data);
-    });
-  });
-  request.on('error', function(error) {
-    deferred.reject(error);
-  });
-  request.setTimeout(3000, function() {
-    request.abort();
-    deferred.reject('timeout');
-  });
-  return deferred.promise;
-}
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 function HereAreTheAccounts() {
   var self = this;
@@ -327,201 +292,17 @@ process.on('SIGINT', function() {
   process.exit(0);
 });
 
+var Monitor = require('./monitor');
+var miner = require('./monitor/miner');
+var marketHistory = require('./monitor/market-history');
 
-function Monitor(startFunction, loopFunction) {
-
-  this.timeouts = {};
-
-  this.start = function() {};
-  if (typeof startFunction === 'function') {
-    this.start = startFunction;
-  }
-
-  this.loop = function() {};
-  if (typeof loopFunction === 'function') {
-    this.loop = loopFunction;
-  }
-
-  this.reset = function() {
-    this.timeouts = {};
-    return this;
-  };
-
-  this.stop = function() {
-    for (var timeout in this.timeouts) {
-      clearTimeout(this.timeouts[timeout]);
-    }
-    this.reset();
-  };
-
-  this.restart = function() {
-    this.stop.call(this);
-    this.start.call(this);
-  };
-
-  this.add = function(key, timeout) {
-    this.timeouts[key] = timeout;
-    return this;
-  };
-
-}
-
-// Get miners every 5 seconds
-
-var startFunction = function() {
-  var self = this;
-  db.accounts.find({}, function(err, accounts) {
-    if (err) return;
-    for (var i = 0; i < accounts.length; i++) {
-      var account = accounts[i];
-      self.loop(account, getRandomInt(0, 5000));
-    }
-  });
-};
-
-var loopFunction = function(account, wait) {
-  var self = this;
-  var code = account.code;
-
-  getHttpData('/dig/miner/log/', code).
-
-  then(function(data) {
-    data = JSON.parse(data);
-    if (!data.data.stats) return { error: 'expired' };
-    var miners = [];
-    for (var i = 0; i < data.data.stats.length; i++) {
-      var miner = data.data.stats[i];
-      miners.push({
-        ip: miner.ip,
-        speed: miner.speed,
-        total: +miner.total_mineral,
-        today: +miner.today_mineral,
-        yesterday: +miner.yes_mineral,
-        servertime: +new Date(miner.update_time),
-        status: miner.status
-      });
-    }
-    return {
-      updated: +new Date,
-      miners: miners
-    };
-  }).
-
-  then(function(data) {
-    var bundle = {};
-    bundle[account._id] = data;
-    db.accounts.update({ _id: account._id }, { $set: {
-      data: JSON.stringify(bundle)
-    } }, {}, function() {
-      db.accounts.persistence.compactDatafile();
-    });
-    io.sockets.emit('UpdateMiners', bundle);
-  }).
-
-  then(function() {
-    return getHttpData('/index.php/transaction/get_current_price');
-  }).
-
-  then(function(data) {
-    try {
-      var marketData = JSON.parse(data);
-      var bundle = {};
-      bundle[account._id] = {
-        price: +marketData.data.price
-      };
-      db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      io.sockets.emit('updateAccount', bundle);
-    } catch(e) {}
-  }).
-
-  then(function(data) {
-    return getHttpData('/dig/miner/stats/', code);
-  }).
-
-  then(function(data) {
-    try {
-      var accountData = JSON.parse(data);
-      var bundle = {};
-      bundle[account._id] = {
-        total: +accountData.data.total_flow,
-        unsold: +accountData.data.flow,
-        sold: +accountData.data.sold
-      };
-      db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      io.sockets.emit('updateAccount', bundle);
-    } catch(e) {}
-  }).
-
-  finally(function() {
-    var timeout = setTimeout(function() {
-      self.loop(account);
-    }, wait || 5000);
-    self.add(account._id, timeout);
-  });
-};
-
-var minerMonitor = new Monitor(startFunction, loopFunction);
-
+// get miners and accounts
+var minerMonitor = new Monitor(miner);
+minerMonitor.io = io;
+minerMonitor.db = db;
 minerMonitor.start();
 
-
 // update market data
-
-var startFunction = function() {
-  this.loop(30000);
-};
-
-var loopFunction = function(wait) {
-  var self = this;
-  var now = new Date;
-  var hour = now.getHours();
-  var minute = now.getMinutes();
-  var promise;
-
-  // 17:00 ~ 17:30
-  if (hour === 17 && minute < 30) {
-    promise = getHttpData('/index.php/transaction/get_market_overview_day/180');
-  } else {
-    var deferred = Q.defer();
-    deferred.resolve();
-    promise = deferred.promise;
-  }
-
-  promise = promise.then(function(data) {
-    if (!data) return;
-
-    data = JSON.parse(data);
-    var H = [];
-    for (var i = 0; i < data.data.length; i++) {
-      var d = data.data[i];
-      var n = data.data[i-1];
-      H.push({
-        date: +new Date(d.createtime),
-        price: (+d.price).toFixed(2),
-        _price: n ? (+n.price).toFixed(2) : null,
-        volume: +d.mineral,
-        _volume: n ? +n.mineral : null
-      });
-    }
-    db.market.update({
-      name: 'market-overiew-180'
-    }, {
-      name: 'market-overiew-180',
-      data: JSON.stringify(H)
-    }, {
-      upsert: true
-    });
-  });
-
-  promise.finally(function() {
-    var timeout = setTimeout(function() {
-      self.loop(wait);
-    }, wait);
-
-    self.reset().add(+(new Date), timeout);
-  });
-};
-
-var marketMonitor = new Monitor(startFunction, loopFunction);
-
+var marketMonitor = new Monitor(marketHistory);
+minerMonitor.db = db;
 marketMonitor.start();

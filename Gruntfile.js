@@ -35,7 +35,7 @@ module.exports = function(grunt) {
         files: [ 'Gruntfile.js' ]
       },
       express: {
-        files: [ 'index.js', 'db/index.js' ],
+        files: [ 'index.js', 'db/index.js', 'monitor/*.js' ],
         tasks: [ 'express' ],
         options: {
           spawn: false,
