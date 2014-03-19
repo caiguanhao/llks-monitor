@@ -678,5 +678,7 @@ controller('LoginController', ['$scope', 'Users', '$timeout',
 }]).
 
 run([function() {
-  // end
+  window.addEventListener('load', function() {
+    FastClick.attach(document.body);
+  }, false);
 }]);

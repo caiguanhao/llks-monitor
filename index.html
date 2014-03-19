@@ -12,15 +12,17 @@
   <script concat="angular" production="/js/vendor/angular.min.js"></script>
   <script concat="angular"
     production="/js/vendor/angular-route.min.js"></script>
-  <script concat="vendors" dest="/js/vendors.js"></script>
-  <script concat="vendors" real-src="node_modules/socket.io/
-    node_modules/socket.io-client/dist/socket.io.min.js"></script>
+  <script uglify="vendors" dest="/js/vendors.js"></script>
+  <script uglify="vendors" production="/js/vendor/fastclick.js"></script>
+  <script uglify="vendors" real-src="node_modules/socket.io/
+    node_modules/socket.io-client/dist/socket.io.js"></script>
   <script uglify="llks-monitor" dest="/js/llks-monitor.js"></script>
   <script uglify="llks-monitor" production="/js/llks-monitor.js"></script>
   <script uglify="llks-monitor" real-src="public/js/templates.js"></script>
   <script uglify="llks-monitor" real-src="public/js/i18n.js"></script>
   <script development src="/js/vendor/angular.js"></script>
   <script development src="/js/vendor/angular-route.js"></script>
+  <script development src="/js/vendor/fastclick.js"></script>
   <script development src="/js/llks-monitor.js"></script>
   <script development src="/js/i18n.js"></script>
   <script development src="/socket.io/socket.io.js"></script>
