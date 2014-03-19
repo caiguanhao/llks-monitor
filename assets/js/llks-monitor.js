@@ -159,7 +159,8 @@ service('Accounts', ['$http', 'Users', '$route',
 }]).
 
 service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
-  function($http, $window, $rootScope, $route, $location) {
+  'ASSETS',
+  function($http, $window, $rootScope, $route, $location, ASSETS) {
   function ls(key, val) {
     if (val === undefined) return $window.localStorage[key];
     if (val === null) {
@@ -171,7 +172,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   this.LogOut = function() {
     this.SetUser(null, null, null);
     this.SetIPAddresses(null);
-    this.Socket = null;
+    this.PrivateSocket = null;
     $route.reload();
   };
   this.PermissionDenied = function() {
@@ -193,11 +194,39 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     return $http.put('/my', { ipaddresses: data });
   };
   this.Init = function() {
+    this.InitPublicSocket();
     this.GetUser();
     var self = this;
     $rootScope.logout = function() {
       self.LogOut();
     };
+  };
+  this.InitPublicSocket = function() {
+    if (this.PublicSocket && this.PublicSocket.$events) {
+      delete this.PublicSocket.$events;
+    }
+    this.PublicSocket = io.connect('/public', {
+      'force new connection': true,
+      'reconnect': true,
+      'reconnection delay': 1000,
+      'reconnection limit': 5000,
+      'max reconnection attempts': 10000
+    });
+    this.PublicSocket.on('ServerHasUpdated', function(data) {
+      if (typeof data !== 'object' || typeof ASSETS !== 'object') {
+        return;
+      }
+      if (angular.equals(ASSETS, {})) return;
+      if (angular.equals(data, {})) return;
+      var assetsHasChanged = !angular.equals(data, ASSETS);
+      if (assetsHasChanged) {
+        $window.location.reload();
+      }
+    });
+    var self = this;
+    this.PublicSocket.on('disconnect', function() {
+      if (self.PublicSocket) self.PublicSocket.socket.reconnect();
+    });
   };
   this.GetLang = function() {
     var lang = ls('llksMonitor.user.lang');
@@ -242,14 +271,14 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     };
     $http.defaults.headers.common['x-user-id'] = id;
     $http.defaults.headers.common['x-user-token'] = token;
-    if (!id || !token) return;
+    // if (!id || !token) return;
     var query = 'id=' + id + '&token=' + token;
-    if (this.Socket) {
+    if (this.PrivateSocket) {
       // if it is going to reconnect, update query object
       // since it won't update automatically
-      this.Socket.socket.options.query = query;
+      this.PrivateSocket.socket.options.query = query;
     }
-    this.Socket = io.connect(null, {
+    this.PrivateSocket = io.connect('/private', {
       'query': query,
       'force new connection': true,
       'reconnect': true,
@@ -282,8 +311,8 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
 }]).
 
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
-  '$filter', 'ASSETS',
-  function($scope, Accounts, Users, $window, $filter, ASSETS) {
+  '$filter',
+  function($scope, Accounts, Users, $window, $filter) {
 
   $scope.name = null;
   $scope.code = null;
@@ -396,12 +425,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
   $scope.status = 'unknown';
 
-  if (Users.Socket && Users.Socket.$events) {
-    delete Users.Socket.$events;
+  if (Users.PrivateSocket && Users.PrivateSocket.$events) {
+    delete Users.PrivateSocket.$events;
   }
-  if (Users.Socket) {
-    Users.Socket.emit('GiveMeAccounts');
-    Users.Socket.on('HereAreTheAccounts', function(accounts) {
+  if (Users.PrivateSocket) {
+    Users.PrivateSocket.emit('GiveMeAccounts');
+    Users.PrivateSocket.on('HereAreTheAccounts', function(accounts) {
       var accountIds = [], changed = false;
       accounts.map(function(account) {
         angular.extend(allMiners, angular.fromJson(account.data));
@@ -421,12 +450,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.accounts = accounts;
       updateAllMiners();
     });
-    Users.Socket.on('UpdateMiners', function(data) {
+    Users.PrivateSocket.on('UpdateMiners', function(data) {
       $scope.status = 'connected';
       angular.extend(allMiners, data);
       updateAllMiners();
     });
-    Users.Socket.on('updateAccount', function(data) {
+    Users.PrivateSocket.on('updateAccount', function(data) {
       $scope.status = 'connected';
       for (var accountId in data) {
         var account = $filter('filter')($scope.accounts || [],
@@ -435,25 +464,20 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         angular.extend(account, data[accountId]);
       }
     });
-    Users.Socket.on('ServerHasUpdated', function(data) {
-      if (typeof data !== 'object' || typeof ASSETS !== 'object') {
-        return;
-      }
-      if (angular.equals(ASSETS, {})) return;
-      if (angular.equals(data, {})) return;
-      var assetsHasChanged = !angular.equals(data, ASSETS);
-      if (assetsHasChanged) {
-        $window.location.reload();
-      }
-    });
-    Users.Socket.on('connect', function() {
+    Users.PrivateSocket.on('connect', function() {
       $scope.status = 'connected';
     });
-    Users.Socket.on('disconnect', function() {
+    Users.PrivateSocket.on('disconnect', function() {
       $scope.status = 'disconnected';
-      if (Users.Socket) Users.Socket.socket.reconnect();
+      if (Users.PrivateSocket) Users.PrivateSocket.socket.reconnect();
     });
-    Users.Socket.on('error', function(reason) {
+    Users.PrivateSocket.on('connect_failed', function(reason) {
+      $scope.status = 'error';
+      if (reason === 'unauthorized') {
+        return Accounts.PermissionDenied();
+      }
+    });
+    Users.PrivateSocket.on('error', function(reason) {
       $scope.status = 'error';
       if (reason === 'handshake unauthorized') {
         return Accounts.PermissionDenied();
@@ -554,9 +578,9 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
   if ($scope.ranges.indexOf($scope.range) === -1) $scope.range = 7;
 
   $scope.$watch('range', function(val) {
-    if (Users.Socket) {
+    if (Users.PublicSocket) {
       $scope.loading = true;
-      Users.Socket.emit('GiveMeHistoryData', val);
+      Users.PublicSocket.emit('GiveMeHistoryData', val);
     }
   });
 
@@ -578,11 +602,11 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
     return date = date[1] + '-' + date[2];
   }
 
-  if (Users.Socket && Users.Socket.$events) {
-    delete Users.Socket.$events;
+  if (Users.PublicSocket && Users.PublicSocket.$events) {
+    delete Users.PublicSocket.$events['HereAreTheHistoryData'];
   }
-  if (Users.Socket) {
-    Users.Socket.on('HereAreTheHistoryData', function(data) {
+  if (Users.PublicSocket) {
+    Users.PublicSocket.on('HereAreTheHistoryData', function(data) {
       data.map(function(d) {
         d.dateText = prettyDate(d.date);
         d.diff = d._price ? (+d.price - +d._price) : 0;

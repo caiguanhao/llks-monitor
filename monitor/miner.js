@@ -51,7 +51,7 @@ module.exports.loop = function(account, wait) {
     } }, {}, function() {
       self.db.accounts.persistence.compactDatafile();
     });
-    self.io.sockets.emit('UpdateMiners', bundle);
+    self.io.of('/private').emit('UpdateMiners', bundle);
   }).
 
   then(function() {
@@ -66,7 +66,7 @@ module.exports.loop = function(account, wait) {
         price: +marketData.data.price
       };
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      self.io.sockets.emit('updateAccount', bundle);
+      self.io.of('/private').emit('updateAccount', bundle);
     } catch(e) {}
   }).
 
@@ -84,7 +84,7 @@ module.exports.loop = function(account, wait) {
         sold: +accountData.data.sold
       };
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      self.io.sockets.emit('updateAccount', bundle);
+      self.io.of('/private').emit('updateAccount', bundle);
     } catch(e) {}
   }).
 

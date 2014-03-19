@@ -228,12 +228,14 @@ server.listen(app.get('port'), function(){
 
 var io = require('socket.io').listen(server);
 
+io.set('log level', 0); // 0 - error 1 - warn 2 - info 3 - debug
+
 app.configure('production', function() {
   io.disable('browser client');
 });
 
-io.configure(function() {
-  io.set('authorization', function(handshakeData, callback) {
+io.of('/private').
+  authorization(function(handshakeData, callback) {
     var id = handshakeData.query.id;
     var token = handshakeData.query.token;
     if (id && token) {
@@ -249,17 +251,26 @@ io.configure(function() {
       return;
     }
     callback('Please provide user id and token!', false);
+  }).
+  on('connection', function(socket) {
+    socket.on('GiveMeAccounts', HereAreTheAccounts);
   });
-  io.set('log level', 1);
-  // 0 - error
-  // 1 - warn
-  // 2 - info
-  // 3 - debug
-});
+
+io.of('/public').
+  on('connection', function(socket) {
+    var assetsHashes = {};
+    try {
+      assetsHashes = require('./db/.assets.json');
+    } catch(e) {
+      console.log('db/.assets.json not found');
+    }
+    socket.emit('ServerHasUpdated', assetsHashes);
+    socket.on('GiveMeHistoryData', HereAreTheHistoryData);
+  });
 
 function HereAreTheAccounts() {
   var self = this;
-  if (typeof self.emit !== 'function') self = io.sockets;
+  if (typeof self.emit !== 'function') self = io.of('/private');
   db.accounts.find({}, function(err, accounts) {
     if (err) return;
     accounts.map(function(account) {
@@ -271,7 +282,7 @@ function HereAreTheAccounts() {
 
 function HereAreTheHistoryData(length) {
   var self = this;
-  if (typeof self.emit !== 'function') self = io.sockets;
+  if (typeof self.emit !== 'function') self = io.of('/public');
 
   if (typeof length === 'number' && length > 0 && length <= 180) {
     length = Math.round(length);
@@ -288,20 +299,6 @@ function HereAreTheHistoryData(length) {
     } catch(e) {}
   });
 }
-
-var assetsHashes = {};
-
-try {
-  assetsHashes = require('./db/.assets.json');
-} catch(e) {
-  console.log('db/.assets.json not found');
-}
-
-io.sockets.on('connection', function(socket) {
-  socket.emit('ServerHasUpdated', assetsHashes);
-  socket.on('GiveMeAccounts', HereAreTheAccounts);
-  socket.on('GiveMeHistoryData', HereAreTheHistoryData);
-});
 
 process.on('SIGINT', function() {
   for (var s in io.sockets.sockets) {
