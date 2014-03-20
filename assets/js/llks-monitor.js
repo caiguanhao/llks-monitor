@@ -335,6 +335,19 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     Users.SetHiddenAccounts($scope.HiddenAccounts);
     updateAllMiners();
   };
+  $scope.toggleShow = function(id) {
+    var H = [];
+    ($scope.accounts || []).forEach(function(a) {
+      if (a._id !== id) H.push(a._id);
+    });
+    if (angular.equals($scope.HiddenAccounts, H)) {
+      $scope.HiddenAccounts = id ? [ id ] : [];
+    } else {
+      $scope.HiddenAccounts = H;
+    }
+    Users.SetHiddenAccounts($scope.HiddenAccounts);
+    updateAllMiners();
+  };
 
   var allMiners = {};
 
@@ -380,6 +393,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       }
       if (allMiners[miner].error) {
         account.updated = false;
+        account.miners = 0;
+        account.minersOnline = 0;
         continue;
       }
       account.updated = allMiners[miner].updated;

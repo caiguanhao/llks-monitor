@@ -123,7 +123,8 @@
           <table class="table table-slim table-hover table-account">
             <thead ng-show="accounts.length">
               <tr>
-                <th><span class="glyphicon glyphicon-eye-open"></span></th>
+                <th><a href ng-click="toggleShow()"><span class="glyphicon
+                  glyphicon-eye-open"></span></a></th>
                 <th><a href ng-click="asort('name')"
                   i18n="account:Name"></a></th>
                 <th class="noneXS"><a href ng-click="asort('miners')"
@@ -152,7 +153,8 @@
               <tr ng-repeat="account in accounts|orderBy:aOrder:aOrderReverse">
                 <td><input type="checkbox" ng-checked="isHidden(account._id)"
                   ng-click="toggleHidden(account._id)"></td>
-                <td ng-bind="account.name"></td>
+                <td><a href ng-click="toggleShow(account._id)"
+                  ng-bind="account.name"></a></td>
                 <td ng-bind="account.minersOnline + ' / ' + account.miners"
                   class="noneXS"></td>
                 <td ng-bind="account.speedText"></td>
