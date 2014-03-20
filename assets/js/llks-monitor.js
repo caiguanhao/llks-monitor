@@ -11,6 +11,9 @@ config(['$routeProvider', '$locationProvider', '$compileProvider',
     templateUrl: 'history',
     controller: 'HistoryController'
   }).
+  when('/help', {
+    templateUrl: 'help'
+  }).
   when('/myaccount', {
     templateUrl: 'myaccount',
     controller: 'MyAccountController'
