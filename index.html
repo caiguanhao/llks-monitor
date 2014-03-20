@@ -387,10 +387,11 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
               </a>
             </div>
             <span i18n="history:History"></span>
+            <span ng-if="dataDate">({{dataDate}})</span>
             <span ng-show="loading" class="glyphicon glyphicon-repeat spin"></span>
           </div>
-          <table class="table table-slim table-striped">
-            <thead ng-show="history && history.length">
+          <table class="table table-slim table-striped" ng-switch on="type">
+            <thead ng-switch-when="history" ng-show="history && history.length">
               <tr>
                 <th><a href ng-click="sort('date')"
                   i18n="history:Date"></a></th>
@@ -405,6 +406,16 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
                   i18n="history:Difference"></a></th>
               </tr>
             </thead>
+            <thead ng-switch-when="day" ng-show="history && history.length">
+              <tr>
+                <th><a href ng-click="sort('date')"
+                  i18n="history:Time"></a></th>
+                <th><a href ng-click="sort('price')"
+                  i18n="history:Price"></a></th>
+                <th><a href ng-click="sort('volume')"
+                  i18n="history:Volume"></a></th>
+              </tr>
+            </thead>
             <tbody ng-show="!history.length">
               <tr>
                 <td class="notice" i18n="No history at the moment."></td>
@@ -414,11 +425,12 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
               <tr ng-repeat="his in history|orderBy:hOrder:hOrderReverse">
                 <td ng-bind="his.dateText"></td>
                 <td>￥<span ng-bind="his.price"></span></td>
-                <td class="noneXS">￥<span ng-bind="his._price"></span></td>
+                <td ng-if="his._price !== undefined" class="noneXS">
+                  ￥<span ng-bind="his._price"></span></td>
                 <td ng-if="his.diff == 0">
                   <span class="glyphicon glyphicon glyphicon-minus"></span>
                 </td>
-                <td ng-if="his.diff != 0"
+                <td ng-if="his.diff !== undefined && his.diff != 0"
                   class="text-{{his.increase&&'success'||'danger'}}">
                   <span class="glyphicon
                     glyphicon-chevron-{{his.increase&&'up'||'down'}}"></span>
@@ -429,7 +441,7 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
                 <td ng-if="his.volumeDiff == 0" class="noneXS">
                   <span class="glyphicon glyphicon glyphicon-minus"></span>
                 </td>
-                <td ng-if="his.volumeDiff != 0"
+                <td ng-if="his.volumeDiff !== undefined && his.volumeDiff != 0"
                   class="noneXS text-{{his.volumeIncrease&&'success'||'danger'}}">
                   <span class="glyphicon
                     glyphicon-chevron-{{his.volumeIncrease&&'up'||'down'}}"></span>

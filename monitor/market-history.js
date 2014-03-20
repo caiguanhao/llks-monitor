@@ -37,13 +37,15 @@ module.exports.loop = function(wait) {
         _volume: n ? +n.mineral : null
       });
     }
-    self.db.market.update({
+    self.db.marketHistory.update({
       name: 'market-overiew-180'
     }, {
       name: 'market-overiew-180',
       data: JSON.stringify(H)
     }, {
       upsert: true
+    }, function() {
+      self.db.marketHistory.persistence.compactDatafile();
     });
   });
 

@@ -266,6 +266,7 @@ io.of('/public').
     }
     socket.emit('ServerHasUpdated', assetsHashes);
     socket.on('GiveMeHistoryData', HereAreTheHistoryData);
+    socket.on('GiveMeDayData', HereAreTheDayData);
   });
 
 function HereAreTheAccounts() {
@@ -290,12 +291,45 @@ function HereAreTheHistoryData(length) {
     length = 7;
   }
 
-  db.market.findOne({ name: 'market-overiew-180' }, function(err, doc) {
+  db.marketHistory.findOne({ name: 'market-overiew-180' }, function(err, doc) {
     if (!doc) return;
     try {
       var data = JSON.parse(doc.data);
       data.splice(0, data.length - length);
-      self.emit('HereAreTheHistoryData', data);
+      var bundle = {
+        length: length,
+        type: 'history',
+        data: data
+      };
+      self.emit('HereAreTheHistoryData', bundle);
+    } catch(e) {}
+  });
+}
+
+function HereAreTheDayData() {
+  var self = this;
+  if (typeof self.emit !== 'function') self = io.of('/public');
+
+  db.marketDay.find({}).sort({ name: 1 }).limit(1).exec(function(err, docs) {
+    if (err || !docs || docs.length === 0) return;
+    try {
+      var doc = docs[0];
+      var H = [];
+      var data = JSON.parse(doc.data);
+      for (var i = 0; i < data.length; i++) {
+        var d = data[i];
+        H.push({
+          date: d[0],
+          price: (d[1]).toFixed(2),
+          volume: +d[2]
+        });
+      }
+      var bundle = {
+        date: doc.name,
+        type: 'day',
+        data: H
+      };
+      self.emit('HereAreTheHistoryData', bundle);
     } catch(e) {}
   });
 }
@@ -308,13 +342,18 @@ process.on('SIGINT', function() {
 });
 
 var Monitor = require('./monitor');
-var miner = require('./monitor/miner');
-var marketHistory = require('./monitor/market-history');
 
 // get miners and accounts
+var miner = require('./monitor/miner');
 var minerMonitor = new Monitor(miner, { io: io, db: db });
 minerMonitor.start();
 
-// update market data
-var marketMonitor = new Monitor(marketHistory, { db: db });
-marketMonitor.start();
+// update market history data
+var marketHistory = require('./monitor/market-history');
+var marketHistoryMonitor = new Monitor(marketHistory, { db: db });
+marketHistoryMonitor.start();
+
+// update market day data
+var marketDay = require('./monitor/market-day');
+var marketDayMonitor = new Monitor(marketDay, { db: db });
+marketDayMonitor.start();

@@ -573,14 +573,18 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
 controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
-  $scope.ranges = [ 7, 14, 30, 60 ];
+  $scope.ranges = [ 1, 7, 14, 30, 60 ];
   $scope.range = parseInt(Users.GetHistoryRange());
   if ($scope.ranges.indexOf($scope.range) === -1) $scope.range = 7;
 
   $scope.$watch('range', function(val) {
     if (Users.PublicSocket) {
       $scope.loading = true;
-      Users.PublicSocket.emit('GiveMeHistoryData', val);
+      if (val === 1) {
+        Users.PublicSocket.emit('GiveMeDayData');
+      } else {
+        Users.PublicSocket.emit('GiveMeHistoryData', val);
+      }
     }
   });
 
@@ -596,31 +600,43 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
       replace(/^,|,([^\d]*)$/g, '$1').
       split('').reverse().join('');
   }
-
-  function prettyDate(string) {
-    var date = (new Date(string)).toJSON().split(/[-T:.]/);
-    return date = date[1] + '-' + date[2];
+  function f(n) { return n < 10 ? '0' + n : n; }
+  function prettyDate(t) {
+    var time = new Date(t);
+    return f(time.getMonth() + 1) + '-' + f(time.getDate());
   }
-
+  function prettyTime(t) {
+    var time = new Date(t);
+    return f(time.getHours()) + ':' + f(time.getMinutes());
+  }
   if (Users.PublicSocket && Users.PublicSocket.$events) {
     delete Users.PublicSocket.$events['HereAreTheHistoryData'];
   }
   if (Users.PublicSocket) {
     Users.PublicSocket.on('HereAreTheHistoryData', function(data) {
-      data.map(function(d) {
-        d.dateText = prettyDate(d.date);
-        d.diff = d._price ? (+d.price - +d._price) : 0;
-        d.increase = d.diff >= 0;
-        d.diffAbs = Math.abs(d.diff).toFixed(2);
+      data.data.map(function(d) {
+        if (data.type === 'day') {
+          d.dateText = prettyTime(d.date);
+        } else {
+          d.dateText = prettyDate(d.date);
+          d.diff = d._price ? (+d.price - +d._price) : 0;
+          d.increase = d.diff >= 0;
+          d.diffAbs = Math.abs(d.diff).toFixed(2);
+          d.diffPercent = d._price ? (+d.diffAbs / d._price * 100).toFixed(2) : 0;
+          d.volumeDiff = d._volume ? (+d.volume - +d._volume) : 0;
+          d.volumeIncrease = d.volumeDiff >= 0;
+          d.volumeDiffAbs = Math.abs(d.volumeDiff);
+          d.volumeDiffPercent = d._volume ? (+d.volumeDiffAbs / d._volume * 100).toFixed(2) : 0;
+          d._price = d._price || 'N/A';
+        }
         d.volumeText = prettyNumber(d.volume);
-        d.diffPercent = d._price ? (+d.diffAbs / d._price * 100).toFixed(2) : 0;
-        d.volumeDiff = d._volume ? (+d.volume - +d._volume) : 0;
-        d.volumeIncrease = d.volumeDiff >= 0;
-        d.volumeDiffAbs = Math.abs(d.volumeDiff);
-        d.volumeDiffPercent = d._volume ? (+d.volumeDiffAbs / d._volume * 100).toFixed(2) : 0;
-        d._price = d._price || 'N/A';
       });
-      $scope.history = data;
+      $scope.dataDate = null;
+      if (data.type === 'day') {
+        $scope.dataDate = data.date;
+      }
+      $scope.type = data.type;
+      $scope.history = data.data;
       $scope.loading = false;
       $scope.$apply();
     });
