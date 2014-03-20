@@ -611,6 +611,7 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
   }
   if (Users.PublicSocket && Users.PublicSocket.$events) {
     delete Users.PublicSocket.$events['HereAreTheHistoryData'];
+    delete Users.PublicSocket.$events['MarketDayDataUpdated'];
   }
   if (Users.PublicSocket) {
     Users.PublicSocket.on('HereAreTheHistoryData', function(data) {
@@ -639,6 +640,11 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
       $scope.history = data.data;
       $scope.loading = false;
       $scope.$apply();
+    });
+    Users.PublicSocket.on('MarketDayDataUpdated', function() {
+      if ($scope.range === 1) {
+        Users.PublicSocket.emit('GiveMeDayData');
+      }
     });
   }
 

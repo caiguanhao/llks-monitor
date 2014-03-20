@@ -355,5 +355,5 @@ marketHistoryMonitor.start();
 
 // update market day data
 var marketDay = require('./monitor/market-day');
-var marketDayMonitor = new Monitor(marketDay, { db: db });
+var marketDayMonitor = new Monitor(marketDay, { io: io, db: db });
 marketDayMonitor.start();

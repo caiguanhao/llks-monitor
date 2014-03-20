@@ -47,6 +47,7 @@ module.exports.loop = function(wait) {
       }, {
         upsert: true
       }, function() {
+        self.io.of('/public').emit('MarketDayDataUpdated');
         self.db.marketDay.persistence.compactDatafile();
       });
     });
