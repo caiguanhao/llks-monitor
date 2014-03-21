@@ -310,7 +310,7 @@ function HereAreTheDayData() {
   var self = this;
   if (typeof self.emit !== 'function') self = io.of('/public');
 
-  db.marketDay.find({}).sort({ name: 1 }).limit(1).exec(function(err, docs) {
+  db.marketDay.find({}).sort({ name: -1 }).limit(1).exec(function(err, docs) {
     if (err || !docs || docs.length === 0) return;
     try {
       var doc = docs[0];
