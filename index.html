@@ -123,27 +123,27 @@
           <table class="table table-slim table-hover table-account">
             <thead ng-show="accounts.length">
               <tr>
-                <th><a href ng-click="toggleShow()"><span class="glyphicon
+                <th ng-click="toggleShow()"><a href><span class="glyphicon
                   glyphicon-eye-open"></span></a></th>
-                <th><a href ng-click="asort('name')"
+                <th ng-click="asort('name')"><a href
                   i18n="account:Name"></a></th>
-                <th class="noneXS"><a href ng-click="asort('miners')"
+                <th class="noneXS" ng-click="asort('miners')"><a href
                   i18n="account:Miners"></a></th>
-                <th><a href ng-click="asort('speed')"
+                <th ng-click="asort('speed')"><a href
                   i18n="account:Speed"></a></th>
-                <th class="noneXS"><a href ng-click="asort('total')"
+                <th class="noneXS" ng-click="asort('total')"><a href
                   i18n="account:Total"></a></th>
-                <th class="noneSM"><a href ng-click="asort('today')"
+                <th class="noneSM" ng-click="asort('today')"><a href
                   i18n="account:Today"></a></th>
-                <th class="noneXS"><a href ng-click="asort('yesterday')"
+                <th class="noneXS" ng-click="asort('yesterday')"><a href
                   i18n="account:Yesterday"></a></th>
-                <th class="noneXS"><a href ng-click="asort('sold')"
+                <th class="noneXS" ng-click="asort('sold')"><a href
                   i18n="account:Sold"></a></th>
-                <th class="noneSM"><a href ng-click="asort('unsold')"
+                <th class="noneSM" ng-click="asort('unsold')"><a href
                   i18n="account:Unsold"></a></th>
-                <th class="noneXS"><a href ng-click="asort('price')"
+                <th class="noneXS" ng-click="asort('price')"><a href
                   i18n="account:Price"></a></th>
-                <th><a href ng-click="asort('unsold')"
+                <th ng-click="asort('unsold')"><a href
                   i18n="account:Worth"></a></th>
                 <th i18n="account:Updated" ng-show="!accountEditsEnabled"></th>
                 <th i18n="account:Actions" ng-show="accountEditsEnabled"></th>
@@ -151,8 +151,8 @@
             </thead>
             <tbody>
               <tr ng-repeat="account in accounts|orderBy:aOrder:aOrderReverse">
-                <td><input type="checkbox" ng-checked="isHidden(account._id)"
-                  ng-click="toggleHidden(account._id)"></td>
+                <td ng-click="toggleHidden(account._id)"><input
+                  type="checkbox" ng-checked="isHidden(account._id)"></td>
                 <td ng-click="toggleShow(account._id)"><a href
                   ng-bind="account.name"></a></td>
                 <td ng-bind="account.minersOnline + ' / ' + account.miners"
@@ -229,21 +229,21 @@
           <table class="table table-slim table-hover">
             <thead ng-if="miners && miners.length">
               <tr>
-                <th><a href ng-click="sort('account')"
+                <th ng-click="sort('account')"><a href
                   i18n="miner:Account"></a></th>
-                <th><a href ng-click="sort('ip')"
+                <th ng-click="sort('ip')"><a href
                   i18n="miner:IP"></a></th>
-                <th class="noneSM"><a href ng-click="sort('total')"
+                <th class="noneSM" ng-click="sort('total')"><a href
                   i18n="miner:Total"></a></th>
-                <th><a href ng-click="sort('today')"
+                <th ng-click="sort('today')"><a href
                   i18n="miner:Today"></a></th>
-                <th class="noneXS"><a href ng-click="sort('yesterday')"
+                <th class="noneXS" ng-click="sort('yesterday')"><a href
                   i18n="miner:Yesterday"></a></th>
-                <th class="noneXS"><a href ng-click="sort('servertime')"
+                <th class="noneXS" ng-click="sort('servertime')"><a href
                   i18n="miner:Server Time"></a></th>
-                <th><a href ng-click="sort(speedCompare, 'speed')"
+                <th ng-click="sort(speedCompare, 'speed')"><a href
                   i18n="miner:Speed"></a></th>
-                <th class="noneXS"><a href ng-click="sort('status')"
+                <th class="noneXS" ng-click="sort('status')"><a href
                   i18n="miner:Status"></a></th>
               </tr>
             </thead>
@@ -398,26 +398,26 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
           <table class="table table-slim table-striped" ng-switch on="type">
             <thead ng-switch-when="history" ng-show="history && history.length">
               <tr>
-                <th><a href ng-click="sort('date')"
+                <th ng-click="sort('date')"><a href
                   i18n="history:Date"></a></th>
-                <th><a href ng-click="sort('price')"
+                <th ng-click="sort('price')"><a href
                   i18n="history:Price"></a></th>
                 <th class="noneXS" i18n="history:Previous"></th>
-                <th><a href ng-click="sort('diff')"
+                <th ng-click="sort('diff')"><a href
                   i18n="history:Difference"></a></th>
-                <th><a href ng-click="sort('volume')"
+                <th ng-click="sort('volume')"><a href
                   i18n="history:Volume"></a></th>
-                <th class="noneXS"><a href ng-click="sort('volumeDiff')"
+                <th class="noneXS" ng-click="sort('volumeDiff')"><a href
                   i18n="history:Difference"></a></th>
               </tr>
             </thead>
             <thead ng-switch-when="day" ng-show="history && history.length">
               <tr>
-                <th><a href ng-click="sort('date')"
+                <th ng-click="sort('date')"><a href
                   i18n="history:Time"></a></th>
-                <th><a href ng-click="sort('price')"
+                <th ng-click="sort('price')"><a href
                   i18n="history:Price"></a></th>
-                <th><a href ng-click="sort('volume')"
+                <th ng-click="sort('volume')"><a href
                   i18n="history:Volume"></a></th>
               </tr>
             </thead>
