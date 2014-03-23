@@ -48,6 +48,7 @@ run(['Users', '$rootScope', 'I18N', '$interval',
     if ($rootScope.CURRENTLANG === code) return;
     $rootScope.CURRENTLANG = code;
     $rootScope.$broadcast('langChange', code);
+    updateWindowTitle();
     Users.SetLang(code);
   };
   $rootScope.i18n$ = function(string) {
@@ -64,6 +65,12 @@ run(['Users', '$rootScope', 'I18N', '$interval',
            || string.slice(string.lastIndexOf(delimeter) + 1)
            || string;
   };
+  // don't use i18n directive on <title> tag,
+  // because the title tag will *blink* in iOS Safari on every route change
+  function updateWindowTitle() {
+    document.title = $rootScope.i18n$('header:LLKS Monitor');
+  }
+  updateWindowTitle();
   $interval(function() {
     $rootScope.$broadcast('anotherSecond');
   }, 1000);
