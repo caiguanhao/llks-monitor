@@ -51,11 +51,18 @@ run(['Users', '$rootScope', 'I18N', '$interval',
     Users.SetLang(code);
   };
   $rootScope.i18n$ = function(string) {
+    if (typeof string !== 'string') return '';
     string = string.trim().replace(/[\n\s]{1,}/g, ' ');
-    var code = $rootScope.CURRENTLANG;
-    var lang = I18N[code] || {};
-    var text = string.slice(string.lastIndexOf(':') + 1) || string;
-    return lang[string] || text;
+    var delimeter = string[0];
+    if (';:,./?-_+=|\\*&^%$#@!~'.indexOf(delimeter) === -1) {
+      delimeter = ':';
+    } else {
+      string = string.slice(1);
+    }
+    var lang = I18N[this.CURRENTLANG] || {};
+    return lang[string]
+           || string.slice(string.lastIndexOf(delimeter) + 1)
+           || string;
   };
   $interval(function() {
     $rootScope.$broadcast('anotherSecond');
@@ -104,7 +111,7 @@ directive('navbarLink', ['$location', function($location) {
 directive('i18n', ['I18N', function(I18N) {
   return {
     link: function($scope, elem, attrs) {
-      var langChange = function(e, code) {
+      var langChange = function() {
         var i18nAttr = attrs.i18n.trim();
         var i18n = { text: i18nAttr };
         if (i18nAttr[0] === '{' && i18nAttr.slice(-1) === '}') {
@@ -114,11 +121,7 @@ directive('i18n', ['I18N', function(I18N) {
         }
         for (var attr in i18n) {
           if (typeof i18n[attr] !== 'string') continue;
-          var string = i18n[attr].replace(/[\n\s]{1,}/g, ' ');
-          var lang = I18N[code] || {};
-          var text = lang[string]
-                    || string.slice(string.lastIndexOf(':') + 1)
-                    || string;
+          var text = $scope.i18n$(i18n[attr]);
           attr = attr.split(/[\n\s\t,.|/\\+&]+/);
           for (var i = 0; i < attr.length; i++) {
             if (attr[i] === 'text') {
@@ -130,8 +133,8 @@ directive('i18n', ['I18N', function(I18N) {
           }
         }
       };
-      langChange(null, $scope.CURRENTLANG);
       $scope.$on('langChange', langChange);
+      $scope.$emit('langChange');
     }
   };
 }]).
