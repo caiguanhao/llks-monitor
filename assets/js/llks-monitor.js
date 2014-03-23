@@ -31,7 +31,8 @@ config(['$routeProvider', '$locationProvider', '$compileProvider',
   $compileProvider.aHrefSanitizationWhitelist(whiteList);
 }]).
 
-run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
+run(['Users', '$rootScope', 'I18N', '$interval',
+  function(Users, $rootScope, I18N, $interval) {
   Users.Init();
 
   $rootScope.CURRENTLANG = 'en';
@@ -56,6 +57,9 @@ run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
     var text = string.slice(string.lastIndexOf(':') + 1) || string;
     return lang[string] || text;
   };
+  $interval(function() {
+    $rootScope.$broadcast('anotherSecond');
+  }, 1000);
 }]).
 
 directive('body', [function() {
@@ -139,20 +143,13 @@ directive('secondsAgo', ['$interval', function($interval) {
       secondsAgo: '='
     },
     link: function($scope, elem, attrs) {
-      var interval;
-      $scope.$watch('secondsAgo', function(val) {
-        if (!val) return;
-        $interval.cancel(interval);
-        interval = $interval(function() {
-          var diff = Math.round((+new Date - $scope.secondsAgo) / 1000);
-          var template = elem.attr('seconds-ago-template') || '{}';
-          elem.text(template.replace(/{}/g, diff));
-        }, 1000);
+      function update(sec) {
         var template = elem.attr('seconds-ago-template') || '{}';
-        elem.text(template.replace(/{}/g, 0));
-      });
-      $scope.$on('$destroy', function(e) {
-        $interval.cancel(interval);
+        elem.text(template.replace(/{}/g, sec));
+      }
+      update(0);
+      $scope.$on('anotherSecond', function(e) {
+        update(Math.round((+new Date - $scope.secondsAgo) / 1000));
       });
     }
   };
