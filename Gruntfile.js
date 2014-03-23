@@ -155,8 +155,21 @@ module.exports = function(grunt) {
     var T = {};
 
     function add(str) {
+      if (typeof str !== 'string') return;
       if (str) {
-        str = str.trim().replace(/[\n\s]{1,}/g, ' ');
+        str = str.trim();
+        if (str[0] === '{' && str.slice(-1) === '}') {
+          try {
+            var obj = eval('(function(){return ' + str + ';})();');
+            if (typeof obj === 'object') {
+              for (var attr in obj) {
+                add(obj[attr]);
+              }
+              return;
+            }
+          } catch(e) {}
+        }
+        str = str.replace(/[\n\s]{1,}/g, ' ');
       }
       if (str) {
         T[str] = translations[lang][str] || '';
