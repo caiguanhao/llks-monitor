@@ -556,13 +556,14 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
           <div class="form-group">
             <label for="username" i18n="login:Username"></label>
             <input type="text" class="form-control" id="username"
-              i18n="{placeholder: 'login:Username'}" ng-model="username"
-              autofocus="autofocus">
+              i18n="{'placeholder, title': 'login:Username'}"
+              ng-model="username" autofocus="autofocus">
           </div>
           <div class="form-group">
             <label for="password" i18n="login:Password"></label>
             <input type="password" class="form-control" id="password"
-              i18n="{placeholder: 'login:Password'}" ng-model="password">
+              i18n="{'placeholder, title': 'login:Password'}"
+              ng-model="password">
           </div>
           <button type="submit" class="btn btn-default"
             ng-disabled="shouldLoginDisable()">

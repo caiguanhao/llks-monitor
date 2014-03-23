@@ -109,15 +109,20 @@ directive('i18n', ['I18N', function(I18N) {
           } catch(e) {}
         }
         for (var attr in i18n) {
+          if (typeof i18n[attr] !== 'string') continue;
           var string = i18n[attr].replace(/[\n\s]{1,}/g, ' ');
           var lang = I18N[code] || {};
           var text = lang[string]
                     || string.slice(string.lastIndexOf(':') + 1)
                     || string;
-          if (attr === 'text') {
-            elem.text(text);
-          } else {
-            elem.attr(attr, text);
+          attr = attr.split(/[\n\s\t,.|/\\+&]+/);
+          for (var i = 0; i < attr.length; i++) {
+            if (attr[i] === 'text') {
+              elem.text(text);
+            } else {
+              if (!attr[i]) continue;
+              elem.attr(attr[i], text);
+            }
           }
         }
       };
