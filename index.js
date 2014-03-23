@@ -19,6 +19,9 @@ app.use(function(req, res, next) {
   if (req.headers) {
     req.userLang = req.headers['x-user-lang'];
   }
+  if (!req.userLang || req.userLang.length > 5) {
+    req.userLang = 'en';
+  }
   req.$$ = function(string) {
     string = string.trim().replace(/[\n\s]{1,}/g, ' ');
     var code = req.userLang;
