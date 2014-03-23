@@ -49,14 +49,13 @@ run(['Users', '$rootScope', 'I18N', function(Users, $rootScope, I18N) {
     $rootScope.$broadcast('langChange', code);
     Users.SetLang(code);
   };
-  $rootScope.i18n = function(string) {
+  $rootScope.i18n$ = function(string) {
     string = string.trim().replace(/[\n\s]{1,}/g, ' ');
     var code = $rootScope.CURRENTLANG;
     var lang = I18N[code] || {};
     var text = string.slice(string.lastIndexOf(':') + 1) || string;
     return lang[string] || text;
   };
-  $rootScope.i18n$ = $rootScope.i18n;
 }]).
 
 directive('body', [function() {
@@ -102,10 +101,25 @@ directive('i18n', ['I18N', function(I18N) {
   return {
     link: function($scope, elem, attrs) {
       var langChange = function(e, code) {
-        var string = attrs.i18n.trim().replace(/[\n\s]{1,}/g, ' ');
-        var lang = I18N[code] || {};
-        var text = string.slice(string.lastIndexOf(':') + 1) || string;
-        elem.text(lang[string] || text);
+        var i18nAttr = attrs.i18n.trim();
+        var i18n = { text: i18nAttr };
+        if (i18nAttr[0] === '{' && i18nAttr.slice(-1) === '}') {
+          try {
+            i18n = $scope.$eval(i18nAttr);
+          } catch(e) {}
+        }
+        for (var attr in i18n) {
+          var string = i18n[attr].replace(/[\n\s]{1,}/g, ' ');
+          var lang = I18N[code] || {};
+          var text = lang[string]
+                    || string.slice(string.lastIndexOf(':') + 1)
+                    || string;
+          if (attr === 'text') {
+            elem.text(text);
+          } else {
+            elem.attr(attr, text);
+          }
+        }
       };
       langChange(null, $scope.CURRENTLANG);
       $scope.$on('langChange', langChange);
@@ -115,6 +129,7 @@ directive('i18n', ['I18N', function(I18N) {
 
 directive('secondsAgo', ['$interval', function($interval) {
   return {
+    priority: 100, // let link run after i18n
     scope: {
       secondsAgo: '='
     },
@@ -125,11 +140,11 @@ directive('secondsAgo', ['$interval', function($interval) {
         $interval.cancel(interval);
         interval = $interval(function() {
           var diff = Math.round((+new Date - $scope.secondsAgo) / 1000);
-          if (attrs.secondsAgoTemplate) {
-            elem.text(attrs.secondsAgoTemplate.replace(/{}/g, diff));
-          }
+          var template = elem.attr('seconds-ago-template') || '{}';
+          elem.text(template.replace(/{}/g, diff));
         }, 1000);
-        elem.text(attrs.secondsAgoTemplate.replace(/{}/g, 0));
+        var template = elem.attr('seconds-ago-template') || '{}';
+        elem.text(template.replace(/{}/g, 0));
       });
       $scope.$on('$destroy', function(e) {
         $interval.cancel(interval);
