@@ -165,6 +165,117 @@ directive('secondsAgo', ['$interval', function($interval) {
   };
 }]).
 
+directive('historyChart', ['$http', function($http) {
+  return {
+    restrict: 'A',
+    scope: {
+      historyChart: '='
+    },
+    link: function($scope, elem, attrs) {
+      $scope.$watchCollection('historyChart', function(data) {
+        if (!data) return;
+        var price = [], volume = [];
+        for (i = 0; i < data.length; i++) {
+          price.push([
+            data[i].date,
+            +data[i].price
+          ]);
+          volume.push([
+            data[i].date,
+            data[i].volume
+          ]);
+        }
+        Highcharts.setOptions({
+          global: {
+            useUTC: false
+          }
+        });
+        new Highcharts.Chart({
+          credits: {
+            enabled: false
+          },
+          colors: [
+            '#2f7ed8'
+          ],
+          chart : {
+            renderTo : elem[0]
+          },
+          legend: {
+            enabled: false
+          },
+          title: {
+            text: null
+          },
+          navigator: {
+            enabled: true
+          },
+          xAxis: {
+            type: 'datetime',
+            labels: {
+              enabled: false
+            }
+          },
+          yAxis: [{
+            labels: {
+              formatter: function() {
+                  return this.value.toFixed(2);
+              }
+            },
+            title: {
+              text: null
+            },
+            height: 200,
+            offset: 0,
+            lineWidth: 1,
+            gridLineColor: '#efefef',
+            tickPixelInterval: 30
+          }, {
+            title: {
+              text: null
+            },
+            top: 250,
+            height: 80,
+            offset: 0,
+            lineWidth: 1
+          }],
+          plotOptions: {
+            series: {
+              marker: {
+                enabled: false,
+                states: {
+                  hover: {
+                    enabled: true,
+                    radius: 3
+                  }
+                }
+              }
+            }
+          },
+          series: [{
+            type: 'line',
+            name: 'Price',
+            data: price,
+            lineWidth: 1,
+            states: {
+              hover: {
+                lineWidth: 1,
+              }
+            },
+            tooltip: {
+              valueDecimals: 2
+            }
+          }, {
+            type: 'column',
+            name: 'Volume',
+            data: volume,
+            yAxis: 1
+          }]
+        });
+      });
+    }
+  };
+}]).
+
 service('Accounts', ['$http', 'Users', '$route',
   function($http, Users, $route) {
   this.PermissionDenied = function() {

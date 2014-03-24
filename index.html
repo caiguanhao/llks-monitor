@@ -23,6 +23,8 @@
   <script development src="/js/vendor/angular.js"></script>
   <script development src="/js/vendor/angular-route.js"></script>
   <script development src="/js/vendor/fastclick.js"></script>
+  <script development src="/js/vendor/highcharts.standalone-framework.src.js"></script>
+  <script development src="/js/vendor/highstock.js"></script>
   <script development src="/js/llks-monitor.js"></script>
   <script development src="/js/i18n.js"></script>
   <script development src="/socket.io/socket.io.js"></script>
@@ -380,6 +382,9 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
   </script>
   <script type="text/ng-template" id="history">
     <div class="row">
+      <div class="col-sm-12">
+        <div style="width: 100%; height: 400px;" history-chart="history"></div>
+      </div>
       <div class="col-sm-8 col-sm-offset-2">
         <div class="panel panel-default">
           <div class="panel-heading">
