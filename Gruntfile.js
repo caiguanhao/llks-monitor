@@ -322,10 +322,11 @@ module.exports = function(grunt) {
       uglify: { options: {}, dest: {}, src: {} }
     };
     var tasks = Object.keys(prod_tasks);
-    var skip_this_tag = false;
+    var skip_this_tag;
 
     var parser = new htmlparser.Parser({
       onopentag: function(name, attribs) {
+        skip_this_tag = null;
         var is_script = (name === 'script');
         if (is_script) {
           tpl.name = '';
@@ -338,6 +339,9 @@ module.exports = function(grunt) {
             attribs.src = attribs.production;
             delete attribs.production;
           }
+        }
+        if (attribs.hasOwnProperty('skip-this-tag')) {
+          skip_this_tag = true;
         }
         if (is_script) {
           for (var i = 0; i < tasks.length; i++) {
@@ -370,7 +374,7 @@ module.exports = function(grunt) {
         if (is_script && attribs.type === 'text/ng-template') {
           tpl.name = attribs.id;
         } else {
-          if (skip_this_tag === false) {
+          if (skip_this_tag !== true) {
             prod_index += '<' + name;
             for (var attrib in attribs) {
               prod_index += ' ' + attrib + '="' + attribs[attrib] + '"';
@@ -383,7 +387,7 @@ module.exports = function(grunt) {
         if (tpl.name !== '') {
           tpl.content += text;
         } else {
-          if (skip_this_tag === false) {
+          if (skip_this_tag !== true) {
             prod_index += text;
           }
         }
@@ -396,10 +400,10 @@ module.exports = function(grunt) {
         } else {
           if (htmlparser.void_elements.indexOf(name.toLowerCase()) > -1)
             return;
-          if (skip_this_tag === false) {
+          if (skip_this_tag !== true) {
             prod_index += '</' + name + '>';
           } else {
-            skip_this_tag = false;
+            skip_this_tag = null;
           }
         }
       },
