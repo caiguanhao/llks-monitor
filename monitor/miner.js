@@ -89,6 +89,24 @@ module.exports.loop = function(account, wait) {
     } catch(e) {}
   }).
 
+  then(function() {
+    return self.getHttpData('/index.php/account/info', code);
+  }).
+
+  then(function(data) {
+    if (!data || typeof data !== 'string') return;
+    data = data.replace(/(<([^>]+)>)/g, '').replace(/[\r\n\s]+/g, '');
+    var totalValue = data.match(/账户总值￥(\d+\.?\d+)/);
+    if (totalValue) {
+      var bundle = {};
+      bundle[account._id] = {
+        totalValue: +totalValue[1]
+      };
+      self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
+      self.io.of('/private').emit('updateAccount', bundle);
+    }
+  }).
+
   finally(function() {
     var timeout = setTimeout(function() {
       self.loop(account);

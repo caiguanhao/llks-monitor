@@ -20,6 +20,7 @@
     "account:Unsold": "尚未卖出",
     "account:Price": "单价",
     "account:Worth": "未卖出价值",
+    "account:value:Total": "账户总值",
     "account:Updated": "更新时间",
     "account:Actions": "操作",
     "account:Expired": "已过期",

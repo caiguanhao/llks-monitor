@@ -151,6 +151,8 @@
                   i18n="account:Price"></a></th>
                 <th ng-click="asort('unsold')"><a href
                   i18n="account:Worth"></a></th>
+                <th ng-click="asort('totalValue')"><a href
+                  i18n="account:value:Total"></a></th>
                 <th i18n="account:Updated" ng-show="!accountEditsEnabled"></th>
                 <th i18n="account:Actions" ng-show="accountEditsEnabled"></th>
               </tr>
@@ -171,6 +173,7 @@
                 <td ng-bind="account.unsold" class="noneSM"></td>
                 <td ng-bind="account.price|currency:'￥'" class="noneXS"></td>
                 <td ng-bind="unsoldWorth(account)|currency:'￥'"></td>
+                <td ng-bind="account.totalValue|currency:'￥'"></td>
                 <td ng-show="!accountEditsEnabled" ng-switch on="account.updated">
                   <span ng-switch-when="false" i18n="account:Expired"></span>
                   <span ng-switch-default seconds-ago="account.updated"
