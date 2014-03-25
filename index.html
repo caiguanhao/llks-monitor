@@ -387,7 +387,9 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
   <script type="text/ng-template" id="history">
     <div class="row">
       <div class="col-sm-12">
-        <div style="width: 100%; height: 400px;" history-chart="history"></div>
+        <div class="history-chart-container">
+          <div class="history-chart" history-chart="history"></div>
+        </div>
       </div>
       <div class="col-sm-8 col-sm-offset-2">
         <div class="panel panel-default">

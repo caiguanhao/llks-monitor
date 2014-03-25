@@ -233,7 +233,7 @@ directive('historyChart', ['$http', function($http) {
             title: {
               text: null
             },
-            top: 250,
+            top: 230,
             height: 80,
             offset: 0,
             lineWidth: 1
