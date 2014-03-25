@@ -80,9 +80,9 @@ module.exports.loop = function(account, wait) {
       var accountData = JSON.parse(data);
       var bundle = {};
       bundle[account._id] = {
-        total: +accountData.data.total_flow,
-        unsold: +accountData.data.flow,
-        sold: +accountData.data.sold
+        total: +(+accountData.data.total_flow).toFixed(2),
+        unsold: +(+accountData.data.flow).toFixed(2),
+        sold: +(+accountData.data.sold).toFixed(2)
       };
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
       self.io.of('/private').emit('updateAccount', bundle);

@@ -568,8 +568,9 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.miners = allMiners[miner].miners.length;
       account.speed = +accountSpeedTotal;
       account.speedText = (account.speed / 1024).toFixed(3) + ' M/S';
-      account.today = +accountTodayTotal.toFixed(5);
-      account.yesterday = +accountYesterdayTotal.toFixed(5);
+      account.today = +accountTodayTotal.toFixed(2);
+      account.yesterday = +accountYesterdayTotal.toFixed(2);
+      account.total = +account.total.toFixed(2);
     }
     $scope.count.total = +$scope.count.total.toFixed(5);
     $scope.count.today = +$scope.count.today.toFixed(5);
