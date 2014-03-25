@@ -25,7 +25,8 @@ module.exports.loop = function(account, wait) {
     data = JSON.parse(data);
     if (!data.data.stats) return { error: 'expired' };
     var miners = [];
-    for (var i = 0; i < data.data.stats.length; i++) {
+    // first item is the sum of others
+    for (var i = 1; i < data.data.stats.length; i++) {
       var miner = data.data.stats[i];
       miners.push({
         ip: miner.ip,
