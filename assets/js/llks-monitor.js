@@ -729,7 +729,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
 controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
-  $scope.ranges = [ 1, 7, 14, 30, 60 ];
+  $scope.ranges = [ 1, 30, 60, 180 ];
   $scope.range = parseInt(Users.GetHistoryRange());
   if ($scope.ranges.indexOf($scope.range) === -1) $scope.range = 7;
 
