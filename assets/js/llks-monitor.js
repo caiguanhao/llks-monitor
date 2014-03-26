@@ -588,7 +588,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     delete Users.PrivateSocket.$events;
   }
   if (Users.PrivateSocket) {
-    Users.PrivateSocket.emit('GiveMeAccounts');
     Users.PrivateSocket.on('HereAreTheAccounts', function(accounts) {
       var accountIds = [], changed = false;
       accounts.map(function(account) {
@@ -625,6 +624,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     });
     Users.PrivateSocket.on('connect', function() {
       $scope.status = 'connected';
+      Users.PrivateSocket.emit('GiveMeAccounts');
     });
     Users.PrivateSocket.on('disconnect', function() {
       $scope.status = 'disconnected';
