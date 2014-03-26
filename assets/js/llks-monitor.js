@@ -301,8 +301,8 @@ service('Accounts', ['$http', 'Users', '$route',
 }]).
 
 service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
-  'ASSETS',
-  function($http, $window, $rootScope, $route, $location, ASSETS) {
+  'ASSETS', 'Cached',
+  function($http, $window, $rootScope, $route, $location, ASSETS, Cached) {
   function ls(key, val) {
     if (val === undefined) return $window.localStorage[key];
     if (val === null) {
@@ -315,6 +315,7 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     this.SetUser(null, null, null);
     this.SetIPAddresses(null);
     this.PrivateSocket = null;
+    Cached.Reset();
     $route.reload();
   };
   this.PermissionDenied = function() {
@@ -453,8 +454,11 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
 }]).
 
 service('Cached', [function() {
-  this.Accounts = [];
-  this.Miners = {};
+  this.Reset = function() {
+    this.Accounts = [];
+    this.Miners = {};
+  };
+  this.Reset();
 }]).
 
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',

@@ -230,19 +230,22 @@
         </div>
         <div class="panel panel-default">
           <div class="panel-heading" ng-switch on="status">
-            <span i18n="miner:Status"></span>:
-            <span ng-switch-when="connected"
-              class="text-success glyphicon glyphicon-ok"></span>
-            <span ng-switch-when="connected" class="text-success"
-              i18n="miner:Connected"></span>
-            <span ng-switch-when="disconnected"
-              class="text-danger glyphicon glyphicon-remove"></span>
-            <span ng-switch-when="disconnected" class="text-danger"
-              i18n="miner:Disconnected"></span>
-            <span ng-switch-default
-              class="text-warning glyphicon glyphicon-question-sign"></span>
-            <span ng-switch-default i18n="miner:Unknown"
-              class="text-warning"></span>
+            <div class="pull-right">
+              <span ng-switch-when="connected"
+                class="text-success glyphicon glyphicon-ok"></span>
+              <span ng-switch-when="connected" class="text-success"
+                i18n="miner:Connected"></span>
+              <span ng-switch-when="disconnected"
+                class="text-danger glyphicon glyphicon-remove"></span>
+              <span ng-switch-when="disconnected" class="text-danger"
+                i18n="miner:Disconnected"></span>
+              <span ng-switch-default
+                class="text-warning glyphicon glyphicon-question-sign"></span>
+              <span ng-switch-default i18n="miner:Unconnected"
+                class="text-warning"></span>
+            </div>
+            <span i18n="miner:Miner Status"></span>
+            (<span ng-bind="miners.length"></span>)
           </div>
           <table class="table table-slim table-hover">
             <thead ng-if="miners && miners.length">
