@@ -50,6 +50,34 @@ footer {
   text-align: center;
 }
 
+.edits-enabled-shown {
+  display: none !important;
+}
+.edits-enabled-hidden {
+  display: block !important;
+}
+td.edits-enabled-hidden, th.edits-enabled-hidden {
+  display: table-cell !important;
+}
+tfoot.edits-enabled-hidden {
+  display: table-footer-group !important;
+}
+
+.edits-enabled {
+  .edits-enabled-shown {
+    display: block !important;
+  }
+  td.edits-enabled-shown, th.edits-enabled-shown {
+    display: table-cell !important;
+  }
+  tfoot.edits-enabled-shown {
+    display: table-footer-group !important;
+  }
+  .edits-enabled-hidden {
+    display: none !important;
+  }
+}
+
 .captcha {
   width: 96px;
   height: 33px;

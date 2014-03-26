@@ -116,7 +116,8 @@
   <script type="text/ng-template" id="main">
     <div class="row">
       <div class="col-sm-12">
-        <div class="panel panel-default">
+        <div class="panel panel-default"
+          ng-class="{'edits-enabled':accountEditsEnabled}">
           <div class="panel-heading btn-group-xs">
             <a class="btn btn-default btn-sm pull-right"
               ng-class="{active:accountEditsEnabled}"
@@ -153,8 +154,8 @@
                   i18n="account:Worth"></a></th>
                 <th class="noneXS" ng-click="asort('totalValue')"><a href
                   i18n="account:value:Total"></a></th>
-                <th i18n="account:Updated" ng-show="!accountEditsEnabled"></th>
-                <th i18n="account:Actions" ng-show="accountEditsEnabled"></th>
+                <th i18n="account:Updated" class="edits-enabled-hidden"></th>
+                <th i18n="account:Actions" class="edits-enabled-shown"></th>
               </tr>
             </thead>
             <tbody>
@@ -174,12 +175,12 @@
                 <td ng-bind="account.priceText" class="noneXS"></td>
                 <td ng-bind="account.unsoldWorth"></td>
                 <td ng-bind="account.totalValueText" class="noneXS"></td>
-                <td ng-show="!accountEditsEnabled" ng-switch on="account.updated">
+                <td class="edits-enabled-hidden" ng-switch on="account.updated">
                   <span ng-switch-when="false" i18n="account:Expired"></span>
                   <span ng-switch-default seconds-ago="account.updated"
                     i18n="{'seconds-ago-template': '{}s ago'}"></span>
                 </td>
-                <td ng-show="accountEditsEnabled">
+                <td class="edits-enabled-shown">
                   <div class="btn-group btn-group-xs">
                     <a class="btn btn-default"
                       i18n="{title: 'account:Edit name'}"
@@ -198,7 +199,7 @@
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
             </tbody>
-            <tfoot ng-show="accountEditsEnabled">
+            <tfoot class="edits-enabled-shown">
               <tr>
                 <td colspan="13" class="text-center">
                   <form class="form-inline input-group-sm" ng-submit="create()">
