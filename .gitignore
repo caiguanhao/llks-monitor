@@ -4,3 +4,4 @@ public/js/*.js
 public/*.html
 db/.*
 *.gz
+config.json

@@ -1,7 +1,7 @@
 module.exports = {};
 
 module.exports.start = function() {
-  this.loop(30000);
+  this.loop(this.configs['market-day-update-interval'] || 30000);
 };
 
 module.exports.loop = function(wait) {

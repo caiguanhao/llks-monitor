@@ -110,7 +110,7 @@ module.exports.loop = function(account, wait) {
   finally(function() {
     var timeout = setTimeout(function() {
       self.loop(account);
-    }, wait || 5000);
+    }, wait || self.configs['miner-update-interval'] || 5000);
     self.add(account._id, timeout);
   });
 };

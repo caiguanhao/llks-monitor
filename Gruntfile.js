@@ -114,6 +114,73 @@ module.exports = function(grunt) {
     });
   });
 
+  grunt.registerTask('config', function() {
+    var defaults = {
+      'miner-update-interval': {
+        prompt: 'Update miners info for every how many milliseconds [1000-99999]: ',
+        format: '^\\d{4,5}$',
+        value: 5000
+      },
+      'market-day-update-interval': {
+        prompt: 'Update market day info for every how many milliseconds [1000-99999]: ',
+        format: '^\\d{4,5}$',
+        value: 30000
+      },
+      'market-history-update-interval': {
+        prompt: 'Update market history for every how many milliseconds [1000-99999]: ',
+        format: '^\\d{4,5}$',
+        value: 30000
+      }
+    };
+    var configs = grunt.file.isFile('config.json') &&
+      grunt.file.readJSON('config.json') || {};
+    var finish = this.async();
+    var readline = require('readline');
+    var rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    var Q = require('q');
+    var deferred = Q.defer();
+    deferred.resolve();
+    var promise = deferred.promise;
+    for (var c in defaults) {
+      promise = promise.
+      then((function(c) {
+        return function() {
+          var deferred = Q.defer();
+          rl.setPrompt(defaults[c].prompt);
+          rl.prompt();
+          rl.write(String(configs[c] || defaults[c].value));
+          rl.on('line', function(value) {
+            value = value.trim();
+            if ((new RegExp(defaults[c].format, 'i')).test(value)) {
+              deferred.resolve(value);
+            } else {
+              rl.prompt();
+            }
+          });
+          return deferred.promise;
+        };
+      })(c)).
+      then((function(c) {
+        return function(value) {
+          configs[c] = isNaN(+value) ? value : +value;
+        };
+      })(c));
+    }
+    promise.then(function() {
+      rl.close();
+      var _c = {};
+      for (var d in defaults) {
+        _c[d] = configs[d];
+      }
+      grunt.file.write('config.json', JSON.stringify(_c, null, 2) + '\n');
+      grunt.log.ok('Configs written to config.json.');
+      finish();
+    });
+  });
+
   grunt.registerTask('_production', 'Update configs for production mode.',
     function() {
     var less = grunt.config('less') || {};

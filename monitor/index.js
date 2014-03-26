@@ -1,5 +1,6 @@
 var https = require('https');
 var Q = require('q');
+var configs = require('../config');
 
 function Monitor(options, dependencies) {
 
@@ -45,6 +46,8 @@ function Monitor(options, dependencies) {
   };
 
   this.Q = Q;
+
+  this.configs = configs || {};
 
   this.getHttpData = function(location, code) {
     var deferred = Q.defer();

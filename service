@@ -9,6 +9,10 @@ command -v pm2 >/dev/null 2>&1 || {
 
 case "$1" in
 start|restart)
+  if [[ ! -f "config.json" ]]; then
+    echo "Please run \"grunt config\" to generate config.json file."
+    exit 1
+  fi
   printf "Stopping... "
   pm2 sendSignal SIGINT index.js > /dev/null
   pm2 delete index.js > /dev/null
