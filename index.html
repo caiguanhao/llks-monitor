@@ -171,9 +171,9 @@
                 <td ng-bind="account.yesterday" class="noneXS"></td>
                 <td ng-bind="account.sold" class="noneXS"></td>
                 <td ng-bind="account.unsold" class="noneSM"></td>
-                <td ng-bind="account.price|currency:'￥'" class="noneXS"></td>
-                <td ng-bind="unsoldWorth(account)|currency:'￥'"></td>
-                <td ng-bind="account.totalValue|currency:'￥'" class="noneXS"></td>
+                <td ng-bind="account.priceText" class="noneXS"></td>
+                <td ng-bind="account.unsoldWorth"></td>
+                <td ng-bind="account.totalValueText" class="noneXS"></td>
                 <td ng-show="!accountEditsEnabled" ng-switch on="account.updated">
                   <span ng-switch-when="false" i18n="account:Expired"></span>
                   <span ng-switch-default seconds-ago="account.updated"

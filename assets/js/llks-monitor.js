@@ -587,6 +587,10 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.miners = allMiners[miner].miners.length;
       account.speed = +accountSpeedTotal;
       account.speedText = (account.speed / 1024).toFixed(3) + ' M/S';
+      account.priceText = $filter('currency')(account.price, '￥');
+      account.unsoldWorth = $filter('currency')((!account || !account.unsold)
+        ? 0 : (Math.floor(account.unsold) * account.price), '￥');
+      account.totalValueText = $filter('currency')(account.totalValue, '￥');
       account.today = +accountTodayTotal.toFixed(2);
       account.yesterday = +accountYesterdayTotal.toFixed(2);
       if (account.total) account.total = +account.total.toFixed(2);
@@ -701,11 +705,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     return speed;
   };
   $scope.sort($scope.speedCompare, 'speed');
-
-  $scope.unsoldWorth = function(account) {
-    if (!account || !account.unsold) return 0;
-    return Math.floor(account.unsold) * account.price;
-  };
 
   $scope.getCaptcha = function() {
     $scope.captcha = null;
