@@ -706,6 +706,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.password = null;
       var account = response.data;
       $scope.accounts.push(account);
+      $scope.getCaptcha();
     }).catch(function(response) {
       if (response.status === 403) {
         alert($scope.i18n$('Permission denied.'));
@@ -722,8 +723,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.name = newName;
     });
   };
-  $scope.delete = function(accounts, index) {
-    var account = accounts[index];
+  $scope.delete = function(accounts, account) {
     if (account.updated !== false &&
       !$window.confirm($scope.i18n$('Are you sure you want to delete '+
         'this account?'))) {
@@ -731,7 +731,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     }
     var id = account._id;
     Accounts.Delete(id).then(function(response) {
-      accounts.splice(index, 1);
+      accounts.splice($filter('filter')(accounts, { _id: id }, true), 1);
       delete allMiners[id];
       updateAllMiners();
     });
