@@ -452,13 +452,23 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   }
 }]).
 
+service('Cached', [function() {
+  this.Accounts = [];
+  this.Miners = {};
+}]).
+
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
-  '$filter', '$http',
-  function($scope, Accounts, Users, $window, $filter, $http) {
+  '$filter', '$http', 'Cached',
+  function($scope, Accounts, Users, $window, $filter, $http, Cached) {
 
   $scope.username = null;
   $scope.password = null;
   $scope.captcha = null;
+
+  function LoadCache() {
+    $scope.accounts = Cached.Accounts;
+  }
+  LoadCache();
 
   $scope.HiddenAccounts = Users.GetHiddenAccounts();
   $scope.isHidden = function(id) {
@@ -477,7 +487,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   };
   $scope.toggleShow = function(id) {
     var H = [];
-    ($scope.accounts || []).forEach(function(a) {
+    (Cached.Accounts || []).forEach(function(a) {
       if (a._id !== id) H.push(a._id);
     });
     if (angular.equals($scope.HiddenAccounts, H)) {
@@ -489,7 +499,10 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     updateAllMiners();
   };
 
-  var allMiners = {};
+  var allMiners = Cached.Miners;
+  if (Object.keys(allMiners).length > 0) {
+    updateAllMiners();
+  }
 
   function speedBg(item) {
     if (!item || item.status !== '在线') return 'active';
@@ -524,7 +537,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     };
     var ipAddreses = Users.GetIPAddresses() || '';
     for (var miner in allMiners) {
-      var account = $filter('filter')($scope.accounts || [],
+      var account = $filter('filter')(Cached.Accounts || [],
         { _id: miner }, true)[0];
       if (!account) continue;
       var shouldIncludeAccountInList = false;
@@ -542,7 +555,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       var accountYesterdayTotal = 0, accountSpeedTotal = 0;
       var minersOnline = 0;
 
-      allMiners[miner].miners.map(function(s) {
+      allMiners[miner].miners.forEach(function(s) {
         s.bg = speedBg(s);
         if (shouldIncludeAccountInList) {
           var match = new RegExp('\\b'+s.ip.replace(/\*+/g, '\\d+').
@@ -590,7 +603,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   if (Users.PrivateSocket) {
     Users.PrivateSocket.on('HereAreTheAccounts', function(accounts) {
       var accountIds = [], changed = false;
-      accounts.map(function(account) {
+      accounts.forEach(function(account) {
         angular.extend(allMiners, angular.fromJson(account.data));
         delete account.data;
         accountIds.push(account._id);
@@ -605,9 +618,13 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       }
       if (changed) Users.SetHiddenAccounts($scope.HiddenAccounts);
 
-      $scope.accounts = accounts;
+      Cached.Accounts = accounts;
+      LoadCache();
       updateAllMiners();
     });
+    if (Users.PrivateSocket.socket.connected) {
+      Users.PrivateSocket.emit('GiveMeAccounts');
+    }
     Users.PrivateSocket.on('UpdateMiners', function(data) {
       $scope.status = 'connected';
       angular.extend(allMiners, data);
@@ -616,7 +633,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     Users.PrivateSocket.on('updateAccount', function(data) {
       $scope.status = 'connected';
       for (var accountId in data) {
-        var account = $filter('filter')($scope.accounts || [],
+        var account = $filter('filter')(Cached.Accounts || [],
           { _id: accountId }, true)[0];
         if (!account) continue;
         angular.extend(account, data[accountId]);
@@ -705,7 +722,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.username = null;
       $scope.password = null;
       var account = response.data;
-      $scope.accounts.push(account);
+      Cached.Accounts.push(account);
+      LoadCache();
       $scope.getCaptcha();
     }).catch(function(response) {
       if (response.status === 403) {
@@ -782,7 +800,7 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
   }
   if (Users.PublicSocket) {
     Users.PublicSocket.on('HereAreTheHistoryData', function(data) {
-      data.data.map(function(d) {
+      data.data.forEach(function(d) {
         if (data.type === 'day') {
           d.dateText = prettyTime(d.date);
         } else {
