@@ -5,3 +5,4 @@ public/*.html
 db/.*
 *.gz
 config.json
+*.log

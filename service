@@ -19,9 +19,13 @@ start|restart)
   printf "Compiling assets... "
   grunt production > /dev/null
   printf "Starting... "
+  rm -f error-*.log output-*.log
   NODE_ENV=production \
   PORT=32123 \
-  pm2 start index.js --name llksMonitor > /dev/null
+  pm2 start index.js \
+    --name llksMonitor \
+    --output output.log \
+    --error error.log > /dev/null
   echo "OK."
   ;;
 stop)
