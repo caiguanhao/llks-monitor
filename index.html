@@ -211,10 +211,10 @@
                     <input type="text" class="form-control" id="captcha"
                       i18n="{placeholder: 'account:Captcha'}"
                       ng-model="captcha">
-                    <a href ng-click="getCaptcha()">
-                      <img class="captcha" ng-src="{{captchaImage}}"
-                        ng-show="captchaImage">
-                    </a>
+                    <a href ng-click="getCaptcha()" ng-show="captchaImage">
+                      <img class="captcha" ng-src="{{captchaImage}}"></a>
+                    <div ng-show="!captchaImage"
+                      class="captcha captcha-loading"></div>
                     <div class="btn-group btn-group-sm">
                       <button type="submit" class="btn btn-default"
                         ng-disabled="!username || !password || !captcha">
