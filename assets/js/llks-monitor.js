@@ -284,12 +284,13 @@ service('Accounts', ['$http', 'Users', '$route',
   this.Reload = function() {
     $route.reload();
   };
-  // Deprecated:
-  // this.Get = function(name, code) {
-  //   return $http.get('/accounts');
-  // };
-  this.Create = function(name, code) {
-    return $http.post('/accounts', { name: name, code: code });
+  this.Create = function(username, password, captcha, phpsessid) {
+    return $http.post('/accounts', {
+      username: username,
+      password: password,
+      captcha: captcha,
+      phpsessid: phpsessid
+    });
   };
   this.Modify = function(id, data) {
     return $http.put('/accounts/' + id, data);
@@ -452,11 +453,12 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
 }]).
 
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
-  '$filter',
-  function($scope, Accounts, Users, $window, $filter) {
+  '$filter', '$http',
+  function($scope, Accounts, Users, $window, $filter, $http) {
 
-  $scope.name = null;
-  $scope.code = null;
+  $scope.username = null;
+  $scope.password = null;
+  $scope.captcha = null;
 
   $scope.HiddenAccounts = Users.GetHiddenAccounts();
   $scope.isHidden = function(id) {
@@ -684,10 +686,24 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     return Math.floor(account.unsold) * account.price;
   };
 
+  $scope.getCaptcha = function() {
+    $scope.captcha = null;
+    $scope.captchaImage = null;
+    $scope.phpsessid = null;
+    $http.get('/captcha').then(function(response) {
+      $scope.captchaImage = response.data.image;
+      $scope.phpsessid = response.data.phpsessid;
+    });
+  };
+
   $scope.create = function() {
-    Accounts.Create($scope.name, $scope.code).then(function(response) {
-      $scope.name = null;
-      $scope.code = null;
+    var captcha = $scope.captcha;
+    $scope.captcha = null;
+    Accounts.Create($scope.username, $scope.password,
+      captcha, $scope.phpsessid).
+    then(function(response) {
+      $scope.username = null;
+      $scope.password = null;
       var account = response.data;
       $scope.accounts.push(account);
     }).catch(function(response) {
@@ -696,6 +712,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         return Accounts.PermissionDenied();
       }
       alert(response.data.error || $scope.i18n$('Unknown Error.'));
+      $scope.getCaptcha();
     });
   };
   $scope.updateName = function(account) {
@@ -703,13 +720,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     if (!newName || newName === account.name) return;
     Accounts.Modify(account._id, { name: newName }).then(function(response) {
       account.name = newName;
-    });
-  };
-  $scope.updateCode = function(account) {
-    var newCode = $window.prompt($scope.i18n$('Enter new code:'), account.code);
-    if (!newCode || newCode === account.code) return;
-    Accounts.Modify(account._id, { code: newCode }).then(function(response) {
-      account.code = newCode;
     });
   };
   $scope.delete = function(accounts, index) {

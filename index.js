@@ -1,5 +1,6 @@
 var express = require('express');
 var db = require('./db');
+var Q = require('q');
 
 var app = express();
 
@@ -171,16 +172,134 @@ app.put('/my', authorize(function(req, res, next) {
   });
 }));
 
+app.get('/captcha', authorize(function(req, res, next) {
+  var deferred = Q.defer();
+  var https = require('https');
+  var request = https.get({
+    hostname: 'jiaoyi.yunfan.com',
+    port: 443,
+    path: '/index.php/user/get_captcha'
+  }, function (response) {
+    var data = '';
+    response.setEncoding('binary');
+    response.on('data', function(chunk) {
+      data += chunk;
+    });
+    response.on('end', function() {
+      deferred.resolve({
+        data: data,
+        headers: response.headers
+      });
+    });
+  });
+  request.on('error', function(error) {
+    deferred.reject();
+  });
+  request.setTimeout(3000, function() {
+    request.abort();
+    deferred.reject();
+  });
+  deferred.promise.then(function(bundle) {
+    var PHPSESSID = null;
+    var headers = bundle.headers['set-cookie'];
+    if (headers instanceof Array && headers.length > 0) {
+      headers = headers[0].match(/PHPSESSID=([a-f0-9]+)/);
+      if (headers) {
+        PHPSESSID = headers[1];
+      }
+    }
+    var dataURL = 'data:' + bundle.headers['content-type'] + ';base64,' +
+      new Buffer(bundle.data, 'binary').toString('base64');
+    res.send({
+      image: dataURL,
+      phpsessid: PHPSESSID
+    });
+  }).catch(function() {
+    next();
+  });
+}));
+
 app.post('/accounts', authorize(function(req, res, next) {
-  var name = req.body.name;
-  var code = req.body.code;
-  if (!name || !code) return next();
-  var user = req.user;
-  db.createAccount(name, code, user, function(err, account) {
-    if (err) return serverError(req, res);
+  var username = req.body.username;
+  var password = req.body.password;
+  var captcha = req.body.captcha;
+  var phpsessid = req.body.phpsessid;
+  var querystring = require('querystring');
+  var post = querystring.stringify({
+    username: username,
+    password: password,
+    vcode: captcha
+  });
+  var headers = {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Content-Length': post.length,
+    'Cookie': 'PHPSESSID=' + phpsessid + ';'
+  };
+  var deferred = Q.defer();
+  var https = require('https');
+  var request = https.request({
+    hostname: 'jiaoyi.yunfan.com',
+    port: 443,
+    path: '/index.php/user/check',
+    method: 'POST',
+    headers: headers
+  }, function (response) {
+    var data = '';
+    response.on('data', function(chunk) {
+      data += chunk;
+    });
+    response.on('end', function() {
+      try {
+        var reply = JSON.parse(data);
+        if (reply.ok === true) {
+          deferred.resolve(response.headers);
+        } else {
+          deferred.reject(reply.reason);
+        }
+      } catch(e) {
+        deferred.reject();
+      }
+    });
+  });
+  request.on('error', function(error) {
+    deferred.reject();
+  });
+  request.setTimeout(3000, function() {
+    request.abort();
+    deferred.reject();
+  });
+  request.write(post);
+  request.end();
+  deferred.promise.then(function(headers) {
+    var sessionid = undefined;
+    var headers = headers['set-cookie'];
+    if (headers instanceof Array && headers.length > 0) {
+      headers = headers[0].match(/ntts_kb_session_id=([^;]+)/);
+      if (headers) {
+        sessionid = headers[1];
+      }
+    }
+    if (!sessionid) throw req.$$('Failed to get Session ID.');
+    return sessionid;
+  }).then(function(sessionid) {
+    var deferred = Q.defer();
+    var user = req.user;
+    db.createAccount(username, sessionid, user, function(err, account) {
+      if (err) {
+        deferred.reject();
+      } else {
+        deferred.resolve(account);
+      }
+    });
+    return deferred.promise;
+  }).then(function(account) {
     onAccountChanges();
     res.status(201);
     res.send(account);
+  }).catch(function(error) {
+    var errorStr = error && error.toString ? error.toString() : '';
+    res.status(500);
+    res.send({ error: errorStr || req.$$('Server error.') });
   });
 }));
 
