@@ -742,7 +742,7 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
   $scope.ranges = [ 1, 30, 60, 180 ];
   $scope.range = parseInt(Users.GetHistoryRange());
-  if ($scope.ranges.indexOf($scope.range) === -1) $scope.range = 7;
+  if ($scope.ranges.indexOf($scope.range) === -1) $scope.range = 30;
 
   $scope.$watch('range', function(val) {
     if (Users.PublicSocket) {
