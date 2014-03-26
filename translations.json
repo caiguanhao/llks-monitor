@@ -26,10 +26,11 @@
     "account:Expired": "已过期",
     "{}s ago": "{}秒前",
     "account:Edit name": "编辑账户名",
-    "account:Edit code": "编辑代码",
     "account:Delete account": "删除账号",
     "No accounts at the moment.": "暂无可用的账户显示。",
-    "account:Code": "代码",
+    "account:Username": "用户名",
+    "account:Password": "密码",
+    "account:Captcha": "验证码",
     "account:Add": "添加",
     "miner:Status": "状态",
     "miner:Connected": "已连接",
@@ -72,7 +73,6 @@
     "Permission denied.": "请先登录。",
     "Unknown Error.": "未知错误。",
     "Enter new name:": "输入新的账户名：",
-    "Enter new code:": "输入新的代码：",
     "Are you sure you want to delete this account?": "确定要删除这个账号吗？",
     "Your password has been updated. It is recommended you log out now and then log in again.": "你的密码已更新，建议你重新登录。",
     "Fail to change password. You may have entered a wrong password or the server refused to change password at the moment.": "无法更改密码。这可能是你输入了错误的密码或是服务器暂时拒绝更改密码。",
@@ -80,6 +80,7 @@
     "The account is temporarily locked due to too many failed login attempts.": "因为输入太多错误密码，账户暂时被锁定。",
     "You are banned by administrators.": "账户已被管理员封锁。",
     "Server error.": "服务器发生错误。",
-    "OK": "OK"
+    "OK": "OK",
+    "Failed to get Session ID.": "无法获取Session ID。"
   }
 }
