@@ -27,7 +27,7 @@ module.exports.loop = function(wait) {
   then(function(docs) {
     return docs.reduce(function(prev, cur) {
       return prev.then(function() {
-        if (cur.github) return;
+        if (cur.github && !isToday(cur.name)) return;
         var name = cur.name;
         data = JSON.parse(cur.data);
         data.forEach(function(d) {
@@ -112,6 +112,17 @@ module.exports.loop = function(wait) {
   });
 
 };
+
+function isToday(str) {
+  if (!str) return false;
+  var date = new Date(str);
+  if (isNaN(date)) return false;
+  var now = new Date;
+  if (date.getFullYear() !== now.getFullYear()) return false;
+  if (date.getMonth() + 1 !== now.getMonth() + 1) return false;
+  if (date.getDate() !== now.getDate()) return false;
+  return true;
+}
 
 function compareBuffers(a, b) {
   if (!Buffer.isBuffer(a)) return undefined;
