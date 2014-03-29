@@ -105,8 +105,10 @@ module.exports.loop = function(wait) {
   }).
 
   then(function() {
+    // yesterday:
     var deferred = self.Q.defer();
-    self.db.minerStat.find({}, function(err, docs) {
+    self.db.minerStat.find({ updated: { $lt: todayAtZeroAM() / 1000 } }).
+      sort({ updated: 1 }).exec(function(err, docs) {
       if (err || !docs) {
         return deferred.reject();
       }
@@ -116,42 +118,49 @@ module.exports.loop = function(wait) {
   }).
 
   then(function(docs) {
-    if (!(docs instanceof Array)) return;
-    var data = docs.map(function(d) {
-      return d.data;
-    });
-    if (!data[0]) return;
-    var filepath = formatUsersHistoryFileName(data[0][0] * 1000);
-    var l = data[0].length;
-    // var colMax = Array.apply(null, new Array(l)).map(function() { return 0; });
-    var colMax = [ 10, 11, 17, 7, 7, 7, 9, 4 ];
-    data.sort(function(a, b) {
-      if (!/^\d+\./.test(a[2])) a[2] = '\u0000';
-      // for (var i = 0; i < a.length; i++) {
-      //   var len = String(a[i]).length;
-      //   if (typeof(a[i]) === 'string') len += 2;
-      //   if (len > colMax[i]) colMax[i] = len;
-      // }
-      if (a[2] > b[2]) {
-        return -1;
-      } else if (a[2] === b[2]) {
-        return a[0] > b[0] ? -1 : 1;
-      }
-      return 1;
-    });
-    var string = JSON.stringify(data, null, 2);
-    string = string.replace(/\\u0000/g, Array(colMax[2] - 1).join('-'));
-    var i = 0;
-    string = string.replace(/^(\s{4})(.+?)(,?)$/mg, function(s, p1, p2, p3) {
-      var x = colMax[(i % l)] - p2.length + 2;
-      i += 1;
-      return p1 + p2 + (x > 0 ? Array(x).join(' ') : '') + p3;
-    });
-    string = string.replace(/\n\s{4}/g, ' ');
-    string = string.replace(/\n\s{2}\]/g, ']');
+    if (!(docs instanceof Array) || docs.length === 0) return;
+    var yesterday = yesterdayAtZeroAM();
+    var filepath = formatUsersHistoryFileName(yesterday);
+    var data = docs.map(function(d) { return d.data; });
+    var string = prettifyMinersData(data);
+    var throwErrorAtTheEnd;
     return pushToGitHub.call(
       self,
-      'miners history',
+      'miners history of ' + getDate(yesterday).f,
+      filepath,
+      string,
+      throwErrorAtTheEnd = true
+    ).then(function() {
+      self.db.minerStat.remove({
+        updated: { $lt: todayAtZeroAM() }
+      }, { multi: true }, function (err, numRemoved) {
+        console.log(numRemoved, 'old items removed');
+      });
+    }, function() {});
+  }, function() {}).
+
+  then(function() {
+    // today:
+    var deferred = self.Q.defer();
+    self.db.minerStat.find({ updated: { $gte: todayAtZeroAM() / 1000 } }).
+      sort({ updated: 1 }).exec(function(err, docs) {
+      if (err || !docs) {
+        return deferred.reject();
+      }
+      deferred.resolve(docs);
+    });
+    return deferred.promise;
+  }).
+
+  then(function(docs) {
+    if (!(docs instanceof Array) || docs.length === 0) return;
+    var today = todayAtZeroAM();
+    var filepath = formatUsersHistoryFileName(today);
+    var data = docs.map(function(d) { return d.data; });
+    var string = prettifyMinersData(data);
+    return pushToGitHub.call(
+      self,
+      'miners history of ' + getDate(today).f,
       filepath,
       string
     );
@@ -167,19 +176,72 @@ module.exports.loop = function(wait) {
 
 };
 
+function prettifyMinersData(data) {
+  // var l = data[0].length;
+  // var colMax = Array.apply(null, new Array(l)).map(function() { return 0; });
+  var colMax = [ 10, 11, 17, 7, 7, 7, 9, 4 ];
+  var l = colMax.length;
+  data.sort(function(a, b) {
+    if (!/^\d+\./.test(a[2])) a[2] = '\u0000';
+    // for (var i = 0; i < a.length; i++) {
+    //   var len = String(a[i]).length;
+    //   if (typeof(a[i]) === 'string') len += 2;
+    //   if (len > colMax[i]) colMax[i] = len;
+    // }
+    if (a[2] > b[2]) {
+      return -1;
+    } else if (a[2] === b[2]) {
+      return a[0] > b[0] ? -1 : 1;
+    }
+    return 1;
+  });
+  var string = JSON.stringify(data, null, 2);
+  string = string.replace(/\\u0000/g, Array(colMax[2] - 1).join('-'));
+  var i = 0;
+  string = string.replace(/^(\s{4})(.+?)(,?)$/mg, function(s, p1, p2, p3) {
+    var x = colMax[(i % l)] - p2.length + 2;
+    i += 1;
+    return p1 + p2 + (x > 0 ? Array(x).join(' ') : '') + p3;
+  });
+  string = string.replace(/\n\s{4}/g, ' ');
+  string = string.replace(/\n\s{2}\]/g, ']');
+  return string;
+}
+
 function f(n) { return n < 10 ? '0' + n : n; }
 
-function formatUsersHistoryFileName(str) {
+function getDate(str) {
   var date = new Date(str);
-  var y = date.getFullYear();
-  var m = f(date.getMonth() + 1);
-  var d = f(date.getDate());
-  return '/miners/' + y + m + '/miners-' + y + '-' + m + '-' + d + '.json';
+  var y = date.getUTCFullYear();
+  var m = f(date.getUTCMonth() + 1);
+  var d = f(date.getUTCDate());
+  return {
+    y: y,
+    m: m,
+    d: d,
+    f: y + '-' + m + '-' + d
+  };
 }
+
+function formatUsersHistoryFileName(str) {
+  var date = getDate(str);
+  return '/miners/' + date.y + date.m + '/miners-' + date.f + '.json';
+}
+
 function formatDayHistoryFileName(str) {
   var date = new Date(str);
-  return '/history/' + date.getFullYear() + f(date.getMonth() + 1) +
+  return '/history/' + date.getUTCFullYear() + f(date.getUTCMonth() + 1) +
     '/history-' + str + '.json';
+}
+
+function yesterdayAtZeroAM() {
+  var now = new Date();
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1);
+}
+
+function todayAtZeroAM() {
+  var now = new Date();
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 }
 
 function isToday(str) {
@@ -187,9 +249,9 @@ function isToday(str) {
   var date = new Date(str);
   if (isNaN(date)) return false;
   var now = new Date;
-  if (date.getFullYear() !== now.getFullYear()) return false;
-  if (date.getMonth() + 1 !== now.getMonth() + 1) return false;
-  if (date.getDate() !== now.getDate()) return false;
+  if (date.getUTCFullYear() !== now.getUTCFullYear()) return false;
+  if (date.getUTCMonth() + 1 !== now.getUTCMonth() + 1) return false;
+  if (date.getUTCDate() !== now.getUTCDate()) return false;
   return true;
 }
 

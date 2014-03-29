@@ -67,6 +67,6 @@ function f(n) {
 }
 
 function prettyDate(date) {
-  return date.getFullYear() + '-' + f(date.getMonth() + 1) + '-' +
-    f(date.getDate());
+  return date.getUTCFullYear() + '-' + f(date.getUTCMonth() + 1) + '-' +
+    f(date.getUTCDate());
 }

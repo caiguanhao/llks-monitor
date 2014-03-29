@@ -145,6 +145,7 @@ module.exports.loop = function(account, wait) {
       });
       return deferred.promise;
     });
+    var updated = Math.floor(DATA.updated / 1000);
     return miners.reduce(function(prev, cur) {
       return prev.then(function() {
         var deferred = self.Q.defer();
@@ -154,6 +155,7 @@ module.exports.loop = function(account, wait) {
         }, {
           time: cur[0],
           ip: cur[2],
+          updated: updated,
           data: cur
         }, { upsert: true }, function() {
           deferred.resolve();
