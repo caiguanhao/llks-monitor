@@ -15,6 +15,52 @@ module.exports.loop = function(wait) {
   then(function() {
     if (hour < 9 || hour > 17) return;
     var deferred = self.Q.defer();
+    self.db.marketDay.find({}).sort({ name: 1 }).exec(function(err, docs) {
+      if (err || !docs) {
+        return deferred.reject();
+      }
+      deferred.resolve(docs);
+    });
+    return deferred.promise;
+  }).
+
+  then(function(docs) {
+    return docs.reduce(function(prev, cur) {
+      return prev.then(function() {
+        if (cur.github) return;
+        var name = cur.name;
+        data = JSON.parse(cur.data);
+        data.forEach(function(d) {
+          d[0] /= 1000;
+        });
+        data.reverse();
+        var string = JSON.stringify(data, null, 2);
+        string = string.replace(/\n\s{4}/g, ' ');
+        string = string.replace(/\n\s{2}\]/g, ' ]');
+        string = string.replace(/,\s(\d+)(\.\d+|),\s(\d+)/g,
+          function(s, p1, p2, p3) {
+          return ' , ' + p1 + p2 + Array(3 - p2.length + 1).join(' ') +
+            ' , ' + p3 + Array(7 - p3.length + 1).join(' ');
+        });
+        var throwErrorAtTheEnd;
+        return pushToGitHub.call(
+          self,
+          'history-' + name,
+          '/data/history-' + name + '.json',
+          string,
+          throwErrorAtTheEnd = true
+        ).then(function() {
+          self.db.marketDay.update({
+            _id: cur._id
+          }, { $set: { github: true } });
+        }, function() { /* make sequence promise continue; */});
+      });
+    }, self.Q());
+  }).
+
+  then(function() {
+    if (hour < 9 || hour > 17) return;
+    var deferred = self.Q.defer();
     self.db.marketHistory.findOne({
       name: 'market-overiew-180'
     }, function(err, doc) {
@@ -49,57 +95,12 @@ module.exports.loop = function(wait) {
     string = string.replace(/"volume"\:\s(\d+)/g, function(s, p1) {
       return s + Array(8 - p1.length + 1).join(' ');
     });
-    return string;
-  }).
-
-  then(function(string) {
-    if (!string) return;
-    var buffer = Buffer(string);
-    var filepath = '/data/history.json';
-    return self.connectGitHub(filepath).then(function(res) {
-
-      var resBuffer = Buffer(res.content, 'base64');
-      var same = compareBuffers(resBuffer, buffer);
-      if (same === undefined) throw 'response is not a buffer';
-      if (same === true) throw 'no need to update ' + res.html_url;
-
-      var message = 'Update market history: ';
-      message += resBuffer.length + ' -> ' + buffer.length + ' bytes';
-      return {
-        data: buffer,
-        filepath: filepath,
-        sha: res.sha,
-        message: message
-      };
-    }, function(error) {
-      if (error.statusCode !== 404) throw error;
-      return {
-        data: buffer,
-        filepath: filepath,
-        message: 'Create market history: ' + buffer.length + ' bytes.'
-      };
-    });
-  }).
-
-  then(function(content) {
-    if (typeof content !== 'object' || !content.filepath) return;
-    var path = content.filepath;
-    var data = {
-      message: content.message,
-      content: content.data.toString('base64')
-    };
-    if (content.sha) {
-      data.sha = content.sha;
-    }
-    data = JSON.stringify(data);
-    return self.connectGitHub(path, 'PUT', data);
-  }).
-
-  then(function(res) {
-    if (!res) return;
-    console.log('github updated:', res.commit.html_url);
-  }, function(err) {
-    console.error('github error:', err);
+    return pushToGitHub.call(
+      self,
+      'market history',
+      '/data/history.json',
+      string
+    );
   }).
 
   finally(function() {
@@ -122,4 +123,58 @@ function compareBuffers(a, b) {
   }
 
   return true;
+}
+
+function pushToGitHub(type, filepath, content, throwErrorAtTheEnd) {
+  var self = this;
+  var buffer = Buffer(content);
+  return self.connectGitHub(filepath).
+
+  then(function(res) {
+    var resBuffer = Buffer(res.content, 'base64');
+    var same = compareBuffers(resBuffer, buffer);
+    if (same === undefined) throw 'response is not a buffer';
+    if (same === true) return 'no need to update ' + res.html_url;
+
+    var message = 'Update ' + type + ': ';
+    message += resBuffer.length + ' -> ' + buffer.length + ' bytes';
+    return {
+      data: buffer,
+      filepath: filepath,
+      sha: res.sha,
+      message: message
+    };
+  }, function(error) {
+    if (error.statusCode !== 404) throw error;
+    return {
+      data: buffer,
+      filepath: filepath,
+      message: 'Create ' + type + ': ' + buffer.length + ' bytes.'
+    };
+  }).
+
+  then(function(content) {
+    if (typeof content !== 'object' || !content.filepath) return content;
+    var path = content.filepath;
+    var data = {
+      message: content.message,
+      content: content.data.toString('base64')
+    };
+    if (content.sha) {
+      data.sha = content.sha;
+    }
+    data = JSON.stringify(data);
+    return self.connectGitHub(path, 'PUT', data);
+  }).
+
+  then(function(content) {
+    if (typeof content === 'string') {
+      console.log('github [' + type + '] log:', content);
+    } else if (typeof content === 'object') {
+      console.log('github [' + type + '] updated:', content.commit.html_url);
+    }
+  }, function(err) {
+    console.error('github [' + type + '] error:', err);
+    if (throwErrorAtTheEnd) throw err;
+  });
 }
