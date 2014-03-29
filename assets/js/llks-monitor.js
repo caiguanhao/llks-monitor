@@ -462,8 +462,8 @@ service('Cached', [function() {
 }]).
 
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
-  '$filter', '$http', 'Cached',
-  function($scope, Accounts, Users, $window, $filter, $http, Cached) {
+  '$filter', '$http', 'Cached', '$q',
+  function($scope, Accounts, Users, $window, $filter, $http, Cached, $q) {
 
   $scope.username = null;
   $scope.password = null;
@@ -706,13 +706,24 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   };
   $scope.sort($scope.speedCompare, 'speed');
 
+  var cancelGettingCaptcha;
+  $scope.enableEditsClicked = function() {
+    if (cancelGettingCaptcha) cancelGettingCaptcha.resolve();
+    if (!$scope.accountEditsEnabled) {
+      $scope.getCaptcha();
+    }
+    $scope.accountEditsEnabled = !$scope.accountEditsEnabled;
+  };
   $scope.getCaptcha = function() {
     $scope.captcha = null;
     $scope.captchaImage = null;
     $scope.phpsessid = null;
-    $http.get('/captcha').then(function(response) {
+    cancelGettingCaptcha = $q.defer();
+    $http.get('/captcha', { timeout: cancelGettingCaptcha.promise }).
+    then(function(response) {
       $scope.captchaImage = response.data.image;
       $scope.phpsessid = response.data.phpsessid;
+      cancelGettingCaptcha = null;
     });
   };
 
