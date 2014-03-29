@@ -118,7 +118,7 @@ function Monitor(options, dependencies) {
     request.on('error', function(error) {
       deferred.reject(error);
     });
-    request.setTimeout(1000 * 30, function() {
+    request.setTimeout(1000 * 60, function() {
       request.abort();
       deferred.reject('timeout');
     });

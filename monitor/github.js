@@ -1,7 +1,7 @@
 module.exports = {};
 
 module.exports.start = function() {
-  this.loop(this.configs['github-update-interval'] || (1000 * 60 * 60));
+  this.loop(this.configs['github-update-interval'] || (1000 * 60 * 30));
 };
 
 module.exports.loop = function(wait) {
@@ -54,7 +54,7 @@ module.exports.loop = function(wait) {
           self.db.marketDay.update({
             _id: cur._id
           }, { $set: { github: true } });
-        }, function() { /* make sequence promise continue; */});
+        }, function() { /* make sequence promise continue; */ });
       });
     }, self.Q());
   }).
