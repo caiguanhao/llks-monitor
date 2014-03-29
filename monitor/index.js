@@ -103,12 +103,16 @@ function Monitor(options, dependencies) {
         data += chunk;
       });
       res.on('end', function() {
-        data = JSON.parse(data);
-        if (res.statusCode < 200 || res.statusCode > 299) {
-          data.statusCode = res.statusCode;
-          return deferred.reject(data);
+        var object;
+        try {
+          object = JSON.parse(data);
+        } catch(e) {}
+        if (!object || res.statusCode < 200 || res.statusCode > 299) {
+          if (!object) object = {};
+          object.statusCode = res.statusCode;
+          return deferred.reject(object);
         }
-        deferred.resolve(data);
+        deferred.resolve(object);
       });
     });
     request.on('error', function(error) {

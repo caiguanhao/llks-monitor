@@ -25,6 +25,7 @@ module.exports.loop = function(wait) {
   }).
 
   then(function(docs) {
+    if (!(docs instanceof Array)) return;
     return docs.reduce(function(prev, cur) {
       return prev.then(function() {
         if (cur.github && !isToday(cur.name)) return;
@@ -45,8 +46,8 @@ module.exports.loop = function(wait) {
         var throwErrorAtTheEnd;
         return pushToGitHub.call(
           self,
-          'history-' + name,
-          '/data/history-' + name + '.json',
+          'history of ' + name,
+          formatDayHistoryFileName(name),
           string,
           throwErrorAtTheEnd = true
         ).then(function() {
@@ -98,7 +99,7 @@ module.exports.loop = function(wait) {
     return pushToGitHub.call(
       self,
       'market history',
-      '/data/history.json',
+      '/history/all.json',
       string
     );
   }).
@@ -112,6 +113,14 @@ module.exports.loop = function(wait) {
   });
 
 };
+
+function f(n) { return n < 10 ? '0' + n : n; }
+
+function formatDayHistoryFileName(str) {
+  var date = new Date(str);
+  return '/history/' + date.getFullYear() + '' + f(date.getMonth() + 1) +
+    '/history-' + str + '.json';
+}
 
 function isToday(str) {
   if (!str) return false;
