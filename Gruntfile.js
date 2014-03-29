@@ -130,6 +130,16 @@ module.exports = function(grunt) {
         prompt: 'Update market history for every how many milliseconds [1000-99999]: ',
         format: '^\\d{4,5}$',
         value: 30000
+      },
+      'github-token': {
+        prompt: '40 characters long GitHub personal access token: ',
+        format: '^[a-f0-9]{40}$',
+        value: ''
+      },
+      'github-username-repo': {
+        prompt: 'GitHub username and repo name [foo/bar]: ',
+        format: '^[A-Za-z0-9\\-_]+\\/[A-Za-z0-9\\-_]+$',
+        value: 'choigoonho/llks-data'
       }
     };
     var configs = grunt.file.isFile('config.json') &&

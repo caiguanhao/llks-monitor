@@ -77,6 +77,54 @@ function Monitor(options, dependencies) {
     return deferred.promise;
   };
 
+  this.connectGitHub = function(location, method, data) {
+    var token = configs['github-token'];
+    var userRepo = configs['github-username-repo'];
+    if (!token) return Q.reject('empty token.');
+    if (!userRepo) return Q.reject('empty username/repo.');
+
+    var deferred = Q.defer();
+    var headers = {
+      'User-Agent': 'caiguanhao@gmail.com',
+      Authorization: 'token ' + token
+    };
+    if (data) {
+      headers['Content-Length'] = data.length;
+    }
+    var request = https.get({
+      hostname: 'api.github.com',
+      port: 443,
+      path: '/repos/' + userRepo + '/contents' + location,
+      method: method || 'GET',
+      headers: headers
+    }, function (res) {
+      var data = '';
+      res.on('data', function(chunk) {
+        data += chunk;
+      });
+      res.on('end', function() {
+        data = JSON.parse(data);
+        if (res.statusCode < 200 || res.statusCode > 299) {
+          data.statusCode = res.statusCode;
+          return deferred.reject(data);
+        }
+        deferred.resolve(data);
+      });
+    });
+    request.on('error', function(error) {
+      deferred.reject(error);
+    });
+    request.setTimeout(1000 * 30, function() {
+      request.abort();
+      deferred.reject('timeout');
+    });
+    if (data) {
+      request.write(data);
+    }
+    request.end();
+    return deferred.promise;
+  };
+
 }
 
 module.exports = Monitor;
