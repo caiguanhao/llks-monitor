@@ -7,48 +7,50 @@ var users = new Datastore({
   filename: __dirname + '/.users',
   autoload: true
 });
-
 users.ensureIndex({
   fieldName: 'username',
   unique: true
 });
-
 module.exports.users = users;
+
 
 var accounts = new Datastore({
   filename: __dirname + '/.accounts',
   autoload: true
 });
-
 accounts.ensureIndex({
   fieldName: 'name',
   unique: true
 });
-
 module.exports.accounts = accounts;
+
+
+var minerStat = new Datastore({
+  filename: __dirname + '/.miner-stat',
+  autoload: true
+});
+module.exports.minerStat = minerStat;
+
 
 var marketHistory = new Datastore({
   filename: __dirname + '/.market-history',
   autoload: true
 });
-
 marketHistory.ensureIndex({
   fieldName: 'name',
   unique: true
 });
-
 module.exports.marketHistory = marketHistory;
+
 
 var marketDay = new Datastore({
   filename: __dirname + '/.market-day',
   autoload: true
 });
-
 marketDay.ensureIndex({
   fieldName: 'name',
   unique: true
 });
-
 module.exports.marketDay = marketDay;
 
 module.exports.createAccount = function(name, code, user, callback) {

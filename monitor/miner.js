@@ -18,8 +18,17 @@ module.exports.start = function() {
 module.exports.loop = function(account, wait) {
   var self = this;
   var code = account.code;
+  var DATA;
 
-  self.getHttpData('/dig/miner/log/', code).
+  self.Q.
+
+  fcall(function() {
+    DATA = null;
+  }).
+
+  then(function(data) {
+    return self.getHttpData('/dig/miner/log/', code);
+  }).
 
   then(function(data) {
     data = JSON.parse(data);
@@ -38,10 +47,11 @@ module.exports.loop = function(account, wait) {
         status: miner.status
       });
     }
-    return {
+    DATA = {
       updated: +new Date,
       miners: miners
     };
+    return DATA;
   }).
 
   then(function(data) {
@@ -105,6 +115,58 @@ module.exports.loop = function(account, wait) {
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
       self.io.of('/private').emit('updateAccount', bundle);
     }
+  }).
+
+  then(function() {
+    var miners = [];
+    DATA.miners.forEach(function(miner) {
+      var times = miner.speed.indexOf('M/S') !== -1 ? 1024 : 1;
+      var speed = parseFloat(miner.speed);
+      if (isNaN(speed)) speed = 0;
+      miners.push([
+        miner.servertime / 1000,
+        account.name,
+        miner.ip,
+        speed * times,
+        miner.yesterday,
+        miner.today,
+        miner.total,
+        miner.status
+      ]);
+    });
+    var check = self.Q().then(function() {
+      var deferred = self.Q.defer();
+      self.db.minerStat.count({}, function(err, count) {
+        if (err) return deferred.reject(err);
+        if (count > 2000) {
+          return deferred.reject('too many documents! aborted!');
+        }
+        deferred.resolve();
+      });
+      return deferred.promise;
+    });
+    return miners.reduce(function(prev, cur) {
+      return prev.then(function() {
+        var deferred = self.Q.defer();
+        self.db.minerStat.update({
+          time: cur[0],
+          ip: cur[2]
+        }, {
+          time: cur[0],
+          ip: cur[2],
+          data: cur
+        }, { upsert: true }, function() {
+          deferred.resolve();
+        });
+        return deferred.promise;
+      });
+    }, check).
+    then(function() {
+      self.db.minerStat.persistence.compactDatafile();
+    }).
+    catch(function(err) {
+      console.error('miner-stat:', err);
+    });
   }).
 
   finally(function() {

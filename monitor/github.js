@@ -104,6 +104,59 @@ module.exports.loop = function(wait) {
     );
   }).
 
+  then(function() {
+    var deferred = self.Q.defer();
+    self.db.minerStat.find({}, function(err, docs) {
+      if (err || !docs) {
+        return deferred.reject();
+      }
+      deferred.resolve(docs);
+    });
+    return deferred.promise;
+  }).
+
+  then(function(docs) {
+    if (!(docs instanceof Array)) return;
+    var data = docs.map(function(d) {
+      return d.data;
+    });
+    if (!data[0]) return;
+    var filepath = formatUsersHistoryFileName(data[0][0] * 1000);
+    var l = data[0].length;
+    // var colMax = Array.apply(null, new Array(l)).map(function() { return 0; });
+    var colMax = [ 10, 11, 17, 7, 7, 7, 9, 4 ];
+    data.sort(function(a, b) {
+      if (!/^\d+\./.test(a[2])) a[2] = '\u0000';
+      // for (var i = 0; i < a.length; i++) {
+      //   var len = String(a[i]).length;
+      //   if (typeof(a[i]) === 'string') len += 2;
+      //   if (len > colMax[i]) colMax[i] = len;
+      // }
+      if (a[2] > b[2]) {
+        return -1;
+      } else if (a[2] === b[2]) {
+        return a[0] > b[0] ? -1 : 1;
+      }
+      return 1;
+    });
+    var string = JSON.stringify(data, null, 2);
+    string = string.replace(/\\u0000/g, Array(colMax[2] - 1).join('-'));
+    var i = 0;
+    string = string.replace(/^(\s{4})(.+?)(,?)$/mg, function(s, p1, p2, p3) {
+      var x = colMax[(i % l)] - p2.length + 2;
+      i += 1;
+      return p1 + p2 + (x > 0 ? Array(x).join(' ') : '') + p3;
+    });
+    string = string.replace(/\n\s{4}/g, ' ');
+    string = string.replace(/\n\s{2}\]/g, ']');
+    return pushToGitHub.call(
+      self,
+      'miners history',
+      filepath,
+      string
+    );
+  }).
+
   finally(function() {
     var timeout = setTimeout(function() {
       self.loop(wait);
@@ -116,9 +169,16 @@ module.exports.loop = function(wait) {
 
 function f(n) { return n < 10 ? '0' + n : n; }
 
+function formatUsersHistoryFileName(str) {
+  var date = new Date(str);
+  var y = date.getFullYear();
+  var m = f(date.getMonth() + 1);
+  var d = f(date.getDate());
+  return '/miners/' + y + m + '/miners-' + y + '-' + m + '-' + d + '.json';
+}
 function formatDayHistoryFileName(str) {
   var date = new Date(str);
-  return '/history/' + date.getFullYear() + '' + f(date.getMonth() + 1) +
+  return '/history/' + date.getFullYear() + f(date.getMonth() + 1) +
     '/history-' + str + '.json';
 }
 
