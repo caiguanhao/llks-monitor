@@ -76,6 +76,7 @@ module.exports.loop = function(account, wait) {
       bundle[account._id] = {
         price: +marketData.data.price
       };
+      if (DATA) DATA.price = +marketData.data.price;
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
       self.io.of('/private').emit('updateAccount', bundle);
     } catch(e) {}
@@ -94,10 +95,33 @@ module.exports.loop = function(account, wait) {
         unsold: +(+accountData.data.flow).toFixed(2),
         sold: +(+accountData.data.sold).toFixed(2)
       };
+      if (DATA) DATA.unsold = +accountData.data.flow;
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
       self.io.of('/private').emit('updateAccount', bundle);
     } catch(e) {}
   }).
+
+  then(function() {
+    return self.getHttpData('/pay/kuaibi/balance/', code);
+  }).
+
+  then(function(data) {
+    try {
+      var balance = JSON.parse(data);
+      var totalValue = +(+balance.data.total_amount +
+          DATA.price * Math.floor(DATA.unsold)).toFixed(2);
+      var bundle = {};
+      bundle[account._id] = {
+        totalValue: totalValue
+      };
+      self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
+      self.io.of('/private').emit('updateAccount', bundle);
+    } catch(e) {}
+  }).
+
+  /*
+
+  // deprecated:
 
   then(function() {
     return self.getHttpData('/index.php/account/info', code);
@@ -116,6 +140,8 @@ module.exports.loop = function(account, wait) {
       self.io.of('/private').emit('updateAccount', bundle);
     }
   }).
+
+  */
 
   then(function() {
     var miners = [];

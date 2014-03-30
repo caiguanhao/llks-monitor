@@ -246,7 +246,7 @@
                 class="text-warning"></span>
             </div>
             <span i18n="miner:Miner Status"></span>
-            (<span ng-bind="miners.length"></span>)
+            (<span ng-bind="miners.length||0"></span>)
           </div>
           <table class="table table-slim table-hover">
             <thead ng-if="miners && miners.length">
