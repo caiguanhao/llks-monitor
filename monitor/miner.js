@@ -138,7 +138,7 @@ module.exports.loop = function(account, wait) {
       var deferred = self.Q.defer();
       self.db.minerStat.count({}, function(err, count) {
         if (err) return deferred.reject(err);
-        if (count > 2000) {
+        if (count > 30000) {
           return deferred.reject('too many documents! aborted!');
         }
         deferred.resolve();
