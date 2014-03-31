@@ -314,6 +314,9 @@ function pushToGitHub(type, filepath, content, throwErrorAtTheEnd) {
       console.log('github [' + type + '] log:', content);
     } else if (typeof content === 'object') {
       console.log('github [' + type + '] updated:', content.commit.html_url);
+      var headers = content['$headers'] || {};
+      console.log('github ratelimit:', +headers['x-ratelimit-remaining'], '/',
+        +headers['x-ratelimit-limit']);
     }
   }, function(err) {
     console.error('github [' + type + '] error:', err);

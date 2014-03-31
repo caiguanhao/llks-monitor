@@ -112,6 +112,7 @@ function Monitor(options, dependencies) {
           object.statusCode = res.statusCode;
           return deferred.reject(object);
         }
+        object['$headers'] = res.headers;
         deferred.resolve(object);
       });
     });
