@@ -1,7 +1,7 @@
 module.exports = {};
 
 module.exports.start = function() {
-  this.loop(this.configs['github-update-interval'] || (1000 * 60 * 30));
+  this.loop(1000 * 60 * 30);
 };
 
 module.exports.loop = function(wait) {
@@ -60,7 +60,7 @@ module.exports.loop = function(wait) {
   }).
 
   then(function() {
-    if (hour < 9 || hour > 17) return;
+    if (hour !== 17) return;
     var deferred = self.Q.defer();
     self.db.marketHistory.findOne({
       name: 'market-overiew-180'
