@@ -314,7 +314,7 @@ function compareBuffers(a, b) {
 }
 
 function getNames(path) {
-  var arr = path.replace(/^[\/]+|[\/]+$/g, '').split(/[\/]+/);
+  var arr = path.replace(/[\/]+$/, '').split(/[\/]+/);
   return {
     basename: arr.slice(-1)[0],
     dirname: arr.slice(0, -1).join('/')
