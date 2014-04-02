@@ -313,32 +313,55 @@ function compareBuffers(a, b) {
   return true;
 }
 
+function getNames(path) {
+  var arr = path.replace(/^[\/]+|[\/]+$/g, '').split(/[\/]+/);
+  return {
+    basename: arr.slice(-1)[0],
+    dirname: arr.slice(0, -1).join('/')
+  };
+}
+
 function pushToGitHub(type, filepath, content, throwErrorAtTheEnd) {
   var self = this;
   var buffer = Buffer(content);
-  return self.connectGitHub(filepath).
+  var names = getNames(filepath);
+  return self.connectGitHub(names.dirname).
 
   then(function(res) {
-    var resBuffer = Buffer(res.content, 'base64');
-    var same = compareBuffers(resBuffer, buffer);
-    if (same === undefined) throw 'response is not a buffer';
-    if (same === true) return 'no need to update ' + res.html_url;
+    var giturl;
+    for (var i = 0; i < res.length; i++) {
+      if (names.basename === res[i].name) {
+        giturl = res[i].git_url;
+        break;
+      }
+    }
+    if (giturl) {
+      return self.connectGitHub(giturl).then(function(res) {
+        var resBuffer = Buffer(res.content, 'base64');
+        var same = compareBuffers(resBuffer, buffer);
+        if (same === undefined) throw 'response is not a buffer';
+        if (same === true) return 'no need to update ' + res.html_url;
 
-    var message = 'Update ' + type + ': ';
-    message += resBuffer.length + ' -> ' + buffer.length + ' bytes';
-    return {
-      data: buffer,
-      filepath: filepath,
-      sha: res.sha,
-      message: message
-    };
+        var message = 'Update ' + type + ': ';
+        message += resBuffer.length + ' -> ' + buffer.length + ' bytes';
+        return {
+          data: buffer,
+          filepath: filepath,
+          sha: res.sha,
+          message: message
+        };
+      }, function(error) {
+        throw error;
+      });
+    } else {
+      return {
+        data: buffer,
+        filepath: filepath,
+        message: 'Create ' + type + ': ' + buffer.length + ' bytes.'
+      };
+    }
   }, function(error) {
-    if (error.statusCode !== 404) throw error;
-    return {
-      data: buffer,
-      filepath: filepath,
-      message: 'Create ' + type + ': ' + buffer.length + ' bytes.'
-    };
+    throw error;
   }).
 
   then(function(content) {

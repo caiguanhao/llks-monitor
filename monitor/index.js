@@ -91,10 +91,16 @@ function Monitor(options, dependencies) {
     if (data) {
       headers['Content-Length'] = data.length;
     }
+    var path;
+    if (/^https?\:\/\//.test(location)) {
+      path = location;
+    } else {
+      path = '/repos/' + userRepo + '/contents' + location;
+    }
     var request = https.get({
       hostname: 'api.github.com',
       port: 443,
-      path: '/repos/' + userRepo + '/contents' + location,
+      path: path,
       method: method || 'GET',
       headers: headers
     }, function (res) {
