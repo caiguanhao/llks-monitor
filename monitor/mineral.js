@@ -24,7 +24,7 @@ module.exports.loop = function(wait) {
   }).
 
   then(function(account) {
-    if (minute === 5) {
+    if (minute < 15) {
       return self.getHttpData('/dig/stats/', account.code);
     }
   }).
