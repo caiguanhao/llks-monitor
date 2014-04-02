@@ -350,18 +350,18 @@ function pushToGitHub(type, filepath, content, throwErrorAtTheEnd) {
           sha: res.sha,
           message: message
         };
-      }, function(error) {
-        throw error;
       });
     } else {
-      return {
-        data: buffer,
-        filepath: filepath,
-        message: 'Create ' + type + ': ' + buffer.length + ' bytes.'
-      };
+      throw 'should create';
     }
-  }, function(error) {
-    throw error;
+  }).
+
+  catch(function() {
+    return {
+      data: buffer,
+      filepath: filepath,
+      message: 'Create ' + type + ': ' + buffer.length + ' bytes.'
+    };
   }).
 
   then(function(content) {
