@@ -70,7 +70,7 @@ function Monitor(options, dependencies) {
     request.on('error', function(error) {
       deferred.reject(error);
     });
-    request.setTimeout(3000, function() {
+    request.setTimeout(1000 * 20, function() {
       request.abort();
       deferred.reject('timeout');
     });

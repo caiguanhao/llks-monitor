@@ -195,7 +195,7 @@ app.get('/captcha', authorize(function(req, res, next) {
   request.on('error', function(error) {
     deferred.reject();
   });
-  request.setTimeout(3000, function() {
+  request.setTimeout(1000 * 10, function() {
     request.abort();
     deferred.reject();
   });
@@ -264,7 +264,7 @@ app.post('/accounts', authorize(function(req, res, next) {
   request.on('error', function(error) {
     deferred.reject();
   });
-  request.setTimeout(3000, function() {
+  request.setTimeout(1000 * 10, function() {
     request.abort();
     deferred.reject();
   });
