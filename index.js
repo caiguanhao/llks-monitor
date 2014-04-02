@@ -481,6 +481,11 @@ var marketDayMonitor = new Monitor(marketDay, { io: io, db: db });
 marketDayMonitor.start();
 
 // update market day data
+var mineral = require('./monitor/mineral');
+var mineralMonitor = new Monitor(mineral, { db: db });
+mineralMonitor.start();
+
+// update market day data
 var GitHub = require('./monitor/github');
 var GitHubMonitor = new Monitor(GitHub, { db: db });
 GitHubMonitor.start();
