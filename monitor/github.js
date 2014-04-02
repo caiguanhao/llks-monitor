@@ -105,6 +105,52 @@ module.exports.loop = function(wait) {
   }).
 
   then(function() {
+    var now = new Date();
+
+    var day = now.getUTCDate();
+    var lastMonth = new Date(now.getUTCFullYear(), now.getUTCMonth());
+    var utc = new Date(now.getUTCFullYear(), now.getUTCMonth() + 1);
+
+    var prev = lastMonth.getUTCFullYear() + '-' + f(lastMonth.getUTCMonth() + 1);
+    var cur = utc.getUTCFullYear() + '-' + f(utc.getUTCMonth() + 1);
+
+    return [prev, cur].reduce(function(previous, current) {
+      return previous.then(function() {
+        var deferred = self.Q.defer();
+        self.db.marketHistory.findOne({
+          name: 'mineral-' + current
+        }, function(err, doc) {
+          deferred.resolve(doc);
+        });
+        return deferred.promise;
+      }).then(function(data) {
+        // for last month, don't check it after the second day
+        if (current === prev && day > 1) return;
+        if (!data) return;
+
+        data = JSON.parse(data.data);
+        var colMax = [ 4, 2, 2, 2, 9, 8, 8, 9, 11, 7 ];
+        var l = colMax.length;
+        var string = JSON.stringify(data, null, 2);
+        var i = 0;
+        string = string.replace(/^(\s{4})(.+?)(,?)$/mg, function(s, p1, p2, p3) {
+          var x = colMax[(i % l)] - p2.length + 2;
+          i += 1;
+          return p1 + p2 + (x > 0 ? Array(x).join(' ') : '') + p3;
+        });
+        string = string.replace(/\n\s{4}/g, ' ');
+        string = string.replace(/\n\s{2}\]/g, ']');
+        return pushToGitHub.call(
+          self,
+          'mineral hour history',
+          '/mineral/' + current + '.json',
+          string
+        );
+      });
+    }, self.Q());
+  }).
+
+  then(function() {
     // yesterday:
     var deferred = self.Q.defer();
     self.db.minerStat.find({ updated: { $lt: todayAtZeroAM() / 1000 } }).
