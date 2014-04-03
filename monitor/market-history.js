@@ -9,19 +9,16 @@ module.exports.loop = function(wait) {
   var now = new Date;
   var hour = now.getHours();
   var minute = now.getMinutes();
-  var promise;
 
-  // 17:00 ~ 17:30
-  if (hour === 17 && minute <= 30) {
-    promise = self.getHttpData('/index.php/transaction/' +
-      'get_market_overview_day/180');
-  } else {
-    var deferred = self.Q.defer();
-    deferred.resolve();
-    promise = deferred.promise;
-  }
-
-  promise = promise.then(function(data) {
+  self.Q.
+  fcall(function() {
+    // 17:00 ~ 17:30
+    if (hour === 17 && minute <= 30) {
+      return self.getHttpData('/index.php/transaction/' +
+        'get_market_overview_day/180');
+    }
+  }).
+  then(function(data) {
     if (!data) return;
 
     data = JSON.parse(data);
@@ -47,9 +44,11 @@ module.exports.loop = function(wait) {
     }, function() {
       self.db.marketHistory.persistence.compactDatafile();
     });
-  });
-
-  promise.finally(function() {
+  }).
+  catch(function(e) {
+    console.error(new Date, '[market-history]', e);
+  }).
+  finally(function() {
     var timeout = setTimeout(function() {
       self.loop(wait);
     }, wait);

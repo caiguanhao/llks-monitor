@@ -328,10 +328,11 @@ function pushToGitHub(type, filepath, content, throwErrorAtTheEnd) {
   return self.connectGitHub(names.dirname).
 
   then(function(res) {
-    var giturl;
+    var giturl, html_url;
     for (var i = 0; i < res.length; i++) {
       if (names.basename === res[i].name) {
         giturl = res[i].git_url;
+        html_url = res[i].html_url;
         break;
       }
     }
@@ -340,7 +341,7 @@ function pushToGitHub(type, filepath, content, throwErrorAtTheEnd) {
         var resBuffer = Buffer(res.content, 'base64');
         var same = compareBuffers(resBuffer, buffer);
         if (same === undefined) throw 'response is not a buffer';
-        if (same === true) return 'no need to update ' + res.html_url;
+        if (same === true) return 'no need to update ' + html_url;
 
         var message = 'Update ' + type + ': ';
         message += resBuffer.length + ' -> ' + buffer.length + ' bytes';
@@ -380,15 +381,17 @@ function pushToGitHub(type, filepath, content, throwErrorAtTheEnd) {
 
   then(function(content) {
     if (typeof content === 'string') {
-      console.log('github [' + type + '] log:', content);
+      console.log(new Date, 'github [' + type + '] log:', content);
     } else if (typeof content === 'object') {
-      console.log('github [' + type + '] updated:', content.commit.html_url);
+      console.log(new Date, 'github [' + type + '] updated:',
+        content.commit.html_url);
       var headers = content['$headers'] || {};
-      console.log('github ratelimit:', +headers['x-ratelimit-remaining'], '/',
+      console.log(new Date, 'github ratelimit:',
+        +headers['x-ratelimit-remaining'], '/',
         +headers['x-ratelimit-limit']);
     }
   }, function(err) {
-    console.error('github [' + type + '] error:', err);
+    console.error(new Date, 'github [' + type + '] error:', err);
     if (throwErrorAtTheEnd) throw err;
   });
 }

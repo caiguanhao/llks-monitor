@@ -127,7 +127,7 @@ module.exports.loop = function(wait) {
   }).
 
   catch(function(e) {
-    console.error('mineral error:', e);
+    console.error(new Date, 'mineral error:', e);
   }).
 
   finally(function() {
