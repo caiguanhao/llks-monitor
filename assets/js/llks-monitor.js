@@ -364,6 +364,9 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
       }
     });
     var self = this;
+    this.PublicSocket.on('connect', function() {
+      self.PublicSocket.emit('GiveMeMarketData');
+    });
     this.PublicSocket.on('disconnect', function() {
       if (self.PublicSocket) self.PublicSocket.socket.reconnect();
     });
@@ -454,6 +457,7 @@ service('Cached', [function() {
   this.Reset = function() {
     this.Accounts = [];
     this.Miners = {};
+    this.Market = {};
   };
   this.Reset();
 }]).
@@ -461,6 +465,25 @@ service('Cached', [function() {
 controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   '$filter', '$http', 'Cached', '$q',
   function($scope, Accounts, Users, $window, $filter, $http, Cached, $q) {
+
+  function updateMarket() {
+    $scope.market = Cached.Market;
+    $scope.market.priceText = {};
+    for (var p in $scope.market.price) {
+      $scope.market.priceText[p] = $filter('currency')($scope.market.price[p], '￥');
+    }
+    $scope.market.timeText = $filter('date')($scope.market.time, 'yyyy-MM-dd HH:mm:ss');
+  }
+
+  if (Users.PublicSocket && Users.PublicSocket.$events) {
+    delete Users.PublicSocket.$events['UpdateMarket'];
+  }
+  if (Users.PublicSocket) {
+    Users.PublicSocket.on('UpdateMarket', function(data) {
+      Cached.Market = data;
+      updateMarket();
+    });
+  }
 
   $scope.username = null;
   $scope.password = null;
@@ -584,7 +607,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.miners = allMiners[miner].miners.length;
       account.speed = +accountSpeedTotal;
       account.speedText = (account.speed / 1024).toFixed(3) + ' M/S';
-      account.priceText = $filter('currency')(account.price, '￥');
       account.unsoldWorth = $filter('currency')((!account || !account.unsold)
         ? 0 : (Math.floor(account.unsold) * account.price), '￥');
       account.totalValueText = $filter('currency')(account.totalValue, '￥');

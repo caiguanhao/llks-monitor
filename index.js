@@ -389,6 +389,7 @@ io.of('/public').
     socket.emit('ServerHasUpdated', assetsHashes);
     socket.on('GiveMeHistoryData', HereAreTheHistoryData);
     socket.on('GiveMeDayData', HereAreTheDayData);
+    socket.on('GiveMeMarketData', HereAreTheMarketData);
   });
 
 function HereAreTheAccounts() {
@@ -424,6 +425,18 @@ function HereAreTheHistoryData(length) {
         data: data
       };
       self.emit('HereAreTheHistoryData', bundle);
+    } catch(e) {}
+  });
+}
+
+function HereAreTheMarketData() {
+  var self = this;
+  if (typeof self.emit !== 'function') self = io.of('/public');
+  db.marketHistory.findOne({ name: 'market-stat' }, function(err, doc) {
+    if (!doc) return;
+    try {
+      var data = JSON.parse(doc.data);
+      self.emit('UpdateMarket', data);
     } catch(e) {}
   });
 }

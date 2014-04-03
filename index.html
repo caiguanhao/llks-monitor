@@ -119,6 +119,79 @@
   <script type="text/ng-template" id="main">
     <div class="row">
       <div class="col-sm-12">
+        <table class="table table-slim table-hover market-stat">
+          <thead>
+            <tr>
+              <th colspan="6">
+                <div class="pull-right">
+                  <span ng-bind="market.timeText"></span>
+                  (<span seconds-ago="market.time"
+                    i18n="{'seconds-ago-template': '{}s ago'}"></span>)
+                </div>
+                <span i18n="market:Market Statistics"></span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="item" i18n="market:Price"></span>
+                <span ng-bind="market.priceText.current"></span>
+              </td>
+              <td>
+                <span class="item" i18n="market:Buying"></span>
+                <span ng-bind="market.priceText.buy"></span>
+              </td>
+              <td>
+                <span class="item" i18n="market:Selling"></span>
+                <span ng-bind="market.priceText.sell"></span>
+              </td>
+              <td>
+                <span class="item" i18n="market:High"></span>
+                <span ng-bind="market.priceText.high"></span>
+              </td>
+              <td class="noneSM">
+                <span class="item" i18n="market:Today"></span>
+                <span ng-bind="market.today"></span>
+                KG
+              </td>
+              <td class="noneSM">
+                <span class="item" i18n="market:Sold"></span>
+                <span ng-bind="market.sold"></span>
+                KG
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="item" i18n="market:Difficulty"></span>
+                <span ng-bind="market.difficulty"></span>
+                G/KG
+              </td>
+              <td>
+                <span class="item" i18n="market:Miners"></span>
+                <span ng-bind="market.miners"></span>
+              </td>
+              <td>
+                <span class="item" i18n="market:Completed"></span>
+                <span ng-bind="market.completedPercent"></span>
+              </td>
+              <td>
+                <span class="item" i18n="market:Low"></span>
+                <span ng-bind="market.priceText.low"></span>
+              </td>
+              <td class="noneSM">
+                <span class="item" i18n="market:Volume"></span>
+                <span ng-bind="market.volume"></span>
+                KG
+              </td>
+              <td class="noneSM">
+                <span class="item" i18n="market:Bought"></span>
+                <span ng-bind="market.bought"></span>
+                KG
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <div class="panel panel-default"
           ng-class="{'edits-enabled':accountEditsEnabled}">
           <div class="panel-heading btn-group-xs">
@@ -151,8 +224,6 @@
                   i18n="account:Sold"></a></th>
                 <th class="noneSM" ng-click="asort('unsold')"><a href
                   i18n="account:Unsold"></a></th>
-                <th class="noneXS" ng-click="asort('price')"><a href
-                  i18n="account:Price"></a></th>
                 <th ng-click="asort('unsold')"><a href
                   i18n="account:Worth"></a></th>
                 <th class="noneXS" ng-click="asort('totalValue')"><a href
@@ -175,7 +246,6 @@
                 <td ng-bind="account.yesterday" class="noneXS"></td>
                 <td ng-bind="account.sold" class="noneXS"></td>
                 <td ng-bind="account.unsold" class="noneSM"></td>
-                <td ng-bind="account.priceText" class="noneXS"></td>
                 <td ng-bind="account.unsoldWorth"></td>
                 <td ng-bind="account.totalValueText" class="noneXS"></td>
                 <td class="edits-enabled-hidden" ng-switch on="account.updated">

@@ -50,6 +50,24 @@ footer {
   text-align: center;
 }
 
+.market-stat {
+  td {
+    font-weight: bold;
+  }
+  .item {
+    font-weight: normal;
+    color: #999;
+  }
+}
+
+@media (max-width: 700px) {
+  .market-stat {
+    .item {
+      display: block;
+    }
+  }
+}
+
 .edits-enabled-shown {
   display: none !important;
 }

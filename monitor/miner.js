@@ -66,20 +66,48 @@ module.exports.loop = function(account, wait) {
   }).
 
   then(function() {
-    return self.getHttpData('/index.php/transaction/get_current_price');
+    return self.Q.all([
+      self.getHttpData('/index.php/transaction/get_current_price'),
+      self.getHttpData('/dig/stats/', code)
+    ]);
   }).
 
   then(function(data) {
-    try {
-      var marketData = JSON.parse(data);
-      var bundle = {};
-      bundle[account._id] = {
-        price: +marketData.data.price
-      };
-      if (DATA) DATA.price = +marketData.data.price;
-      self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      self.io.of('/private').emit('updateAccount', bundle);
-    } catch(e) {}
+    var priceData = JSON.parse(data[0]);
+    var price = +priceData.data.price;
+    if (DATA) DATA.price = price;
+    self.db.accounts.update({ _id: account._id }, { $set: { price: price } });
+    var time = priceData.data.createtime.replace(/[^0-9\s\:]+/g, '-');
+    time = time.replace('- ', ' ');
+    time = +new Date(time);
+    var mineralData = JSON.parse(data[1]);
+    var bundle = {
+      time: time,
+      price: {
+        current: price,
+        diff: +priceData.data.change,
+        buy: +priceData.data.buy,
+        sell: +priceData.data.sell,
+        high: +priceData.data.maxprice,
+        low: +priceData.data.minprice
+      },
+      bought: +priceData.data.buymineral,
+      sold: +priceData.data.sellmineral,
+      volume: +priceData.data.volume,
+      difficulty: parseFloat(mineralData.data.factor),
+      miners: +mineralData.data.latest.miner_count,
+      today: +(+mineralData.data.latest.today).toFixed(2),
+      completedPercent: mineralData.data.latest.total_per + '%',
+    };
+    self.db.marketHistory.update({ name: 'market-stat' }, {
+      name: 'market-stat',
+      data: JSON.stringify(bundle)
+    }, { upsert: true });
+    self.io.of('/public').emit('UpdateMarket', bundle);
+  }).
+
+  catch(function(e) {
+    console.error(e)
   }).
 
   then(function(data) {
