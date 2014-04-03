@@ -118,7 +118,7 @@ directive('navbarLink', ['$location', function($location) {
 directive('i18n', ['I18N', function(I18N) {
   return {
     link: function($scope, elem, attrs) {
-      var langChange = function() {
+      $scope.$on('langChange', function() {
         var i18nAttr = attrs.i18n.trim();
         var i18n = { text: i18nAttr };
         if (i18nAttr[0] === '{' && i18nAttr.slice(-1) === '}') {
@@ -139,28 +139,25 @@ directive('i18n', ['I18N', function(I18N) {
             }
           }
         }
-      };
-      $scope.$on('langChange', langChange);
+      });
       $scope.$emit('langChange');
     }
   };
 }]).
 
-directive('secondsAgo', ['$interval', function($interval) {
+directive('secondsAgo', [function() {
   return {
     priority: 100, // let link run after i18n
     scope: {
       secondsAgo: '='
     },
     link: function($scope, elem, attrs) {
-      function update(sec) {
-        var template = elem.attr('seconds-ago-template') || '{}';
-        elem.text(template.replace(/{}/g, sec));
-      }
-      update(0);
       $scope.$on('anotherSecond', function(e) {
-        update(Math.round((+new Date - $scope.secondsAgo) / 1000));
+        var diff = Math.round((+new Date - $scope.secondsAgo) / 1000);
+        var template = elem.attr('seconds-ago-template') || '{}';
+        elem.text(template.replace(/{}/g, Math.max(diff, 0)));
       });
+      $scope.$emit('anotherSecond');
     }
   };
 }]).

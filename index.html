@@ -81,7 +81,7 @@
                   ng-class="{open:dropdown}">
                   <a href ng-click="dropdown=!dropdown">
                     <span class="glyphicon glyphicon-user"></span>
-                    {{User.Username}}
+                    <span ng-bind="User.Username"></span>
                     <b class="caret"></b></a>
                   <ul class="dropdown-menu">
                     <li><a href="/#/myaccount" close="navbar,dropdown">
