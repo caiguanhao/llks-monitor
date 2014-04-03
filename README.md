@@ -7,19 +7,9 @@ Angular.js.
 Usage
 -----
 
-You just need to log in to [LLKS](https://jiaoyi.yunfan.com) using Google
-Chrome, then open console (press Control-Shift-J on Windows or Command-Alt-J
-on Mac) and enter the following command:
-
-    copy(document.cookie.match(/ntts_kb_session_id=(.+?);/)[1])
-
-Then use the code in your clipboard to access your account!
-
-Don't click the log out link in the web page. You can log out the web page
-by entering this line of code:
-
-    document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
-    ';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();
+    npm -g i grunt-cli pm2
+    npm i
+    npm start
 
 Screenshot
 ----------

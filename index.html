@@ -392,22 +392,6 @@
     <div class="row">
       <div class="col-sm-12"  ng-switch on="CURRENTLANG">
         <div ng-switch-default>
-          <h2>Add account (obsolete)</h2>
-          <p>
-            Open Google Chrome browser, go to and log in to
-            <a href="https://jiaoyi.yunfan.com/" target="_blank">LLKS</a>,
-            then press <code>Control-Shift-J</code> (Windows) or
-            <code>Command-Alt-J</code> (Mac), and then enter this line of code:
-            <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
-            Click Enable Edit button above, then paste the text in your
-            clipboard to the 'code' text box to add account.
-          </p>
-          <p>
-            Don't click the log out link in the web page. You can log out the
-            web page by entering this line of code:
-            <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
-';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
-          </p>
           <h2>Open Remote Desktop from browser</h2>
           <p>
             Right click Notepad and choose Run as Administrator, copy and
@@ -434,20 +418,6 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
           </p>
         </div>
         <div ng-switch-when="zh">
-          <h2>添加账户（已停用）</h2>
-          <p>
-            使用Google浏览器，前往并登录<a href="https://jiaoyi.yunfan.com/"
-            target="_blank">流量矿石</a>交易系统，然后按下
-            <code>Control-Shift-J</code> (Windows) 或
-            <code>Command-Alt-J</code> (Mac) 按键，复制如下代码，并按回车：
-            <pre>copy(/ntts_kb_session_id=(.+?);/.exec(document.cookie)[1])</pre>
-            点击启用编辑按钮，然后粘贴你剪贴板上的文本到“代码”文本框添加账户。
-          </p>
-          <p>
-            不要按流量矿石上的退出登录按钮，你可以像刚才一样，通过如下代码退出登录：
-            <pre>document.cookie='ntts_kb_session_id=;expires='+new Date(0)+
-';domain=.jiaoyi.yunfan.com;path=/;';window.location.reload();</pre>
-          </p>
           <h2>从浏览器打开“远程桌面连接”程序</h2>
           <p>
             右击记事本，选择以管理员身份运行，复制粘贴下面代码，并保存到
