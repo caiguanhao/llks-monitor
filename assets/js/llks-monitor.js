@@ -155,7 +155,9 @@ directive('secondsAgo', [function() {
       $scope.$on('anotherSecond', function(e) {
         var diff = Math.round((+new Date - $scope.secondsAgo) / 1000);
         var template = elem.attr('seconds-ago-template') || '{}';
-        elem.text(template.replace(/{}/g, Math.max(diff, 0)));
+        var num = Math.max(diff, 0);
+        if (isNaN(num)) num = 'N/A'
+        elem.text(template.replace(/{}/g, num));
       });
       $scope.$emit('anotherSecond');
     }
@@ -473,6 +475,11 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.market.priceText[p] = $filter('currency')($scope.market.price[p], '￥');
     }
     $scope.market.timeText = $filter('date')($scope.market.time, 'yyyy-MM-dd HH:mm:ss');
+  }
+  if (Cached.Market.time) {
+    updateMarket();
+  } else if (Users.PublicSocket.socket.connected) {
+    Users.PublicSocket.emit('GiveMeMarketData');
   }
 
   if (Users.PublicSocket && Users.PublicSocket.$events) {
