@@ -125,8 +125,9 @@
               <th colspan="6">
                 <div class="pull-right">
                   <span ng-bind="market.timeText"></span>
-                  (<span seconds-ago="market.time"
-                    i18n="{'seconds-ago-template': '{}s ago'}"></span>)
+                  <span seconds-ago="market.time"
+                    seconds-ago-hide-after-n-secs="600"
+                    i18n="{'seconds-ago-template': '({}s ago)'}"></span>
                 </div>
                 <span i18n="market:Market Statistics"></span>
               </th>

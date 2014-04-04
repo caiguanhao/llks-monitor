@@ -149,7 +149,8 @@ directive('secondsAgo', [function() {
   return {
     priority: 100, // let link run after i18n
     scope: {
-      secondsAgo: '='
+      secondsAgo: '=',
+      secondsAgoHideAfterNSecs: '='
     },
     link: function($scope, elem, attrs) {
       $scope.$on('anotherSecond', function(e) {
@@ -158,6 +159,12 @@ directive('secondsAgo', [function() {
         var num = Math.max(diff, 0);
         if (isNaN(num)) num = 'N/A'
         elem.text(template.replace(/{}/g, num));
+        if (isNaN(num) || ($scope.secondsAgoHideAfterNSecs &&
+          num > $scope.secondsAgoHideAfterNSecs)) {
+          elem.addClass('ng-hide');
+        } else {
+          elem.removeClass('ng-hide');
+        }
       });
       $scope.$emit('anotherSecond');
     }
