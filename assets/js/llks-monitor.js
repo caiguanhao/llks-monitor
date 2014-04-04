@@ -474,6 +474,11 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     for (var p in $scope.market.price) {
       $scope.market.priceText[p] = $filter('currency')($scope.market.price[p], '￥');
     }
+    $scope.market.todayText = $scope.market.today + ' KB';
+    $scope.market.difficultyText = $scope.market.difficulty + ' G/KG';
+    $scope.market.soldText = $scope.market.sold + ' KB';
+    $scope.market.volumeText = $scope.market.volume + ' KB';
+    $scope.market.boughtText = $scope.market.bought + ' KB';
     $scope.market.timeText = $filter('date')($scope.market.time, 'yyyy-MM-dd HH:mm:ss');
   }
   if (Cached.Market.time) {
