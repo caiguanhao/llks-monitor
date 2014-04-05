@@ -547,6 +547,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.HiddenAccounts.splice(index, 1);
     }
     Users.SetHiddenAccounts($scope.HiddenAccounts);
+    $scope.minerIPFilter = '';
     updateAllMiners();
   };
   $scope.toggleShow = function(id) {
@@ -560,6 +561,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       $scope.HiddenAccounts = H;
     }
     Users.SetHiddenAccounts($scope.HiddenAccounts);
+    $scope.minerIPFilter = '';
     updateAllMiners();
   };
 
