@@ -345,15 +345,12 @@
               </tr>
             </tbody>
             <tbody>
-              <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
-                class="{{miner.bg}}">
+              <tr ng-repeat="miner in miners | filter:minerFilter |
+                orderBy:mOrder:mOrderReverse" class="{{miner.bg}}">
                 <td>
                   <span ng-bind="miner.account" class="accountName"></span>
                 </td>
-                <td ng-if="miner.ipreal">
-                  <a href="llksmonitor:{{miner.ipreal}}"
-                    ng-bind="miner.ip"></a></td>
-                <td ng-if="!miner.ipreal" ng-bind="miner.ip"></td>
+                <td bind-html="miner.ipText"></td>
                 <td ng-bind="miner.total" class="noneSM"></td>
                 <td ng-bind="miner.today"></td>
                 <td ng-bind="miner.yesterday" class="noneXS"></td>
@@ -380,6 +377,21 @@
               </tr>
             </tfoot>
           </table>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="input-group">
+          <span class="input-group-addon" i18n="miner:Filter"></span>
+          <input type="text" class="form-control" ng-model="minerFilter.ip"
+            i18n="{placeholder:'Filter by IP'}">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button"
+              ng-click="minerFilter.ip=''" ng-disabled="!minerFilter.ip">
+              <span class="glyphicon glyphicon-remove"></span>
+            </button>
+          </span>
         </div>
       </div>
     </div>

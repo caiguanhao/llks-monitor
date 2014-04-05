@@ -77,6 +77,7 @@ module.exports.loop = function(account, wait) {
     var price = +priceData.data.price;
     if (DATA) DATA.price = price;
     self.db.accounts.update({ _id: account._id }, { $set: { price: price } });
+    if (!data[1]) return;
     var time = priceData.data.createtime.replace(/[^0-9\s\:]+/g, '-');
     time = time.replace('- ', ' ');
     time = +new Date(time);

@@ -171,6 +171,18 @@ directive('secondsAgo', [function() {
   };
 }]).
 
+directive('bindHtml', ['$compile', function($compile) {
+  return {
+    scope: {
+      bindHtml: '='
+    },
+    link: function($scope, elem, attrs, controller) {
+      elem.html($scope.bindHtml);
+      $compile(elem.contents())($scope.$parent);
+    }
+  };
+}]).
+
 directive('historyChart', ['$http', function($http) {
   return {
     restrict: 'A',
@@ -508,6 +520,15 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.password = null;
   $scope.captcha = null;
 
+  $scope.filterMinerIP = function(ip) {
+    $scope.minerFilter = $scope.minerFilter || {};
+    if ($scope.minerFilter.ip === ip) {
+      $scope.minerFilter.ip = '';
+    } else {
+      $scope.minerFilter.ip = ip;
+    }
+  };
+
   function LoadCache() {
     $scope.accounts = Cached.Accounts;
   }
@@ -603,7 +624,24 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
         if (shouldIncludeAccountInList) {
           var match = new RegExp('\\b'+s.ip.replace(/\*+/g, '\\d+').
             replace(/\./g, '\\.')+'\\b').exec(ipAddreses);
-          if (match) s.ipreal = match[0];
+          var ipreal;
+          if (match) ipreal = match[0];
+          var t = s.ip.split('.');
+          if (t.length === 4) {
+            s.ipText = '<a href ng-click="filterMinerIP(\'' +
+              t.slice(0, 2).join('.') + '\')">' + t.slice(0, 2).join('.') +
+              '</a>';
+            s.ipText += '.<a href ng-click="filterMinerIP(\'' +
+              t.slice(0, 3).join('.') + '\')">' + t[2] + '</a>.';
+            if (ipreal) {
+              s.ipText += '<a href="llksmonitor:' + ipreal + '">' +
+                t[3] + '</a>';
+            } else {
+              s.ipText += t[3];
+            }
+          } else {
+            s.ipText = s.ip;
+          }
           s.account = account.name;
           s.servertimeText = prettyTime(s.servertime);
           $scope.count[s.bg] += 1;
