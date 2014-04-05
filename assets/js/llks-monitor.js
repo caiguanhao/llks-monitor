@@ -629,10 +629,8 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
           var t = s.ip.split('.');
           if (t.length === 4) {
             s.ipText = '<a href ng-click="filterMinerIP(\'' +
-              t.slice(0, 2).join('.') + '\')">' + t.slice(0, 2).join('.') +
-              '</a>';
-            s.ipText += '.<a href ng-click="filterMinerIP(\'' +
-              t.slice(0, 3).join('.') + '\')">' + t[2] + '</a>.';
+              t.slice(0, 3).join('.') + '\')">' + t.slice(0, 3).join('.') +
+              '</a>.';
             if (ipreal) {
               s.ipText += '<a href="llksmonitor:' + ipreal + '">' +
                 t[3] + '</a>';
