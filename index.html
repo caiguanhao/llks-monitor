@@ -322,8 +322,13 @@
               <tr>
                 <th ng-click="sort('account')"><a href
                   i18n="miner:Account"></a></th>
-                <th ng-click="sort('ip')"><a href
-                  i18n="miner:IP"></a></th>
+                <th>
+                  <a href ng-click="sort('ip')" i18n="miner:IP"></a>
+                  <a href ng-click="filterMinerIP('')"  ng-show="minerIPFilter"
+                    class="text-danger" i18n="{title:'miner:Clear Filter'}">
+                    <span class="glyphicon glyphicon-remove"></span>
+                  </a>
+                </th>
                 <th class="noneSM" ng-click="sort('total')"><a href
                   i18n="miner:Total"></a></th>
                 <th ng-click="sort('today')"><a href
@@ -345,8 +350,8 @@
               </tr>
             </tbody>
             <tbody>
-              <tr ng-repeat="miner in miners | filter:minerFilter |
-                orderBy:mOrder:mOrderReverse" class="{{miner.bg}}">
+              <tr ng-repeat="miner in miners|orderBy:mOrder:mOrderReverse"
+                class="{{miner.bg}}">
                 <td>
                   <span ng-bind="miner.account" class="accountName"></span>
                 </td>
@@ -377,21 +382,6 @@
               </tr>
             </tfoot>
           </table>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-sm-4">
-        <div class="input-group">
-          <span class="input-group-addon" i18n="miner:Filter"></span>
-          <input type="text" class="form-control" ng-model="minerFilter.ip"
-            i18n="{placeholder:'Filter by IP Address'}">
-          <span class="input-group-btn">
-            <button class="btn btn-default" type="button"
-              ng-click="minerFilter.ip=''" ng-disabled="!minerFilter.ip">
-              <span class="glyphicon glyphicon-remove"></span>
-            </button>
-          </span>
         </div>
       </div>
     </div>

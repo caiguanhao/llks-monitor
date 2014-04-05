@@ -521,12 +521,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
   $scope.captcha = null;
 
   $scope.filterMinerIP = function(ip) {
-    $scope.minerFilter = $scope.minerFilter || {};
-    if ($scope.minerFilter.ip === ip) {
-      $scope.minerFilter.ip = '';
+    if ($scope.minerIPFilter === ip) {
+      $scope.minerIPFilter = '';
     } else {
-      $scope.minerFilter.ip = ip;
+      $scope.minerIPFilter = ip;
     }
+    updateAllMiners();
   };
 
   function LoadCache() {
@@ -621,7 +621,19 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
       allMiners[miner].miners.forEach(function(s) {
         s.bg = speedBg(s);
-        if (shouldIncludeAccountInList) {
+        if (s.status === '在线') minersOnline += 1;
+        if (s.speednum) accountSpeedTotal += s.speednum;
+        accountTotalTotal += s.total;
+        accountTodayTotal += s.today;
+        accountYesterdayTotal += s.yesterday;
+
+        var shouldIncludeMinerInList = true;
+        if ($scope.minerIPFilter) {
+          if (s.ip.indexOf($scope.minerIPFilter) === -1) {
+            shouldIncludeMinerInList = false;
+          }
+        }
+        if (shouldIncludeAccountInList && shouldIncludeMinerInList) {
           var match = new RegExp('\\b'+s.ip.replace(/\*+/g, '\\d+').
             replace(/\./g, '\\.')+'\\b').exec(ipAddreses);
           var ipreal;
@@ -644,20 +656,15 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
           s.servertimeText = prettyTime(s.servertime);
           $scope.count[s.bg] += 1;
           if (s.status === '在线') $scope.count.online += 1;
+
+          $scope.count.total += s.total;
+          $scope.count.today += s.today;
+          $scope.count.yesterday += s.yesterday;
+          if (s.speednum) $scope.count.speed += s.speednum;
+
+          miners.push(s);
         }
-        if (s.status === '在线') minersOnline += 1;
-        if (s.speednum) accountSpeedTotal += s.speednum;
-        accountTotalTotal += s.total;
-        accountTodayTotal += s.today;
-        accountYesterdayTotal += s.yesterday;
       });
-      if (shouldIncludeAccountInList) {
-        miners = miners.concat(allMiners[miner].miners);
-        $scope.count.total += accountTotalTotal;
-        $scope.count.today += accountTodayTotal;
-        $scope.count.yesterday += accountYesterdayTotal;
-        $scope.count.speed += accountSpeedTotal;
-      }
       account.minersOnline = minersOnline;
       account.miners = allMiners[miner].miners.length;
       account.speed = +accountSpeedTotal;
