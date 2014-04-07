@@ -59,6 +59,10 @@ module.exports.loop = function(wait) {
     }, self.Q());
   }).
 
+  catch(function(e) {
+    console.error(new Date, '[github-market-day-history]', e);
+  }).
+
   then(function() {
     if (hour !== 17) return;
     var deferred = self.Q.defer();
@@ -102,6 +106,10 @@ module.exports.loop = function(wait) {
       '/history/all.json',
       string
     );
+  }).
+
+  catch(function(e) {
+    console.error(new Date, '[github-market-history]', e);
   }).
 
   then(function() {
@@ -150,6 +158,10 @@ module.exports.loop = function(wait) {
     }, self.Q());
   }).
 
+  catch(function(e) {
+    console.error(new Date, '[github-mineral-hour-history]', e);
+  }).
+
   then(function() {
     // yesterday:
     var deferred = self.Q.defer();
@@ -185,6 +197,10 @@ module.exports.loop = function(wait) {
     }, function() {});
   }, function() {}).
 
+  catch(function(e) {
+    console.error(new Date, '[github-miners-history-yesterday]', e);
+  }).
+
   then(function() {
     // today:
     var deferred = self.Q.defer();
@@ -210,6 +226,10 @@ module.exports.loop = function(wait) {
       filepath,
       string
     );
+  }).
+
+  catch(function(e) {
+    console.error(new Date, '[github-miners-history-today]', e);
   }).
 
   finally(function() {
