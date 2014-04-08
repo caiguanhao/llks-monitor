@@ -137,7 +137,7 @@ module.exports.loop = function(wait) {
         if (!data) return;
 
         data = JSON.parse(data.data);
-        var colMax = [ 4, 2, 2, 2, 9, 8, 8, 9, 11, 7 ];
+        var colMax = [ 4, 2, 2, 2, 9, 8, 8, 9, 11, 6, 6 ];
         var l = colMax.length;
         var string = JSON.stringify(data, null, 2);
         var i = 0;

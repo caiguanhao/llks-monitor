@@ -1,7 +1,7 @@
 module.exports = {};
 
 module.exports.start = function() {
-  this.loop(1000 * 60 * 10);
+  this.loop(1000 * 60 * 20);
 };
 
 module.exports.loop = function(wait) {
@@ -24,9 +24,7 @@ module.exports.loop = function(wait) {
   }).
 
   then(function(account) {
-    if (minute < 15) {
-      return self.getHttpData('/dig/stats/', account.code);
-    }
+    return self.getHttpData('/dig/stats/', account.code);
   }).
 
   then(function(data) {
@@ -81,8 +79,10 @@ module.exports.loop = function(wait) {
           +(+data.his_stats[0].co_mineral).toFixed(2),
           +(+data.latest.today).toFixed(2),
           +(+data.latest.total_mineral).toFixed(2),
-          parseFloat(data.factor)
+          parseFloat(data.factor),
+          +data.latest.miner_count
         ]);
+        console.log(docdata)
         return docdata;
       }, function() {
         var H = [];
@@ -101,7 +101,8 @@ module.exports.loop = function(wait) {
             +(+data.his_stats[i].co_mineral).toFixed(2),
             +(+data.latest.today).toFixed(2),
             +(+data.latest.total_mineral).toFixed(2),
-            parseFloat(data.factor)
+            parseFloat(data.factor),
+            +data.latest.miner_count
           ]);
         }
         return H;
