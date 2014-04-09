@@ -58,6 +58,8 @@
             <div class="collapse navbar-collapse" ng-class="{in:navbar}"
               id="navbar">
               <ul class="nav navbar-nav">
+                <li navbar-link><a href="/#/subscribe" close="navbar,dropdown"
+                  i18n="header:Subscribe"></a></li>
                 <li navbar-link><a href="/#/history" close="navbar,dropdown"
                   i18n="header:History"></a></li>
                 <li navbar-link><a href="/#/help" close="navbar,dropdown"
@@ -407,6 +409,33 @@
             </tfoot>
           </table>
         </div>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="subscribe">
+    <div class="row">
+      <div class="col-sm-6 col-sm-offset-3">
+        <h3 i18n=";subscribe;Subscribe to these accounts:"
+          ng-show="accounts.length"></h3>
+        <div class="alert alert-dismissable alert-{{statusClass}}"
+          ng-show="status">
+          <button type="button" class="close"
+            ng-click="status=''">&times;</button>
+          <span ng-bind="status"></span>
+        </div>
+        <form ng-submit="update()" ng-show="accounts.length">
+          <div class="form-group" ng-repeat="account in accounts">
+            <div class="checkbox">
+              <label><input type="checkbox" ng-model="account.subscribed">
+              <span ng-bind="account.name"></span></label>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-default"
+            ng-disabled="shouldSubscribeDisable()">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span i18n="subscribe:Subscribe"></span>
+          </button>
+        </form>
       </div>
     </div>
   </script>

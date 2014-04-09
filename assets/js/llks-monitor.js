@@ -7,6 +7,10 @@ config(['$routeProvider', '$locationProvider', '$compileProvider',
     templateUrl: 'main',
     controller: 'MainController'
   }).
+  when('/subscribe', {
+    templateUrl: 'subscribe',
+    controller: 'SubscribeController'
+  }).
   when('/history', {
     templateUrl: 'history',
     controller: 'HistoryController'
@@ -342,6 +346,9 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
   this.Authenticate = function(user, pass) {
     return $http.post('/login', { username: user, password: pass });
   };
+  this.GetAccounts = function() {
+    return $http.get('/accounts');
+  };
   this.GetMyInfo = function() {
     return $http.get('/my');
   };
@@ -350,6 +357,10 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
       oldpassword: oldPassword,
       newpassword: newPassword
     });
+  };
+  this.UpdateSubscriptions = function(data) {
+    if (typeof data !== 'string') data = angular.toJson(data);
+    return $http.put('/my', { subscriptions: data });
   };
   this.SaveIPAddresses = function(data) {
     return $http.put('/my', { ipaddresses: data });
@@ -889,6 +900,42 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       accounts.splice($filter('filter')(accounts, { _id: id }, true), 1);
       delete allMiners[id];
       updateAllMiners();
+    });
+  };
+}]).
+
+controller('SubscribeController', ['$scope', 'Users', '$filter', 'Cached',
+  function($scope, Users, $filter, Cached) {
+
+  if (!Users.RequiresLogin()) return;
+
+  var getSelected = function() {
+    var subs = $filter('filter')($scope.accounts, { subscribed: true }, true);
+    if (!subs) return null;
+    subs = subs.map(function(s) {
+      return s._id;
+    });
+    return subs;
+  };
+  var original = [];
+  Users.GetAccounts().then(function(response) {
+    $scope.accounts = response.data;
+    original = getSelected();
+  });
+  $scope.shouldSubscribeDisable = function() {
+    return angular.equals(original, getSelected());
+  };
+  $scope.update = function() {
+    var subs = getSelected();
+    Users.UpdateSubscriptions(subs).then(function() {
+      original = getSelected();
+      Cached.Reset();
+      $scope.statusClass = 'success';
+      $scope.status = $scope.i18n$('Subscription settings saved. ');
+    }, function() {
+      $scope.statusClass = 'danger';
+      $scope.status = $scope.i18n$('Error saving subscription settings. ' +
+        'Please try again later.');
     });
   };
 }]).

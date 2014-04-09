@@ -149,6 +149,22 @@ app.put('/my', authorize(function(req, res, next) {
     return;
   }
 
+  var subscriptions = req.body.subscriptions;
+  if (typeof subscriptions === 'string') {
+    var new_date = new Date;
+    db.users.update({
+      _id: req.user._id
+    }, { $set: {
+      subscriptions: subscriptions,
+      updated_at: new_date
+    } }, {}, function(err) {
+      if (err) return next();
+      res.status(200);
+      res.send({ status: req.$$('OK') });
+    });
+    return;
+  }
+
   var oldPassword = req.body.oldpassword;
   var newPassword = req.body.newpassword;
   if (!db.checkPassword(oldPassword) || !db.checkPassword(newPassword)) {
@@ -216,6 +232,23 @@ app.get('/captcha', authorize(function(req, res, next) {
     });
   }).catch(function() {
     next();
+  });
+}));
+
+app.get('/accounts', authorize(function(req, res, next) {
+  db.accounts.find({}, function(err, accounts) {
+    if (err) return next();
+    var subscriptions = req.user.subscriptions;
+    try {
+      subscriptions = JSON.parse(subscriptions);
+    } catch(e) {}
+    subscriptions = subscriptions || [];
+    accounts.map(function(account) {
+      delete account.code;
+      delete account.data;
+      account.subscribed = subscriptions.indexOf(account._id) !== -1;
+    });
+    res.send(accounts);
   });
 }));
 
@@ -395,12 +428,41 @@ io.of('/public').
 function HereAreTheAccounts() {
   var self = this;
   if (typeof self.emit !== 'function') self = io.of('/private');
-  db.accounts.find({}, function(err, accounts) {
-    if (err) return;
-    accounts.map(function(account) {
-      delete account.code;
+
+  Q.
+  fcall(function() {
+    var deferred = Q.defer();
+    db.accounts.find({}, function(err, accounts) {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        deferred.resolve(accounts || []);
+      }
     });
+    return deferred.promise;
+  }).
+  then(function(accounts) {
+    var deferred = Q.defer();
+    var user_id = self.manager.handshaken[self.id].user_id;
+    db.users.findOne({ _id: user_id }, function(err, user) {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        var subscriptions = user.subscriptions || [];
+        accounts = accounts.filter(function(account) {
+          delete account.code;
+          return subscriptions.indexOf(account._id) !== -1;
+        });
+        deferred.resolve(accounts);
+      }
+    });
+    return deferred.promise;
+  }).
+  then(function(accounts) {
     self.emit('HereAreTheAccounts', accounts);
+  }).
+  catch(function(err) {
+    console.error(new Date, 'HereAreTheAccounts', err);
   });
 }
 
