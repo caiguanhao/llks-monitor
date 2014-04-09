@@ -427,7 +427,11 @@ io.of('/public').
 
 function HereAreTheAccounts() {
   var self = this;
-  if (typeof self.emit !== 'function') self = io.of('/private');
+  var toAll = false;
+  if (typeof self.emit !== 'function') {
+    toAll = true;
+    self = io.of('/private');
+  }
 
   Q.
   fcall(function() {
@@ -442,24 +446,40 @@ function HereAreTheAccounts() {
     return deferred.promise;
   }).
   then(function(accounts) {
-    var deferred = Q.defer();
-    var user_id = self.manager.handshaken[self.id].user_id;
-    db.users.findOne({ _id: user_id }, function(err, user) {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        var subscriptions = user.subscriptions || [];
-        accounts = accounts.filter(function(account) {
-          delete account.code;
-          return subscriptions.indexOf(account._id) !== -1;
+    var clients;
+    if (toAll) {
+      clients = self.clients();
+    } else {
+      clients = [ self ];
+    }
+    return clients.reduce(function(prev, cur) {
+      return prev.then(function() {
+        var deferred = Q.defer();
+        db.users.findOne({
+          _id: cur.manager.handshaken[cur.id].user_id
+        }, function(err, user) {
+          if (err) {
+            deferred.resolve();
+          } else {
+            var subscriptions;
+            try {
+              subscriptions = JSON.parse(user.subscriptions) || [];
+            } catch(e) {
+              subscriptions = [];
+            }
+            var acc = accounts.filter(function(account) {
+              delete account.code;
+              return subscriptions.indexOf(account._id) !== -1;
+            });
+            deferred.resolve(acc);
+          }
         });
-        deferred.resolve(accounts);
-      }
-    });
-    return deferred.promise;
-  }).
-  then(function(accounts) {
-    self.emit('HereAreTheAccounts', accounts);
+        return deferred.promise;
+      }).then(function(accounts) {
+        if (!accounts || accounts.length === 0) return;
+        cur.emit('HereAreTheAccounts', accounts);
+      }, function() {});
+    }, Q());
   }).
   catch(function(err) {
     console.error(new Date, 'HereAreTheAccounts', err);
