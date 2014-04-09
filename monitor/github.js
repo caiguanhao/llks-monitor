@@ -137,6 +137,13 @@ module.exports.loop = function(wait) {
         if (!data) return;
 
         data = JSON.parse(data.data);
+        // ensure there are 11 columns
+        for (var i = 0; i < data.length; i++) {
+          var l = data[i].length;
+          for (var j = 0; j < 11 - l; j++) {
+            data[i].push(-1);
+          }
+        }
         var colMax = [ 4, 2, 2, 2, 9, 8, 8, 9, 11, 6, 6 ];
         var l = colMax.length;
         var string = JSON.stringify(data, null, 2);
