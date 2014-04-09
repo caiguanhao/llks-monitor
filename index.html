@@ -203,7 +203,8 @@
           <table class="table table-slim table-hover table-account">
             <thead ng-show="accounts.length">
               <tr>
-                <th ng-click="toggleShow()"><a href><span class="glyphicon
+                <th class="toggleShowHide" ng-click="toggleShow()">
+                  <a href><span class="glyphicon
                   glyphicon-eye-open"></span></a></th>
                 <th ng-click="asort('name')"><a href
                   i18n="account:Name"></a></th>
@@ -270,7 +271,7 @@
               </tr>
             </tbody>
             <tfoot>
-              <tr>
+              <tr ng-show="accounts.length">
                 <td colspan="2">
                   <span class="noneSM" ng-repeat="type in
                     ['success','warning','danger','active']">
