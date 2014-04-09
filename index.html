@@ -198,6 +198,7 @@
               <span i18n="account:Enable Edits"></span>
             </a>
             <span i18n="account:Accounts"></span>
+            (<span ng-bind="accounts.length||0"></span>)
           </div>
           <table class="table table-slim table-hover table-account">
             <thead ng-show="accounts.length">
@@ -268,8 +269,28 @@
                 <td class="notice" i18n="No accounts at the moment."></td>
               </tr>
             </tbody>
-            <tfoot class="edits-enabled-shown">
+            <tfoot>
               <tr>
+                <td colspan="2">
+                  <span class="noneSM" ng-repeat="type in
+                    ['success','warning','danger','active']">
+                    <span class="legend {{type}}"></span>
+                    <span ng-bind="count.account[type]"></span>
+                  </span>
+                </td>
+                <td ng-bind="count.account.minersOnline + ' / ' +
+                  count.account.miners" class="noneXS"></td>
+                <td ng-bind="count.account.speed"></td>
+                <td ng-bind="count.account.total" class="noneXS"></td>
+                <td ng-bind="count.account.today" class="noneSM"></td>
+                <td ng-bind="count.account.yesterday" class="noneXS"></td>
+                <td ng-bind="count.account.sold" class="noneXS"></td>
+                <td ng-bind="count.account.unsold" class="noneSM"></td>
+                <td ng-bind="count.account.unsoldWorth"></td>
+                <td ng-bind="count.account.totalValue" class="noneXS"></td>
+                <td></td>
+              </tr>
+              <tr class="edits-enabled-shown">
                 <td colspan="13" class="text-center">
                   <form class="form-inline input-group-sm" ng-submit="create()">
                     <input type="text" class="form-control" id="username"

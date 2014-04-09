@@ -599,7 +599,24 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       today: 0,
       yesterday: 0,
       speed: 0,
-      online: 0
+      online: 0,
+
+      account: {
+        danger: 0,
+        warning: 0,
+        active: 0,
+        success: 0,
+        minersOnline: 0,
+        miners: 0,
+        speed: 0,
+        total: 0,
+        today: 0,
+        yesterday: 0,
+        sold: 0,
+        unsold: 0,
+        unsoldWorth: 0,
+        totalValue: 0
+      }
     };
     var ipAddreses = Users.GetIPAddresses() || '';
     for (var miner in allMiners) {
@@ -623,6 +640,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
 
       allMiners[miner].miners.forEach(function(s) {
         s.bg = speedBg(s);
+        $scope.count.account[s.bg] += 1;
         if (s.status === '在线') minersOnline += 1;
         if (s.speednum) accountSpeedTotal += s.speednum;
         accountTotalTotal += s.total;
@@ -671,17 +689,39 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       account.miners = allMiners[miner].miners.length;
       account.speed = +accountSpeedTotal;
       account.speedText = (account.speed / 1024).toFixed(3) + ' M/S';
-      account.unsoldWorth = $filter('currency')((!account || !account.unsold)
-        ? 0 : (Math.floor(account.unsold) * account.price), '￥');
+      var worth = (!account || !account.unsold) ? 0 :
+        (Math.floor(account.unsold) * account.price);
+      account.unsoldWorth = $filter('currency')(worth, '￥');
       account.totalValueText = $filter('currency')(account.totalValue, '￥');
       account.today = +accountTodayTotal.toFixed(2);
       account.yesterday = +accountYesterdayTotal.toFixed(2);
       if (account.total) account.total = +account.total.toFixed(2);
+      $scope.count.account.minersOnline += account.minersOnline;
+      $scope.count.account.miners += account.miners;
+      $scope.count.account.speed += account.speed;
+      $scope.count.account.total += account.total;
+      $scope.count.account.today += account.today;
+      $scope.count.account.yesterday += account.yesterday;
+      $scope.count.account.sold += account.sold;
+      $scope.count.account.unsold += account.unsold;
+      $scope.count.account.unsoldWorth += worth;
+      $scope.count.account.totalValue += account.totalValue;
     }
     $scope.count.total = +$scope.count.total.toFixed(5);
     $scope.count.today = +$scope.count.today.toFixed(5);
     $scope.count.yesterday = +$scope.count.yesterday.toFixed(5);
     $scope.count.speed = ($scope.count.speed / 1024).toFixed(3) + ' M/S';
+    $scope.count.account.speed = ($scope.count.account.speed /
+      1024).toFixed(3) + ' M/S';
+    $scope.count.account.total = $scope.count.account.total.toFixed(2);
+    $scope.count.account.today = $scope.count.account.today.toFixed(2);
+    $scope.count.account.sold = $scope.count.account.sold.toFixed(2);
+    $scope.count.account.unsold = $scope.count.account.unsold.toFixed(2);
+    $scope.count.account.yesterday = $scope.count.account.yesterday.toFixed(2);
+    $scope.count.account.unsoldWorth = $filter('currency')
+      ($scope.count.account.unsoldWorth, '￥');
+    $scope.count.account.totalValue = $filter('currency')
+      ($scope.count.account.totalValue, '￥');
     $scope.miners = miners;
     if (!$scope.$$phase) $scope.$apply();
   }
