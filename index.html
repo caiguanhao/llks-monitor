@@ -203,6 +203,10 @@
           <table class="table table-slim table-hover table-account">
             <thead ng-show="accounts.length">
               <tr>
+                <th i18n="account:Updated"
+                  class="updated edits-enabled-hidden"></th>
+                <th i18n="account:Actions"
+                  class="updated edits-enabled-shown"></th>
                 <th class="toggleShowHide" ng-click="toggleShow()">
                   <a href><span class="glyphicon
                   glyphicon-eye-open"></span></a></th>
@@ -226,12 +230,30 @@
                   i18n="account:Worth"></a></th>
                 <th class="noneXS" ng-click="asort('totalValue')"><a href
                   i18n="account:value:Total"></a></th>
-                <th i18n="account:Updated" class="edits-enabled-hidden"></th>
-                <th i18n="account:Actions" class="edits-enabled-shown"></th>
               </tr>
             </thead>
             <tbody>
               <tr ng-repeat="account in accounts|orderBy:aOrder:aOrderReverse">
+                <td class="updated edits-enabled-hidden"
+                  ng-switch on="account.updated">
+                  <span ng-switch-when="false" i18n="account:Expired"></span>
+                  <span ng-switch-default seconds-ago="account.updated"
+                    i18n="{'seconds-ago-template': '{}s ago'}"></span>
+                </td>
+                <td class="updated edits-enabled-shown">
+                  <div class="btn-group btn-group-xs">
+                    <a class="btn btn-default"
+                      i18n="{title: 'account:Edit name'}"
+                      ng-click="updateName(account)">
+                      <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+                    <a class="btn btn-default"
+                      i18n="{title: 'account:Delete account'}"
+                      ng-click="delete(accounts, account)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                    </a>
+                  </div>
+                </td>
                 <td ng-click="toggleHidden(account._id)"><input
                   type="checkbox" ng-checked="isHidden(account._id)"></td>
                 <td ng-click="toggleShow(account._id)"><a href
@@ -246,25 +268,6 @@
                 <td ng-bind="account.unsold" class="noneSM"></td>
                 <td ng-bind="account.unsoldWorth"></td>
                 <td ng-bind="account.totalValueText" class="noneXS"></td>
-                <td class="edits-enabled-hidden" ng-switch on="account.updated">
-                  <span ng-switch-when="false" i18n="account:Expired"></span>
-                  <span ng-switch-default seconds-ago="account.updated"
-                    i18n="{'seconds-ago-template': '{}s ago'}"></span>
-                </td>
-                <td class="edits-enabled-shown">
-                  <div class="btn-group btn-group-xs">
-                    <a class="btn btn-default"
-                      i18n="{title: 'account:Edit name'}"
-                      ng-click="updateName(account)">
-                      <span class="glyphicon glyphicon-pencil"></span>
-                    </a>
-                    <a class="btn btn-default"
-                      i18n="{title: 'account:Delete account'}"
-                      ng-click="delete(accounts, account)">
-                      <span class="glyphicon glyphicon-trash"></span>
-                    </a>
-                  </div>
-                </td>
               </tr>
               <tr ng-show="!accounts||!accounts.length">
                 <td class="notice" i18n="No accounts at the moment."></td>
@@ -272,8 +275,8 @@
             </tbody>
             <tfoot>
               <tr ng-show="accounts.length">
-                <td colspan="2">
-                  <span class="noneSM" ng-repeat="type in
+                <td colspan="3" class="text-center">
+                  <span ng-repeat="type in
                     ['success','warning','danger','active']">
                     <span class="legend {{type}}"></span>
                     <span ng-bind="count.account[type]"></span>
@@ -289,7 +292,6 @@
                 <td ng-bind="count.account.unsold" class="noneSM"></td>
                 <td ng-bind="count.account.unsoldWorth"></td>
                 <td ng-bind="count.account.totalValue" class="noneXS"></td>
-                <td></td>
               </tr>
               <tr class="edits-enabled-shown">
                 <td colspan="13" class="text-center">
