@@ -772,7 +772,7 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
       angular.extend(allMiners, data);
       updateAllMiners();
     });
-    Users.PrivateSocket.on('updateAccount', function(data) {
+    Users.PrivateSocket.on('UpdateAccounts', function(data) {
       $scope.status = 'connected';
       for (var accountId in data) {
         var account = $filter('filter')(Cached.Accounts || [],

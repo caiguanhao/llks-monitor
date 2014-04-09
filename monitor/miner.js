@@ -126,7 +126,7 @@ module.exports.loop = function(account, wait) {
       };
       if (DATA) DATA.unsold = +accountData.data.flow;
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      self.io.of('/private').emit('updateAccount', bundle);
+      self.io.of('/private').emit('UpdateAccounts', bundle);
     } catch(e) {}
   }).
 
@@ -144,7 +144,7 @@ module.exports.loop = function(account, wait) {
         totalValue: totalValue
       };
       self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      self.io.of('/private').emit('updateAccount', bundle);
+      self.io.of('/private').emit('UpdateAccounts', bundle);
     } catch(e) {}
   }).
 
