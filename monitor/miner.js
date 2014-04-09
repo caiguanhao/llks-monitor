@@ -73,15 +73,16 @@ module.exports.loop = function(account, wait) {
   }).
 
   then(function(data) {
-    var priceData = JSON.parse(data[0]);
+    var priceData = JSON.parse(data[0]) || {};
+    if (!priceData.ok) return;
     var price = +priceData.data.price;
     if (DATA) DATA.price = price;
-    self.db.accounts.update({ _id: account._id }, { $set: { price: price } });
     if (!data[1]) return;
     var time = priceData.data.createtime.replace(/[^0-9\s\:]+/g, '-');
     time = time.replace('- ', ' ');
     time = +new Date(time);
-    var mineralData = JSON.parse(data[1]);
+    var mineralData = JSON.parse(data[1]) || {};
+    if (!mineralData.ok) return;
     var bundle = {
       time: time,
       price: {
@@ -100,11 +101,37 @@ module.exports.loop = function(account, wait) {
       today: +(+mineralData.data.latest.today).toFixed(2),
       completedPercent: mineralData.data.latest.total_per + '%',
     };
-    self.db.marketHistory.update({ name: 'market-stat' }, {
-      name: 'market-stat',
-      data: JSON.stringify(bundle)
-    }, { upsert: true });
-    self.io.of('/public').emit('UpdateMarket', bundle);
+    return self.Q().
+    then(function() {
+      var deferred = self.Q.defer();
+      self.db.accounts.update({ _id: account._id }, {
+        $set: { price: price }
+      }, {}, function(err) {
+        if (err) {
+          deferred.reject(err);
+        } else {
+          deferred.resolve();
+        }
+      });
+      return deferred.promise;
+    }).
+    then(function() {
+      var deferred = self.Q.defer();
+      self.db.marketHistory.update({ name: 'market-stat' }, {
+        name: 'market-stat',
+        data: JSON.stringify(bundle)
+      }, { upsert: true }, function(err) {
+        if (err) {
+          deferred.reject(err);
+        } else {
+          deferred.resolve();
+        }
+      });
+      return deferred.promise;
+    }).
+    finally(function() {
+      self.io.of('/public').emit('UpdateMarket', bundle);
+    });
   }).
 
   catch(function(e) {
@@ -119,8 +146,15 @@ module.exports.loop = function(account, wait) {
   }).
 
   then(function(data) {
-    var accountData = JSON.parse(data[0]);
-    var balance = JSON.parse(data[1]);
+
+    var accountData;
+    var balance;
+    try {
+      accountData = JSON.parse(data[0]);
+      balance = JSON.parse(data[1]);
+    } catch(e) {
+      return;
+    }
 
     var totalValue = +(+balance.data.total_amount +
         DATA.price * Math.floor(DATA.unsold)).toFixed(2);
@@ -134,8 +168,19 @@ module.exports.loop = function(account, wait) {
     };
 
     if (DATA) DATA.unsold = +accountData.data.flow;
-    self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-    self.io.of('/private').emit('UpdateAccounts', bundle);
+    var deferred = self.Q.defer();
+    self.db.accounts.update({
+      _id: account._id
+    }, {
+      $set: bundle[account._id]
+    }, {}, function(err) {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        self.io.of('/private').emit('UpdateAccounts', bundle);
+        deferred.resolve();
+      }
+    });
   }).
 
   catch(function(e) {
@@ -144,6 +189,9 @@ module.exports.loop = function(account, wait) {
 
   then(function() {
     var miners = [];
+    if (!DATA || !DATA.miners) {
+      return;
+    }
     DATA.miners.forEach(function(miner) {
       var times = miner.speed.indexOf('M/S') !== -1 ? 1024 : 1;
       var speed = parseFloat(miner.speed);
