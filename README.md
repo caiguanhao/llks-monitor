@@ -4,6 +4,8 @@ llks-monitor
 Near real-time LLKS (流量矿石) activity monitoring powered by Socket.IO and
 Angular.js.
 
+Check out the [history data archive](https://github.com/choigoonho/llks-data).
+
 Usage
 -----
 
@@ -14,7 +16,7 @@ Usage
 Screenshot
 ----------
 
-![llks monitor](https://f.cloud.github.com/assets/1284703/2438232/5d558e8c-adef-11e3-94e4-8e2c29de8839.png)
+![llks](https://cloud.githubusercontent.com/assets/1284703/2652836/41a02f64-bfb8-11e3-916e-8a36693992ae.png)
 
 Nginx
 -----
