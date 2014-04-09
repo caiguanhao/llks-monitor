@@ -112,40 +112,34 @@ module.exports.loop = function(account, wait) {
   }).
 
   then(function(data) {
-    return self.getHttpData('/dig/miner/stats/', code);
+    return self.Q.all([
+      self.getHttpData('/dig/miner/stats/', code),
+      self.getHttpData('/pay/kuaibi/balance/', code)
+    ]);
   }).
 
   then(function(data) {
-    try {
-      var accountData = JSON.parse(data);
-      var bundle = {};
-      bundle[account._id] = {
-        total: +(+accountData.data.total_flow).toFixed(2),
-        unsold: +(+accountData.data.flow).toFixed(2),
-        sold: +(+accountData.data.sold).toFixed(2)
-      };
-      if (DATA) DATA.unsold = +accountData.data.flow;
-      self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      self.io.of('/private').emit('UpdateAccounts', bundle);
-    } catch(e) {}
+    var accountData = JSON.parse(data[0]);
+    var balance = JSON.parse(data[1]);
+
+    var totalValue = +(+balance.data.total_amount +
+        DATA.price * Math.floor(DATA.unsold)).toFixed(2);
+
+    var bundle = {};
+    bundle[account._id] = {
+      total: +(+accountData.data.total_flow).toFixed(2),
+      unsold: +(+accountData.data.flow).toFixed(2),
+      sold: +(+accountData.data.sold).toFixed(2),
+      totalValue: totalValue
+    };
+
+    if (DATA) DATA.unsold = +accountData.data.flow;
+    self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
+    self.io.of('/private').emit('UpdateAccounts', bundle);
   }).
 
-  then(function() {
-    return self.getHttpData('/pay/kuaibi/balance/', code);
-  }).
-
-  then(function(data) {
-    try {
-      var balance = JSON.parse(data);
-      var totalValue = +(+balance.data.total_amount +
-          DATA.price * Math.floor(DATA.unsold)).toFixed(2);
-      var bundle = {};
-      bundle[account._id] = {
-        totalValue: totalValue
-      };
-      self.db.accounts.update({ _id: account._id }, { $set: bundle[account._id] });
-      self.io.of('/private').emit('UpdateAccounts', bundle);
-    } catch(e) {}
+  catch(function(e) {
+    console.error(new Date, '[miner-stats]', e);
   }).
 
   then(function() {
