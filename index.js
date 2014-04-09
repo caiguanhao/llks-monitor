@@ -551,6 +551,11 @@ function HereAreTheDayData() {
   });
 }
 
+// stop restart loop caused by errors
+process.on('uncaughtException', function(err) {
+  console.error('Caught exception: ' + JSON.stringify(err));
+});
+
 process.on('SIGINT', function() {
   for (var s in io.sockets.sockets) {
     io.sockets.sockets[s].disconnect();
