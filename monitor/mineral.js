@@ -82,7 +82,6 @@ module.exports.loop = function(wait) {
           parseFloat(data.factor),
           +data.latest.miner_count
         ]);
-        console.log(docdata)
         return docdata;
       }, function() {
         var H = [];

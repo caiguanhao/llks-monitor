@@ -712,12 +712,12 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     $scope.count.yesterday = +$scope.count.yesterday.toFixed(5);
     $scope.count.speed = ($scope.count.speed / 1024).toFixed(3) + ' M/S';
     $scope.count.account.speed = ($scope.count.account.speed /
-      1024).toFixed(3) + ' M/S';
-    $scope.count.account.total = $scope.count.account.total.toFixed(2);
-    $scope.count.account.today = $scope.count.account.today.toFixed(2);
-    $scope.count.account.sold = $scope.count.account.sold.toFixed(2);
-    $scope.count.account.unsold = $scope.count.account.unsold.toFixed(2);
-    $scope.count.account.yesterday = $scope.count.account.yesterday.toFixed(2);
+      1024).toFixed(1) + ' M/S';
+    $scope.count.account.total = $scope.count.account.total.toFixed(1);
+    $scope.count.account.today = $scope.count.account.today.toFixed(1);
+    $scope.count.account.sold = $scope.count.account.sold.toFixed(1);
+    $scope.count.account.unsold = $scope.count.account.unsold.toFixed(1);
+    $scope.count.account.yesterday = $scope.count.account.yesterday.toFixed(1);
     $scope.count.account.unsoldWorth = $filter('currency')
       ($scope.count.account.unsoldWorth, '￥');
     $scope.count.account.totalValue = $filter('currency')
