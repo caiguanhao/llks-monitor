@@ -326,6 +326,27 @@ app.post('/accounts', authorize(function(req, res, next) {
     });
     return deferred.promise;
   }).then(function(account) {
+    // add subscription by default
+    var subscriptions;
+    try {
+      subscriptions = JSON.parse(req.user.subscriptions);
+    } catch(e) {}
+    if (!subscriptions) subscriptions = [];
+    subscriptions.push(account._id);
+    var deferred = Q.defer();
+    db.users.update({
+      _id: req.user._id
+    }, { $set: {
+      subscriptions: JSON.stringify(subscriptions)
+    } }, {}, function(err, user) {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        deferred.resolve(account);
+      }
+    });
+    return deferred.promise;
+  }).then(function(account) {
     onAccountChanges();
     res.status(201);
     res.send(account);
