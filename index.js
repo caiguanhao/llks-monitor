@@ -244,6 +244,18 @@ app.get('/accounts', authorize(function(req, res, next) {
     subscriptions = subscriptions || [];
     accounts.map(function(account) {
       delete account.code;
+      account.miners = {};
+      var data = account.data;
+      try {
+        data = JSON.parse(data);
+        account.miners = data[account._id];
+        account.miners.miners = account.miners.miners.map(function(m) {
+          return {
+            speed: m.speed,
+            status: m.status
+          };
+        });
+      } catch(e) {}
       delete account.data;
       account.subscribed = subscriptions.indexOf(account._id) !== -1;
     });

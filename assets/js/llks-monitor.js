@@ -581,18 +581,6 @@ controller('MainController', ['$scope', 'Accounts', 'Users', '$window',
     updateAllMiners();
   }
 
-  function speedBg(item) {
-    if (!item || item.status !== '在线') return 'active';
-    if (!item.speed) return '';
-    var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
-    var speed = parseFloat(item.speed);
-    if (isNaN(speed)) return 'danger';
-    speed = speed * times;
-    item.speednum = speed;
-    if (speed >= 1024) return 'success';
-    if (speed >= 512) return 'warning';
-    return 'danger';
-  }
   function f(n) { return n < 10 ? '0' + n : n; }
   function prettyTime(t) {
     var time = new Date(t);
@@ -918,10 +906,32 @@ controller('SubscribeController', ['$scope', 'Users', '$filter', 'Cached',
     return subs;
   };
   var original = [];
-  Users.GetAccounts().then(function(response) {
-    $scope.accounts = response.data;
-    original = getSelected();
-  });
+  $scope.reload = function() {
+    original = [];
+    Users.GetAccounts().then(function(response) {
+      $scope.accounts = response.data;
+      for (var i = 0; i < $scope.accounts.length; i++) {
+        var miners = $scope.accounts[i].miners;
+        var count = {
+          danger: 0,
+          warning: 0,
+          active: 0,
+          success: 0
+        };
+        $scope.accounts[i].updated = false;
+        if (miners && (miners.miners instanceof Array)) {
+          for (var j = 0; j < miners.miners.length; j++) {
+            count[speedBg(miners.miners[j])]++;
+          }
+          $scope.accounts[i].updated = $scope.accounts[i].miners.updated;
+        }
+        $scope.accounts[i].count = count;
+        delete $scope.accounts[i].miners;
+      }
+      original = getSelected();
+    });
+  };
+  $scope.reload();
   $scope.shouldSubscribeDisable = function() {
     return angular.equals(original, getSelected());
   };
@@ -1159,3 +1169,16 @@ run([function() {
     FastClick.attach(document.body);
   }, false);
 }]);
+
+function speedBg(item) {
+  if (!item || item.status !== '在线') return 'active';
+  if (!item.speed) return '';
+  var times = item.speed.indexOf('M/S') !== -1 ? 1024 : 1;
+  var speed = parseFloat(item.speed);
+  if (isNaN(speed)) return 'danger';
+  speed = speed * times;
+  item.speednum = speed;
+  if (speed >= 1024) return 'success';
+  if (speed >= 512) return 'warning';
+  return 'danger';
+}

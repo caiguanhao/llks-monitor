@@ -435,6 +435,16 @@
               ng-click="account.subscribed=!account.subscribed">
               <input type="checkbox" ng-checked="account.subscribed">
               <span ng-bind="account.name"></span>
+              <div class="subscription-details">
+                <span ng-repeat="type in
+                  ['success','warning','danger','active']">
+                  <span class="legend {{type}}"></span>
+                  <span ng-bind="account.count[type]"></span>
+                </span>
+                <div ng-if="account.updated" seconds-ago="account.updated"
+                  i18n="{'seconds-ago-template': '({}s ago)'}"></div>
+                <div ng-if="account.updated===false" i18n="(expired)"></div>
+              </div>
             </div>
           </div>
           <div class="btn-toolbar" role="toolbar">
@@ -452,6 +462,10 @@
               <button type="button" class="btn btn-default"
                 ng-disabled="shouldSelectNoneDisable()"
                 i18n="subscribe:Select None" ng-click="selectNone()"></button>
+            </div>
+            <div class="btn-group">
+              <button type="button" class="btn btn-default"
+                i18n="subscribe:Reload" ng-click="reload()"></button>
             </div>
           </div>
         </form>
