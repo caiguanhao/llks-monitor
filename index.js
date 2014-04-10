@@ -64,7 +64,7 @@ app.post('/login', function(req, res, next) {
       try {
         var clients = io.sockets.clients();
         for (var i = 0; i < clients.length; i++) {
-          var user_id = clients[i].handshake.user_id;
+          var user_id = clients[i].handshake.user._id;
           if (user._id === user_id) {
             clients[i].disconnect();
           }
@@ -135,14 +135,13 @@ app.get('/my', authorize(function(req, res, next) {
 app.put('/my', authorize(function(req, res, next) {
   var ipaddresses = req.body.ipaddresses;
   if (typeof ipaddresses === 'string') {
-    var new_date = new Date;
+    req.user['ipaddresses'] = ipaddresses;
+    req.user['updated_at'] = new Date;
     db.users.update({
       _id: req.user._id
-    }, { $set: {
-      ipaddresses: ipaddresses,
-      updated_at: new_date
-    } }, {}, function(err) {
+    }, req.user, {}, function(err) {
       if (err) return next();
+      UpdateUserHandshakeData(req.user);
       res.status(200);
       res.send({ status: req.$$('OK') });
     });
@@ -151,14 +150,13 @@ app.put('/my', authorize(function(req, res, next) {
 
   var subscriptions = req.body.subscriptions;
   if (typeof subscriptions === 'string') {
-    var new_date = new Date;
+    req.user['subscriptions'] = subscriptions;
+    req.user['updated_at'] = new Date;
     db.users.update({
       _id: req.user._id
-    }, { $set: {
-      subscriptions: subscriptions,
-      updated_at: new_date
-    } }, {}, function(err) {
+    }, req.user, {}, function(err) {
       if (err) return next();
+      UpdateUserHandshakeData(req.user);
       res.status(200);
       res.send({ status: req.$$('OK') });
     });
@@ -182,6 +180,7 @@ app.put('/my', authorize(function(req, res, next) {
       updated_at: new_date
     } }, {}, function(err) {
       if (err) return next();
+      // UpdateUserHandshakeData(req.user); // we don't need to update this
       res.status(200);
       res.send({ status: req.$$('OK') });
     });
@@ -421,7 +420,7 @@ io.of('/private').
       }).exec(function(error, user) {
         if (error) return callback('Error occurred.', false);
         if (!user) return callback(null, false);
-        handshakeData.user_id = user._id;
+        handshakeData.user = user;
         return callback(null, true);
       });
       return;
@@ -445,6 +444,16 @@ io.of('/public').
     socket.on('GiveMeDayData', HereAreTheDayData);
     socket.on('GiveMeMarketData', HereAreTheMarketData);
   });
+
+function UpdateUserHandshakeData(user) {
+  var clients = io.of('/private').clients();
+  if (!clients) return;
+  for (var i = 0; i < clients.length; i++) {
+    if (clients[i].manager.handshaken[clients[i].id].user._id = user._id) {
+      clients[i].manager.handshaken[clients[i].id].user = user;
+    }
+  }
+}
 
 function HereAreTheAccounts() {
   var self = this;
@@ -475,27 +484,17 @@ function HereAreTheAccounts() {
     }
     return clients.reduce(function(prev, cur) {
       return prev.then(function() {
-        var deferred = Q.defer();
-        db.users.findOne({
-          _id: cur.manager.handshaken[cur.id].user_id
-        }, function(err, user) {
-          if (err) {
-            deferred.resolve();
-          } else {
-            var subscriptions;
-            try {
-              subscriptions = JSON.parse(user.subscriptions) || [];
-            } catch(e) {
-              subscriptions = [];
-            }
-            var acc = accounts.filter(function(account) {
-              delete account.code;
-              return subscriptions.indexOf(account._id) !== -1;
-            });
-            deferred.resolve(acc);
-          }
+        var handshake = cur.manager.handshaken[cur.id];
+        var subscriptions;
+        try {
+          subscriptions = JSON.parse(handshake.user.subscriptions) || [];
+        } catch(e) {
+          subscriptions = [];
+        }
+        return accounts.filter(function(account) {
+          delete account.code;
+          return subscriptions.indexOf(account._id) !== -1;
         });
-        return deferred.promise;
       }).then(function(accounts) {
         if (!accounts || accounts.length === 0) return;
         cur.emit('HereAreTheAccounts', accounts);
