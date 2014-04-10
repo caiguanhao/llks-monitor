@@ -243,17 +243,18 @@ module.exports.loop = function(account, wait) {
         miner.status
       ]);
     });
-    var check = self.Q().then(function() {
-      var deferred = self.Q.defer();
-      self.db.minerStat.count({}, function(err, count) {
-        if (err) return deferred.reject(err);
-        if (count > 30000) {
-          return deferred.reject('too many documents! aborted!');
-        }
-        deferred.resolve();
-      });
-      return deferred.promise;
-    });
+    var check = self.Q();
+    // var check = self.Q().then(function() {
+    //   var deferred = self.Q.defer();
+    //   self.db.minerStat.count({}, function(err, count) {
+    //     if (err) return deferred.reject(err);
+    //     if (count > 30000) {
+    //       return deferred.reject('too many documents! aborted!');
+    //     }
+    //     deferred.resolve();
+    //   });
+    //   return deferred.promise;
+    // });
     var updated = Math.floor(DATA.updated / 1000);
     return miners.reduce(function(prev, cur) {
       return prev.then(function() {
