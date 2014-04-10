@@ -62,7 +62,25 @@ module.exports.loop = function(account, wait) {
     } }, {}, function() {
       self.db.accounts.persistence.compactDatafile();
     });
-    self.io.of('/private').emit('UpdateMiners', bundle);
+    return bundle;
+  }).
+
+  then(function(bundle) {
+    var clients = self.io.of('/private').clients();
+    return clients.reduce(function(prev, cur) {
+      return prev.then(function() {
+        var handshake = cur.manager.handshaken[cur.id];
+        var subscriptions;
+        try {
+          subscriptions = JSON.parse(handshake.user.subscriptions) || [];
+        } catch(e) {
+          subscriptions = [];
+        }
+        if (subscriptions.indexOf(account._id) !== -1) {
+          cur.emit('UpdateMiners', bundle);
+        }
+      });
+    }, self.Q());
   }).
 
   then(function() {
@@ -177,10 +195,28 @@ module.exports.loop = function(account, wait) {
       if (err) {
         deferred.reject(err);
       } else {
-        self.io.of('/private').emit('UpdateAccounts', bundle);
-        deferred.resolve();
+        deferred.resolve(bundle);
       }
     });
+    return deferred.promise;
+  }).
+
+  then(function(bundle) {
+    var clients = self.io.of('/private').clients();
+    return clients.reduce(function(prev, cur) {
+      return prev.then(function() {
+        var handshake = cur.manager.handshaken[cur.id];
+        var subscriptions;
+        try {
+          subscriptions = JSON.parse(handshake.user.subscriptions) || [];
+        } catch(e) {
+          subscriptions = [];
+        }
+        if (subscriptions.indexOf(account._id) !== -1) {
+          cur.emit('UpdateAccounts', bundle);
+        }
+      });
+    }, self.Q());
   }).
 
   catch(function(e) {
