@@ -63,7 +63,7 @@
     "miner:Status": "状态",
     "No miners at the moment.": "暂无可用的矿机显示。",
     "subscribe;Subscribe to these accounts:": "订阅这些账号：",
-    "(expired)": "(已过期)",
+    "expired": "已过期",
     "subscribe:Update Subscriptions": "更新订阅",
     "subscribe:Select All": "选择全部",
     "subscribe:Select None": "全不选",

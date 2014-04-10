@@ -957,6 +957,20 @@ controller('SubscribeController', ['$scope', 'Users', '$filter', 'Cached',
         'Please try again later.');
     });
   };
+  var lvls = [ 'warning', 'danger', 'active' ];
+  $scope.select = function(type) {
+    $scope.accounts.forEach(function(a) {
+      var i = lvls.indexOf(type);
+      if (a.count && i > -1) {
+        for (; i < lvls.length; i++) {
+          if (a.count[lvls[i]] > 0) {
+            return a.subscribed = true;
+          }
+        }
+      }
+      a.subscribed = false;
+    });
+  };
   $scope.selectAll = function() {
     if (!$scope.accounts) return;
     $scope.accounts.forEach(function(a) {
