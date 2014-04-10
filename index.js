@@ -236,7 +236,7 @@ app.get('/captcha', authorize(function(req, res, next) {
 }));
 
 app.get('/accounts', authorize(function(req, res, next) {
-  db.accounts.find({}, function(err, accounts) {
+  db.accounts.find({}).sort({ name: 1 }).exec(function(err, accounts) {
     if (err) return next();
     var subscriptions = req.user.subscriptions;
     try {

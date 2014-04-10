@@ -925,17 +925,38 @@ controller('SubscribeController', ['$scope', 'Users', '$filter', 'Cached',
   $scope.shouldSubscribeDisable = function() {
     return angular.equals(original, getSelected());
   };
+  $scope.shouldSelectAllDisable = function() {
+    if (!$scope.accounts) return true;
+    for (var i = 0; i < $scope.accounts.length; i++) {
+      if (!$scope.accounts[i].subscribed) return false;
+    }
+    return true;
+  };
+  $scope.shouldSelectNoneDisable = function() {
+    return angular.equals([], getSelected());
+  };
   $scope.update = function() {
     var subs = getSelected();
     Users.UpdateSubscriptions(subs).then(function() {
       original = getSelected();
       Cached.Reset();
-      $scope.statusClass = 'success';
-      $scope.status = $scope.i18n$('Subscription settings saved. ');
+      Users.Authenticated();
     }, function() {
       $scope.statusClass = 'danger';
       $scope.status = $scope.i18n$('Error saving subscription settings. ' +
         'Please try again later.');
+    });
+  };
+  $scope.selectAll = function() {
+    if (!$scope.accounts) return;
+    $scope.accounts.forEach(function(a) {
+      a.subscribed = true;
+    });
+  };
+  $scope.selectNone = function() {
+    if (!$scope.accounts) return;
+    $scope.accounts.forEach(function(a) {
+      a.subscribed = false;
     });
   };
 }]).

@@ -233,6 +233,9 @@ module.exports = function(grunt) {
 
     function add(str) {
       if (typeof str !== 'string') return;
+      if (';:,./?-_+=|\\*&^%$#@!~'.indexOf(str[0]) > -1) {
+        str = str.slice(1);
+      }
       if (str) {
         str = str.trim();
         if (str[0] === '{' && str.slice(-1) === '}') {

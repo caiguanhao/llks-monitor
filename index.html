@@ -193,12 +193,18 @@
         <div class="panel panel-default"
           ng-class="{'edits-enabled':accountEditsEnabled}">
           <div class="panel-heading btn-group-xs">
-            <a class="btn btn-default btn-sm pull-right"
-              ng-class="{active:accountEditsEnabled}"
-              ng-click="enableEditsClicked()">
-              <span class="glyphicon glyphicon-pencil"></span>
-              <span i18n="account:Enable Edits"></span>
-            </a>
+            <div class="btn-group btn-group-xs pull-right">
+              <a class="btn btn-default btn-sm" href="/#/subscribe">
+                <span class="glyphicon glyphicon-plus"></span>
+                <span i18n="account:Subscribe"></span>
+              </a>
+              <a class="btn btn-default btn-sm"
+                ng-class="{active:accountEditsEnabled}"
+                ng-click="enableEditsClicked()">
+                <span class="glyphicon glyphicon-pencil"></span>
+                <span i18n="account:Edit"></span>
+              </a>
+            </div>
             <span i18n="account:Accounts"></span>
             (<span ng-bind="accounts.length||0"></span>)
           </div>
@@ -414,7 +420,7 @@
   </script>
   <script type="text/ng-template" id="subscribe">
     <div class="row">
-      <div class="col-sm-6 col-sm-offset-3">
+      <div class="col-sm-8 col-sm-offset-2">
         <h3 i18n=";subscribe;Subscribe to these accounts:"
           ng-show="accounts.length"></h3>
         <div class="alert alert-dismissable alert-{{statusClass}}"
@@ -424,17 +430,30 @@
           <span ng-bind="status"></span>
         </div>
         <form ng-submit="update()" ng-show="accounts.length">
-          <div class="form-group" ng-repeat="account in accounts">
-            <div class="checkbox">
-              <label><input type="checkbox" ng-model="account.subscribed">
-              <span ng-bind="account.name"></span></label>
+          <div class="row subscriptions">
+            <div class="subscription col-sm-3" ng-repeat="account in accounts"
+              ng-click="account.subscribed=!account.subscribed">
+              <input type="checkbox" ng-checked="account.subscribed">
+              <span ng-bind="account.name"></span>
             </div>
           </div>
-          <button type="submit" class="btn btn-default"
-            ng-disabled="shouldSubscribeDisable()">
-            <span class="glyphicon glyphicon-ok"></span>
-            <span i18n="subscribe:Subscribe"></span>
-          </button>
+          <div class="btn-toolbar" role="toolbar">
+            <div class="btn-group">
+              <button type="submit" class="btn btn-default"
+                ng-disabled="shouldSubscribeDisable()">
+                <span class="glyphicon glyphicon-ok"></span>
+                <span i18n="subscribe:Update Subscriptions"></span>
+              </button>
+            </div>
+            <div class="btn-group">
+              <button type="button" class="btn btn-default"
+                ng-disabled="shouldSelectAllDisable()"
+                i18n="subscribe:Select All" ng-click="selectAll()"></button>
+              <button type="button" class="btn btn-default"
+                ng-disabled="shouldSelectNoneDisable()"
+                i18n="subscribe:Select None" ng-click="selectNone()"></button>
+            </div>
+          </div>
         </form>
       </div>
     </div>
