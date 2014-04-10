@@ -146,7 +146,6 @@ module.exports.loop = function(account, wait) {
   }).
 
   then(function(data) {
-
     var accountData;
     var balance;
     try {
@@ -156,18 +155,19 @@ module.exports.loop = function(account, wait) {
       return;
     }
 
+    var unsold = +accountData.data.flow;
     var totalValue = +(+balance.data.total_amount +
-        DATA.price * Math.floor(DATA.unsold)).toFixed(2);
+        DATA.price * Math.floor(unsold)).toFixed(2);
 
     var bundle = {};
     bundle[account._id] = {
       total: +(+accountData.data.total_flow).toFixed(2),
-      unsold: +(+accountData.data.flow).toFixed(2),
+      unsold: +unsold.toFixed(2),
       sold: +(+accountData.data.sold).toFixed(2),
       totalValue: totalValue
     };
 
-    if (DATA) DATA.unsold = +accountData.data.flow;
+    if (DATA) DATA.unsold = unsold;
     var deferred = self.Q.defer();
     self.db.accounts.update({
       _id: account._id

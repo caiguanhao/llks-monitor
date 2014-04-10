@@ -74,6 +74,7 @@ function Monitor(options, dependencies) {
       request.abort();
       deferred.reject('timeout');
     });
+    request.end();
     return deferred.promise;
   };
 
