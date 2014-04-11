@@ -1127,6 +1127,9 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     var completed = originalCompleted;
     var days = -1;
     while (difficulty < $scope.difficulty) {
+      if ($scope.average < 100) {
+        return $scope.daysToGo = 0;
+      }
       completed += $scope.average;
       var val = completed / $scope.total;
       difficulty = 1 / Math.pow(1 - val, 3.14) * 20
@@ -1158,6 +1161,7 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     var now = new Date;
     var h = now.getUTCHours() + 8 + 1;
     $scope.average = Math.round(Cached.Market.today / (h / 24));
+    if ($scope.average === 0) $scope.average = 130000;
 
     if (originalCompleted === undefined) {
       originalCompleted = Cached.Market.completed;
