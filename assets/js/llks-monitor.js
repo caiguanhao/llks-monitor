@@ -1080,15 +1080,34 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
   $scope.sort('date');
 }]).
 
-controller('CalculatorController', ['$scope', '$filter',
-  function($scope, $filter) {
+controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
+  function($scope, $filter, Cached, Users) {
+
+  function updateMarket() {
+    $scope.price = Cached.Market.price.current;
+    $scope.completed = Cached.Market.completed;
+    $scope.completedPercent = $scope.completed / $scope.total * 100;
+    $scope.completedPercent = +$scope.completedPercent.toFixed(2);
+  }
+  if (Cached.Market.time) {
+    updateMarket();
+  } else if (Users.PublicSocket.socket.connected) {
+    Users.PublicSocket.emit('GiveMeMarketData');
+  }
+
+  if (Users.PublicSocket && Users.PublicSocket.$events) {
+    delete Users.PublicSocket.$events['UpdateMarket'];
+  }
+  if (Users.PublicSocket) {
+    Users.PublicSocket.on('UpdateMarket', function(data) {
+      Cached.Market = data;
+      updateMarket();
+    });
+  }
+
   $scope.number = 1;
-  $scope.price = 3.34;
   $scope.speed = 6;
-  $scope.completed = 13245639;
   $scope.total = 100000000;
-  $scope.completedPercent = $scope.completed / $scope.total * 100;
-  $scope.completedPercent = +$scope.completedPercent.toFixed(2);
   function computeDifficulty() {
     $scope.completed = $scope.total * $scope.completedPercent;
     $scope.difficulty = 1 / Math.pow(1 - $scope.completedPercent / 100, 3.14) * 20;

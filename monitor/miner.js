@@ -117,6 +117,7 @@ module.exports.loop = function(account, wait) {
       difficulty: parseFloat(mineralData.data.factor),
       miners: +mineralData.data.latest.miner_count,
       today: +(+mineralData.data.latest.today).toFixed(2),
+      completed: +mineralData.data.latest.total_mineral,
       completedPercent: mineralData.data.latest.total_per + '%',
     };
     return self.Q().
