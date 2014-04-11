@@ -1085,9 +1085,17 @@ controller('CalculatorController', ['$scope', '$filter',
   $scope.number = 1;
   $scope.price = 3.34;
   $scope.speed = 6;
-  $scope.completed = 13245639.024168;
-  $scope.difficulty = 1 / Math.pow(1 - $scope.completed / 100000000, 3.14) * 20;
-  $scope.difficulty = +$scope.difficulty.toFixed(2);
+  $scope.completed = 13245639;
+  $scope.total = 100000000;
+  $scope.completedPercent = $scope.completed / $scope.total * 100;
+  $scope.completedPercent = +$scope.completedPercent.toFixed(2);
+  function computeDifficulty() {
+    $scope.completed = $scope.total * $scope.completedPercent;
+    $scope.difficulty = 1 / Math.pow(1 - $scope.completedPercent / 100, 3.14) * 20;
+    $scope.difficulty = +$scope.difficulty.toFixed(2);
+    if (isNaN($scope.difficulty)) $scope.difficulty = 0;
+  }
+  $scope.$watch('completedPercent', computeDifficulty);
   $scope.hour = 1;
   $scope.day = 1;
   $scope.week = 1;
@@ -1098,6 +1106,7 @@ controller('CalculatorController', ['$scope', '$filter',
     var r = $scope.number;
     r *= $scope.speed * time / 1024 / $scope.difficulty * $scope.price;
     r *= $scope.exchangeRate / 100;
+    if (isNaN(r) || !isFinite(r)) r = 0;
     return $filter('currency')(r, '￥');
   };
 }]).

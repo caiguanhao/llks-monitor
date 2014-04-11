@@ -630,6 +630,15 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
       <div class="col-sm-12">
         <div class="form-inline calculator text-center">
           <div class="form-group">
+            <span i18n="calculator:Completed"></span>:
+            <input ng-model="completedPercent" type="number" min="0" max="100"
+              class="form-control factor"
+              i18n="{'title,placeholder':'calculator:Completed'}">
+            %
+          </div>
+        </div>
+        <div class="form-inline calculator text-center">
+          <div class="form-group">
             <input ng-model="number" type="number" class="form-control number"
               min="0" i18n="{'title,placeholder':'calculator:Quantity'}">
           </div>
