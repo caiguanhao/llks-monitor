@@ -15,6 +15,10 @@ config(['$routeProvider', '$locationProvider', '$compileProvider',
     templateUrl: 'history',
     controller: 'HistoryController'
   }).
+  when('/calculator', {
+    templateUrl: 'calculator',
+    controller: 'CalculatorController'
+  }).
   when('/help', {
     templateUrl: 'help'
   }).
@@ -1074,6 +1078,28 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
     lastByStr = byStr;
   };
   $scope.sort('date');
+}]).
+
+controller('CalculatorController', ['$scope', '$filter',
+  function($scope, $filter) {
+  $scope.number = 1;
+  $scope.price = 3.34;
+  $scope.speed = 6;
+  $scope.completed = 13245639.024168;
+  $scope.difficulty = 1 / Math.pow(1 - $scope.completed / 100000000, 3.14) * 20;
+  $scope.difficulty = +$scope.difficulty.toFixed(2);
+  $scope.hour = 1;
+  $scope.day = 1;
+  $scope.week = 1;
+  $scope.month = 1;
+  $scope.year = 1;
+  $scope.exchangeRate = 95;
+  $scope.calc = function(time) {
+    var r = $scope.number;
+    r *= $scope.speed * time / 1024 / $scope.difficulty * $scope.price;
+    r *= $scope.exchangeRate / 100;
+    return $filter('currency')(r, '￥');
+  };
 }]).
 
 controller('MyAccountController', ['$scope', 'Users',

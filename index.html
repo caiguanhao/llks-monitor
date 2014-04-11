@@ -62,6 +62,8 @@
                   i18n="header:Subscribe"></a></li>
                 <li navbar-link><a href="/#/history" close="navbar,dropdown"
                   i18n="header:History"></a></li>
+                <li navbar-link><a href="/#/calculator" close="navbar,dropdown"
+                  i18n="header:Calculator"></a></li>
                 <li navbar-link><a href="/#/help" close="navbar,dropdown"
                   i18n="header:Help"></a></li>
               </ul>
@@ -619,6 +621,94 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  </script>
+  <script type="text/ng-template" id="calculator">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="form-inline calculator text-center">
+          <div class="form-group">
+            <input ng-model="number" type="number" class="form-control number"
+              min="0" i18n="{'title,placeholder':'calculator:Quantity'}">
+          </div>
+          <div class="form-group">
+            <span class="glyphicon glyphicon-remove"></span>
+          </div>
+          <div class="form-group">
+            <input ng-model="speed" type="number" class="form-control number"
+              min="0" i18n="{'title,placeholder':'calculator:Speed'}"> M/S
+          </div>
+          <div class="form-group">
+            <span class="glyphicon glyphicon-remove"></span>
+          </div>
+          <div class="form-group">
+            <input ng-model="difficulty" type="number" min="0"
+              class="form-control factor"
+              i18n="{'title,placeholder':'calculator:Difficulty'}"> G/KG
+          </div>
+          <div class="form-group">
+            <span class="glyphicon glyphicon-remove"></span>
+          </div>
+          <div class="form-group">
+            ￥
+            <input ng-model="price" type="number" class="form-control factor"
+              min="0" i18n="{'title,placeholder':'calculator:Price'}">
+          </div>
+          <div class="form-group">
+            <span class="glyphicon glyphicon-remove"></span>
+          </div>
+          <div class="form-group">
+            <input ng-model="exchangeRate" type="number" max="100" min="0"
+              class="form-control number"
+              i18n="{'title,placeholder':'calculator:Exchange Rate'}">
+            %
+          </div>
+          <div class="form-group">
+            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+          </div>
+          <div class="form-group text-right">
+            <div class="values" ng-bind="calc(3600*hour)"></div>
+            <div class="values" ng-bind="calc(3600*24*day)"></div>
+            <div class="values" ng-bind="calc(3600*24*7*week)"></div>
+            <div class="values" ng-bind="calc(3600*24*30*month)"></div>
+            <div class="values" ng-bind="calc(3600*24*365*year)"></div>
+          </div>
+          <div class="form-group">
+            <div class="seps">/</div>
+            <div class="seps">/</div>
+            <div class="seps">/</div>
+            <div class="seps">/</div>
+            <div class="seps">/</div>
+          </div>
+          <div class="form-group text-left">
+            <div>
+              <input ng-model="hour" type="number" min="1"
+                class="form-control number">
+              <span i18n="calculator:hour"></span>
+            </div>
+            <div>
+              <input ng-model="day" type="number" min="1"
+                class="form-control number">
+              <span i18n="calculator:day"></span>
+            </div>
+            <div>
+              <input ng-model="week" type="number" min="1"
+                class="form-control number">
+              <span i18n="calculator:week"></span>
+            </div>
+            <div>
+              <input ng-model="month" type="number" min="1"
+                class="form-control number">
+              <span i18n="calculator:month"></span>
+            </div>
+            <div>
+              <input ng-model="year" type="number" min="1"
+                class="form-control number">
+              <span i18n="calculator:year"></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
