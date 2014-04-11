@@ -632,7 +632,7 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
           <div class="form-group">
             <span i18n="calculator:Completed"></span>:
             <input ng-model="completedPercent" type="number" min="0" max="100"
-              class="form-control factor"
+              class="form-control factor" ng-change="changed()"
               i18n="{'title,placeholder':'calculator:Completed'}">
             %
           </div>
@@ -663,7 +663,8 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
           <div class="form-group">
             ￥
             <input ng-model="price" type="number" class="form-control factor"
-              min="0" i18n="{'title,placeholder':'calculator:Price'}">
+              min="0" i18n="{'title,placeholder':'calculator:Price'}"
+              ng-change="changed()">
           </div>
           <div class="form-group">
             <span class="glyphicon glyphicon-remove"></span>
@@ -717,6 +718,14 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
                 class="form-control number">
               <span i18n="calculator:year"></span>
             </div>
+          </div>
+        </div>
+        <div class="form-inline calculator text-center">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" ng-model="autoupdate">
+              <span i18n="calculator:Automatically update market data"></span>
+            </label>
           </div>
         </div>
       </div>

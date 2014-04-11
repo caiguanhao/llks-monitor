@@ -1082,29 +1082,6 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
 controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   function($scope, $filter, Cached, Users) {
-
-  function updateMarket() {
-    $scope.price = Cached.Market.price.current;
-    $scope.completed = Cached.Market.completed;
-    $scope.completedPercent = $scope.completed / $scope.total * 100;
-    $scope.completedPercent = +$scope.completedPercent.toFixed(2);
-  }
-  if (Cached.Market.time) {
-    updateMarket();
-  } else if (Users.PublicSocket.socket.connected) {
-    Users.PublicSocket.emit('GiveMeMarketData');
-  }
-
-  if (Users.PublicSocket && Users.PublicSocket.$events) {
-    delete Users.PublicSocket.$events['UpdateMarket'];
-  }
-  if (Users.PublicSocket) {
-    Users.PublicSocket.on('UpdateMarket', function(data) {
-      Cached.Market = data;
-      updateMarket();
-    });
-  }
-
   $scope.number = 1;
   $scope.speed = 6;
   $scope.total = 100000000;
@@ -1128,6 +1105,42 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     if (isNaN(r) || !isFinite(r)) r = 0;
     return $filter('currency')(r, '￥');
   };
+
+  $scope.autoupdate = true;
+  $scope.changed = function() {
+    $scope.autoupdate = false;
+  };
+  function updateMarket() {
+    $scope.price = Cached.Market.price.current;
+    $scope.completed = Cached.Market.completed;
+    $scope.completedPercent = $scope.completed / $scope.total * 100;
+    $scope.completedPercent = +$scope.completedPercent.toFixed(2);
+  }
+  if (Cached.Market.time) {
+    updateMarket();
+  } else if (Users.PublicSocket.socket.connected) {
+    Users.PublicSocket.emit('GiveMeMarketData');
+  }
+
+  if (Users.PublicSocket && Users.PublicSocket.$events) {
+    delete Users.PublicSocket.$events['UpdateMarket'];
+  }
+  if (Users.PublicSocket) {
+    Users.PublicSocket.on('UpdateMarket', function(data) {
+      Cached.Market = data;
+      if ($scope.autoupdate === true) {
+        updateMarket();
+      } else {
+        console.log('not updateing')
+      }
+    });
+  }
+  $scope.$watch('autoupdate', function(val) {
+    if (Users.PublicSocket && val === true) {
+      Users.PublicSocket.emit('GiveMeMarketData');
+    }
+  });
+
 }]).
 
 controller('MyAccountController', ['$scope', 'Users',
