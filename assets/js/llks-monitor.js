@@ -1085,13 +1085,30 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   $scope.number = 1;
   $scope.speed = 6;
   $scope.total = 100000000;
-  function computeDifficulty() {
-    $scope.completed = $scope.total * $scope.completedPercent;
-    $scope.difficulty = 1 / Math.pow(1 - $scope.completedPercent / 100, 3.14) * 20;
-    $scope.difficulty = +$scope.difficulty.toFixed(2);
-    if (isNaN($scope.difficulty)) $scope.difficulty = 0;
-  }
-  $scope.$watch('completedPercent', computeDifficulty);
+  var dwatchstop, cwatchstop, dwatchstart, cwatchstart;
+  dwatchstart = function() {
+    dwatchstop = $scope.$watch('difficulty', function(val, old) {
+      if (Math.abs(val - old) < 0.1) return;
+      var d = val / 20;
+      var s = (1 - Math.pow(1 / d, 1 / 3.14)) * 100;
+      cwatchstop();
+      $scope.completedPercent = +s.toFixed(2);
+      cwatchstart();
+    });
+  };
+  cwatchstart = function() {
+    cwatchstop = $scope.$watch('completedPercent', function(val, old) {
+      if (Math.abs(val - old) < 0.1) return;
+      $scope.completed = $scope.total * val;
+      dwatchstop();
+      $scope.difficulty = 1 / Math.pow(1 - val / 100, 3.14) * 20;
+      $scope.difficulty = +$scope.difficulty.toFixed(2);
+      if (isNaN($scope.difficulty)) $scope.difficulty = 0;
+      dwatchstart();
+    });
+  };
+  dwatchstart();
+  cwatchstart();
   $scope.hour = 1;
   $scope.day = 1;
   $scope.week = 1;
