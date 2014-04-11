@@ -637,7 +637,7 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
             %
             <span class="break"></span>
             <label i18n="calculator:Average"></label>:
-            <input ng-model="yesterday" type="number" min="0" step="1000"
+            <input ng-model="average" type="number" min="0" step="1000"
               class="form-control factor" ng-change="calcDaysToGo()"
               i18n="{'title,placeholder':'calculator:Average'}">
             KG/<span i18n="calculator:day"></span>
@@ -690,13 +690,9 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
           <div class="form-group text-right">
             <div class="values" ng-bind="calc(3600*hour)"></div>
             <div class="values" ng-bind="calc(3600*24*day)"></div>
-            <div class="values" ng-bind="calc(3600*24*7*week)"></div>
             <div class="values" ng-bind="calc(3600*24*30*month)"></div>
-            <div class="values" ng-bind="calc(3600*24*365*year)"></div>
           </div>
           <div class="form-group">
-            <div class="seps">/</div>
-            <div class="seps">/</div>
             <div class="seps">/</div>
             <div class="seps">/</div>
             <div class="seps">/</div>
@@ -713,19 +709,9 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
               <span i18n="calculator:day"></span>
             </div>
             <div>
-              <input ng-model="week" type="number" min="1"
-                class="form-control number">
-              <span i18n="calculator:week"></span>
-            </div>
-            <div>
               <input ng-model="month" type="number" min="1"
                 class="form-control number">
               <span i18n="calculator:month"></span>
-            </div>
-            <div>
-              <input ng-model="year" type="number" min="1"
-                class="form-control number">
-              <span i18n="calculator:year"></span>
             </div>
           </div>
         </div>

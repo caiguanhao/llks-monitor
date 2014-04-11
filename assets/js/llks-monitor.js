@@ -1121,13 +1121,12 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   $scope.month = 1;
   $scope.year = 1;
   $scope.exchangeRate = 95;
-  $scope.yesterday = 130000;
   $scope.calcDaysToGo = function() {
     var difficulty = originalDifficulty;
     var completed = originalCompleted;
     var days = -1;
     while (difficulty < $scope.difficulty) {
-      completed += $scope.yesterday;
+      completed += $scope.average;
       var val = completed / $scope.total;
       difficulty = 1 / Math.pow(1 - val, 3.14) * 20
       days += 1;
@@ -1148,9 +1147,14 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     $scope.autoupdate = false;
   };
   function updateMarket() {
-    $scope.today = Cached.Market.today;
     $scope.price = Cached.Market.price.current;
     $scope.completed = Cached.Market.completed;
+
+    // use today to estimate whole day:
+    var now = new Date;
+    var h = now.getUTCHours() + 8 + 1;
+    $scope.average = Math.round(Cached.Market.today / (h / 24));
+
     if (originalCompleted === undefined) {
       originalCompleted = Cached.Market.completed;
     }
