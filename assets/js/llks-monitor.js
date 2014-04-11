@@ -1085,6 +1085,7 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   $scope.number = 1;
   $scope.speed = 6;
   $scope.total = 100000000;
+  var originalCompleted, originalDifficulty;
   var dwatchstop, cwatchstop, dwatchstart, cwatchstart;
   dwatchstart = function() {
     dwatchstop = $scope.$watch('difficulty', function(val, old) {
@@ -1094,6 +1095,7 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
       cwatchstop();
       $scope.completedPercent = +s.toFixed(2);
       cwatchstart();
+      $scope.calcDaysToGo();
     });
   };
   cwatchstart = function() {
@@ -1102,9 +1104,13 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
       $scope.completed = $scope.total * val;
       dwatchstop();
       $scope.difficulty = 1 / Math.pow(1 - val / 100, 3.14) * 20;
+      if (!originalDifficulty) {
+        originalDifficulty = $scope.difficulty;
+      }
       $scope.difficulty = +$scope.difficulty.toFixed(2);
       if (isNaN($scope.difficulty)) $scope.difficulty = 0;
       dwatchstart();
+      $scope.calcDaysToGo();
     });
   };
   dwatchstart();
@@ -1115,6 +1121,20 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   $scope.month = 1;
   $scope.year = 1;
   $scope.exchangeRate = 95;
+  $scope.yesterday = 130000;
+  $scope.calcDaysToGo = function() {
+    var difficulty = originalDifficulty;
+    var completed = originalCompleted;
+    var days = -1;
+    while (difficulty < $scope.difficulty) {
+      completed += $scope.yesterday;
+      var val = completed / $scope.total;
+      difficulty = 1 / Math.pow(1 - val, 3.14) * 20
+      days += 1;
+    }
+    $scope.daysToGo = Math.max(days, 0);
+  };
+  $scope.calcDaysToGo();
   $scope.calc = function(time) {
     var r = $scope.number;
     r *= $scope.speed * time / 1024 / $scope.difficulty * $scope.price;
@@ -1128,8 +1148,12 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     $scope.autoupdate = false;
   };
   function updateMarket() {
+    $scope.today = Cached.Market.today;
     $scope.price = Cached.Market.price.current;
     $scope.completed = Cached.Market.completed;
+    if (originalCompleted === undefined) {
+      originalCompleted = Cached.Market.completed;
+    }
     $scope.completedPercent = $scope.completed / $scope.total * 100;
     $scope.completedPercent = +$scope.completedPercent.toFixed(2);
   }
