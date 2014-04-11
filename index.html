@@ -629,7 +629,20 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
     <div class="row">
       <div class="col-sm-12">
         <div class="form-inline calculator text-center">
+        </div>
+        <div class="form-inline calculator text-center">
           <div class="form-group">
+            <span class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="autoupdate"
+                  ng-disabled="loading">
+                <span ng-show="loading"
+                  i18n="calculator:Loading market data..."></span>
+                <span ng-hide="loading"
+                  i18n="calculator:Automatically update market data"></span>
+              </label>
+            </span>
+            <span class="break"></span>
             <label i18n="calculator:Completed"></label>:
             <input ng-model="completedPercent" type="number" min="0" max="100"
               class="form-control factor" ng-change="changed()"
@@ -713,14 +726,6 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
                 class="form-control number">
               <span i18n="calculator:month"></span>
             </div>
-          </div>
-        </div>
-        <div class="form-inline calculator text-center">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" ng-model="autoupdate">
-              <span i18n="calculator:Automatically update market data"></span>
-            </label>
           </div>
         </div>
       </div>

@@ -1143,10 +1143,12 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   };
 
   $scope.autoupdate = true;
+  $scope.loading = true;
   $scope.changed = function() {
     $scope.autoupdate = false;
   };
   function updateMarket() {
+    $scope.loading = false;
     $scope.price = Cached.Market.price.current;
     $scope.completed = Cached.Market.completed;
 
@@ -1175,13 +1177,12 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
       Cached.Market = data;
       if ($scope.autoupdate === true) {
         updateMarket();
-      } else {
-        console.log('not updateing')
       }
     });
   }
   $scope.$watch('autoupdate', function(val) {
     if (Users.PublicSocket && val === true) {
+      $scope.loading = true;
       Users.PublicSocket.emit('GiveMeMarketData');
     }
   });
