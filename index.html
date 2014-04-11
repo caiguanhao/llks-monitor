@@ -728,12 +728,18 @@ ws.Exec("mstsc.exe /v:" + WScript.Arguments(0).replace(/^.+?:/, ""))</pre>
         </div>
         <div class="form-inline calculator text-center">
           <div class="form-group">
-            <span i18n="calculator:Cost"></span>:
+            <label i18n="calculator:Servers"></label>:
+            <span ng-bind="number"></span>
+            <span class="break"></span>
+            <label i18n="calculator:Cost"></label>:
             ￥
             <input ng-model="cost" type="number" class="form-control factor"
               min="0" i18n="{'title,placeholder':'calculator:Cost'}">
             / <span i18n="calculator:month"></span>
             / <span i18n="calculator:server"></span>
+            <span class="break"></span>
+            <label i18n="calculator:Total Cost"></label>:
+            <span ng-bind="number*cost|currency:'￥'"></span>
           </div>
         </div>
       </div>

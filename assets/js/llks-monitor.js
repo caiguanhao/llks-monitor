@@ -1160,7 +1160,7 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     // use today to estimate whole day:
     var now = new Date;
     var h = now.getUTCHours() + 8 + 1;
-    $scope.average = Math.round(Cached.Market.today / (h / 24));
+    $scope.average = Math.round(Cached.Market.today / (h % 24 / 24));
     if ($scope.average === 0) $scope.average = 130000;
 
     if (originalCompleted === undefined) {
