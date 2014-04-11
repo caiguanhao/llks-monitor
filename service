@@ -18,6 +18,8 @@ start|restart)
   pm2 delete index.js > /dev/null
   printf "Compiling assets... "
   grunt production > /dev/null
+  printf "Backing up db... "
+  grunt backupdb > /dev/null
   printf "Starting... "
   rm -f error-*.log output-*.log
   NODE_ENV=production \

@@ -214,7 +214,36 @@ module.exports = function(grunt) {
       if (error) grunt.fail.fatal(error);
       grunt.log.ok('Asset files compressed.')
       finish();
-    })
+    });
+  });
+
+  grunt.registerTask('backupdb', 'backup database', function() {
+    var finish = this.async();
+    var exec = require('child_process').exec;
+    var files = grunt.file.expand('backup/*.tar.gz');
+    files.sort(function(a, b) {
+      a = a.split(/\/|-|\./g);
+      b = b.split(/\/|-|\./g);
+      a = +new Date(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]);
+      b = +new Date(+b[1], +b[2] - 1, +b[3], +b[4], +b[5], +b[6]);
+      return a > b ? -1 : 1;
+    });
+    var max = 30;
+    if (max > 0 && files.length > max - 1) {
+      for (var i = max - 1; i < files.length; i++) {
+        grunt.log.write('Deleting old backup file ' + files[i].cyan + '... ');
+        grunt.file.delete(files[i]);
+        grunt.log.ok();
+      }
+    }
+    var date = (new Date).toJSON().replace(/\..*$/, '').replace(/[T:]+/g, '-');
+    exec('mkdir -p backup && tar cfz backup/' + date + '.tar.gz db', {},
+      function(error, stdout, stderr) {
+      if (stderr) grunt.fail.fatal(stderr);
+      if (error) grunt.fail.fatal(error);
+      grunt.log.ok('Database backed up successfully.')
+      finish();
+    });
   });
 
   var htmlparser = require('htmlparser2');
