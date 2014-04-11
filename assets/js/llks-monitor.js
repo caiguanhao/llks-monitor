@@ -416,6 +416,14 @@ service('Users', ['$http', '$window', '$rootScope', '$route', '$location',
     ls('llksMonitor.user.lang', code);
     this.GetLang();
   };
+  this.GetCalculatorValues = function() {
+    var calc = ls('llksMonitor.user.calculator');
+    return angular.fromJson(calc);
+  };
+  this.SetCalculatorValues = function(obj) {
+    ls('llksMonitor.user.calculator', angular.toJson(obj));
+    this.GetCalculatorValues();
+  };
   this.GetIPAddresses = function() {
     return ls('llksMonitor.user.ipaddresses');
   };
@@ -1082,8 +1090,29 @@ controller('HistoryController', ['$scope', 'Users', function($scope, Users) {
 
 controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   function($scope, $filter, Cached, Users) {
-  $scope.number = 1;
-  $scope.speed = 6;
+
+  var defaultValues = {
+    number: 1,
+    speed: 6,
+    hour: 1,
+    day: 1,
+    month: 1,
+    exchangeRate: 95,
+    cost: 520
+  }
+
+  var keys = Object.keys(defaultValues);
+  var collection = '[' + String(keys) + ']';
+  $scope.$watchCollection(collection, function(val) {
+    var obj = {};
+    for (var i = 0; i < keys.length; i++) {
+      obj[keys[i]] = val[i];
+    }
+    Users.SetCalculatorValues(obj);
+  });
+
+  angular.extend($scope, defaultValues, Users.GetCalculatorValues() || {});
+
   $scope.total = 100000000;
   var originalCompleted, originalDifficulty;
   var dwatchstop, cwatchstop, dwatchstart, cwatchstart;
@@ -1115,13 +1144,6 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   };
   dwatchstart();
   cwatchstart();
-  $scope.hour = 1;
-  $scope.day = 1;
-  $scope.week = 1;
-  $scope.month = 1;
-  $scope.year = 1;
-  $scope.exchangeRate = 95;
-  $scope.cost = 520;
   $scope.calcDaysToGo = function() {
     var difficulty = originalDifficulty;
     var completed = originalCompleted;
@@ -1161,7 +1183,9 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     var now = new Date;
     var h = now.getUTCHours() + 8 + 1;
     $scope.average = Math.round(Cached.Market.today / (h % 24 / 24));
-    if ($scope.average === 0) $scope.average = 130000;
+    if ($scope.average < 10000 || $scope.average > 999999) {
+      $scope.average = 130000;
+    }
 
     if (originalCompleted === undefined) {
       originalCompleted = Cached.Market.completed;
