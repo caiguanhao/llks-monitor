@@ -1121,6 +1121,7 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
   $scope.month = 1;
   $scope.year = 1;
   $scope.exchangeRate = 95;
+  $scope.cost = 520;
   $scope.calcDaysToGo = function() {
     var difficulty = originalDifficulty;
     var completed = originalCompleted;
@@ -1139,7 +1140,8 @@ controller('CalculatorController', ['$scope', '$filter', 'Cached', 'Users',
     r *= $scope.speed * time / 1024 / $scope.difficulty * $scope.price;
     r *= $scope.exchangeRate / 100;
     if (isNaN(r) || !isFinite(r)) r = 0;
-    return $filter('currency')(r, '￥');
+    r -= $scope.number * $scope.cost / (3600 * 24 * 30) * time;
+    return $filter('currency')(Math.max(0, r), '￥');
   };
 
   $scope.autoupdate = true;
